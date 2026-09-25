@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT"
+
+# name:one-line description — single source of truth for both the menu and completion
+COMMANDS=(
+  "dev:Run the Next.js dev server"
+  "build:Production build"
+  "typecheck:Typecheck with tsc --noEmit"
+  "lint:Lint with eslint --max-warnings 0"
+  "test:Run the vitest suite"
+  "seed:Run scripts/seed.ts"
+  "format:Format with prettier --write"
+  "gates:Run every gate, in order"
+  "shell:Print the ~/.zshrc snippet for the swamp-magazine function + completion"
+  "help:List commands"
+)
+
+cmd_dev() { bun run dev; }
+cmd_build() { bun run build; }
+cmd_typecheck() { bun run typecheck; }
+cmd_lint() { bun run lint; }
+cmd_test() { bun run test; }
+cmd_seed() { bun run seed; }
+cmd_format() { bun run format; }
+
+cmd_gates() {
+  cmd_build
+  cmd_typecheck
+  cmd_lint
+  cmd_test
+}
+
+cmd_help() {
+  echo "usage: swamp-magazine <command>"
+  echo
+  for entry in "${COMMANDS[@]}"; do
+    printf "  %-10s %s\n" "${entry%%:*}" "${entry#*:}"
+  done
+}
+
+cmd_shell() {
+  cat <<'EOF'
+swamp-magazine() { "$HOME/Projects/swamp-magazine/scripts/swamp-magazine" "$@"; }
+
+_swamp_magazine_complete() {
+  local -a subcmds
+  subcmds=("${(@f)$(swamp-magazine --complete)}")
+  _describe 'command' subcmds
+}
+compdef _swamp_magazine_complete swamp-magazine
+EOF
+}
+
+cmd___complete() {
+  for entry in "${COMMANDS[@]}"; do
+    echo "$entry"
+  done
+}
+
+# Same table drives an fzf picker on bare invocation — only when it'd actually be
+# interactive, so a cron job or `swamp-magazine test | something` never gets asked anything.
+interactive_pick() {
+  local lines
+  lines="$(for entry in "${COMMANDS[@]}"; do
+    printf "%-10s %s\n" "${entry%%:*}" "${entry#*:}"
+  done)"
+  echo "$lines" | fzf --prompt='swamp-magazine> ' --height='~70%' --reverse --no-info \
+    --header='select a command' | awk '{print $1}'
+}
+
+if [[ $# -eq 0 && -t 0 && -t 1 ]] && command -v fzf >/dev/null 2>&1; then
+  picked="$(interactive_pick || true)"
+  [[ -n "$picked" ]] || exit 0
+  set -- "$picked"
+fi
+
+case "${1:-help}" in
+  dev) cmd_dev ;;
+  build) cmd_build ;;
+  typecheck) cmd_typecheck ;;
+  lint) cmd_lint ;;
+  test) cmd_test ;;
+  seed) cmd_seed ;;
+  format) cmd_format ;;
+  gates) cmd_gates ;;
+  shell) cmd_shell ;;
+  --complete) cmd___complete ;;
+  help|*) cmd_help ;;
+esac
