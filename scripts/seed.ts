@@ -70,6 +70,20 @@ const CATALOG: SeedProduct[] = [
     cutoutFile: "swamp-images/LURKER GRID - AUG 9.png",
     sortOrder: 3,
   },
+  // Facts off the founder's LONGSLEEVE mockups (LURKER LONG SLEEVE, M L,
+  // "PLEASE VENMO $30", credits YLVA (L) / Z (R)). The row itself already
+  // exists in the DB, created in the admin and left inactive, so this never
+  // inserts it or touches its price; what it adds is the sizes and the cutout.
+  // Activating it is still the founder's switch in the admin.
+  {
+    slug: "lurker-longsleeve",
+    name: "Lurker Long Sleeve",
+    priceCents: 3000,
+    sizes: ["M", "L"],
+    modelCredits: "YLVA (L), Z (R)",
+    cutoutFile: "swamp-images/Lurker lonsleeve.png",
+    sortOrder: 4,
+  },
 ];
 
 // Product backgrounds. star-shorts is deliberately absent: its slot is already
