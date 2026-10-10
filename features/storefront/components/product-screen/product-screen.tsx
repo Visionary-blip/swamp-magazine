@@ -5,7 +5,6 @@ import { CheckoutForm } from "@/features/checkout";
 
 import type { ProductDetail } from "../../lib/catalog";
 import { storefrontCopy } from "../../lib/storefront-copy";
-import { SiteFooter } from "../site-footer/site-footer";
 
 // The founder's order poster: the shoot full-bleed, the garment's cutout dead
 // centre, red Anton set straight onto the photograph. BACK and the model
@@ -68,8 +67,6 @@ export function ProductScreen({ product }: { product: ProductDetail }) {
           variants={product.variants}
         />
       </div>
-
-      <SiteFooter />
     </main>
   );
 }
