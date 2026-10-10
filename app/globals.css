@@ -17,6 +17,21 @@
   --color-ink: var(--ink);
   --font-display: var(--font-anton);
   --font-body: var(--font-archivo);
+  /* Real Helvetica where the OS has it (Mac, iOS), Arial elsewhere. Not
+     self-hosted: no licence for Helvetica Neue has been supplied. */
+  --font-brat: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+/* The product poster's type: heavy Helvetica pulled tight, all caps, set with
+   almost no leading. The soft shadow is for legibility over a busy photo, not
+   decoration. */
+@utility brat {
+  font-family: var(--font-brat);
+  font-weight: 700;
+  letter-spacing: -0.065em;
+  line-height: 0.92;
+  text-transform: uppercase;
+  text-shadow: 0 0 14px color-mix(in srgb, var(--ink) 55%, transparent);
 }
 
 /* CSS-only marquee (Thames reference). Motion (the library) arrives with the

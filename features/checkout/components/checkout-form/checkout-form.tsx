@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, type FormEvent } from "react";
+import { useState, useTransition, type FormEvent, type ReactNode } from "react";
 
 import {
   createCheckoutSession,
@@ -9,7 +9,6 @@ import {
 import { dials } from "@/config/dials";
 import { cn } from "@/lib/utils";
 
-import { OrderLedger } from "../order-ledger/order-ledger";
 import { PaymentStation } from "../payment-station/payment-station";
 import {
   formatUsd,
@@ -30,22 +29,29 @@ export type CheckoutFormProps = {
   variants: CheckoutVariant[];
 };
 
-const deliveryOptions: { value: DeliveryMethod; label: string; price: string }[] =
-  [
-    { value: "pickup", label: orderCopy.pickup, price: orderCopy.free },
-    {
-      value: "shipping",
-      label: orderCopy.shipping,
-      // The rate is the dial's, never a literal -- change it in config/dials.ts
-      // and this line and the Stripe shipping option move together.
-      price: formatUsd(dials.shippingFlatRateCents),
-    },
-  ];
+const deliveryOptions: {
+  value: DeliveryMethod;
+  label: string;
+  price: string;
+}[] = [
+  { value: "pickup", label: orderCopy.pickup, price: orderCopy.free },
+  {
+    value: "shipping",
+    label: orderCopy.shipping,
+    // The rate is the dial's, never a literal -- change it in config/dials.ts
+    // and this line and the Stripe shipping option move together.
+    price: formatUsd(dials.shippingFlatRateCents),
+  },
+];
 
-// Direction A re-skin: same flow, same states, left-aligned on the ink panel
-// instead of centred on a photograph. Cream carries the reading, yellow is the
-// ratified "this one is live", red is reserved for the acts (NEXT / SUBMIT) and
-// for anything gone wrong.
+// The poster layout (the founder's order mockups): red Helvetica set straight
+// onto the shoot, centred like the YZY store. Same flow and states as before;
+// only the placement changed. This component renders no wrapper of its own --
+// its pieces are grid items of ProductScreen's poster grid, and the `md:`
+// placements below (delivery left, order right, name and sizes under the
+// cutout) only mean something inside it. Red is the ink, yellow is "this one is
+// live", and the card step sits on a solid panel because Stripe's fields need
+// a flat ground.
 export function CheckoutForm({
   slug,
   name,
@@ -108,53 +114,52 @@ export function CheckoutForm({
 
   if (!stripePromise || errorReason === "stripe-unconfigured") {
     return (
-      <div className="flex w-full flex-col gap-6 font-body text-cream">
-        {/* The sizes stay on the page when ordering is not armed yet. Dropping
-            them would take the row the mockups are built around off the product
-            screen, so an un-keyed deploy would read as broken rather than as
-            not open yet. The price is not repeated here: Direction A's panel
-            states it above this block on every branch, and P2's guarantee that
-            it "shows plainly wherever the order block isn't" is what that
-            satisfies. */}
-        <div>
-          <p className="mb-3 text-[10px] font-semibold tracking-[0.35em] text-cream/50">
-            {orderCopy.size}
-          </p>
-          <ul className="flex flex-wrap items-baseline gap-x-[30px] gap-y-2 font-display text-2xl leading-none md:text-[26px]">
+      <>
+        {/* The sizes stay on the page when ordering is not armed yet: dropping
+            them would take the row the mockups are built around off the
+            product screen, so an un-keyed deploy would read as broken rather
+            than as not open yet. */}
+        <NameAndSizes name={name}>
+          <ul className="brat flex flex-wrap justify-center gap-x-8 text-[clamp(2.5rem,5vw,3.5rem)] text-brand-red">
             {sizes.map((option) => (
               <li
                 key={option.size}
-                className={
-                  option.soldOut ? "text-cream/30 line-through" : "text-cream/45"
-                }
+                className={option.soldOut ? "line-through opacity-40" : ""}
               >
                 {option.size}
-                {option.soldOut ? <span className="sr-only"> sold out</span> : null}
+                {option.soldOut ? (
+                  <span className="sr-only"> sold out</span>
+                ) : null}
               </li>
             ))}
           </ul>
+        </NameAndSizes>
+        <div className="brat flex flex-col items-center gap-2 text-center text-brand-red md:col-start-3 md:row-start-2 md:items-end md:self-center md:text-right">
+          <p className="text-3xl md:text-5xl">{formatUsd(priceCents)}</p>
+          <p className="text-2xl md:text-3xl">
+            {orderErrorLines["stripe-unconfigured"]}
+          </p>
         </div>
-        <p className="font-display text-2xl tracking-[0.06em] text-brand-red md:text-[30px]">
-          {orderErrorLines["stripe-unconfigured"]}
-        </p>
-      </div>
+      </>
     );
   }
 
   if (clientSecret) {
     return (
-      <PaymentStation
-        clientSecret={clientSecret}
-        orderId={orderId}
-        name={name}
-        size={size}
-        priceCents={priceCents}
-        delivery={delivery}
-        deliveryLabel={deliveryLabel}
-        shippingCents={shippingCents}
-        totalCents={totalCents}
-        onChangeSize={handleChangeSize}
-      />
+      <div className="relative z-10 mx-auto w-full max-w-md bg-ink/95 p-6 md:col-span-3 md:col-start-1 md:row-span-2 md:row-start-2 md:self-center">
+        <PaymentStation
+          clientSecret={clientSecret}
+          orderId={orderId}
+          name={name}
+          size={size}
+          priceCents={priceCents}
+          delivery={delivery}
+          deliveryLabel={deliveryLabel}
+          shippingCents={shippingCents}
+          totalCents={totalCents}
+          onChangeSize={handleChangeSize}
+        />
+      </div>
     );
   }
 
@@ -163,50 +168,54 @@ export function CheckoutForm({
   const errorLine = errorReason ? orderErrorLines[errorReason] : null;
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex w-full flex-col gap-6 font-body text-cream md:gap-[34px]"
-    >
-      <fieldset disabled={isPending}>
-        <legend className="mb-3 text-[10px] font-semibold tracking-[0.35em] text-cream/50">
-          {orderCopy.size}
-        </legend>
-        <div className="flex flex-wrap items-baseline gap-x-[30px] gap-y-2 font-display text-2xl leading-none md:text-[26px]">
-          {sizes.map((option) => (
-            <label
-              key={option.size}
-              className={cn(
-                "cursor-pointer transition-colors duration-200",
-                option.soldOut
-                  ? "cursor-not-allowed text-cream/30 line-through"
-                  : size === option.size
-                    ? "text-brand-yellow"
-                    : "text-cream/45 hover:text-cream",
-              )}
-            >
-              <input
-                type="radio"
-                name="size"
-                value={option.size}
-                checked={size === option.size}
-                disabled={option.soldOut}
-                onChange={() => setSize(option.size)}
-                className="peer sr-only"
-              />
-              <span className="peer-focus-visible:underline peer-focus-visible:underline-offset-8">
-                {option.size}
-                {/* The strike-through is the sighted cue; disabled alone does
-                    not say why, so screen readers get the reason. */}
-                {option.soldOut ? <span className="sr-only"> sold out</span> : null}
-              </span>
-            </label>
-          ))}
-        </div>
-      </fieldset>
+    // `contents`: the form is only the submit boundary. Its children are the
+    // poster grid's items, so it must not generate a box of its own.
+    <form onSubmit={handleSubmit} className="contents">
+      <NameAndSizes name={name}>
+        <fieldset disabled={isPending}>
+          <legend className="sr-only">{orderCopy.size}</legend>
+          <div className="brat flex flex-wrap justify-center gap-x-8 text-[clamp(2.5rem,5vw,3.5rem)]">
+            {sizes.map((option) => (
+              <label
+                key={option.size}
+                className={cn(
+                  "cursor-pointer transition-colors duration-200",
+                  option.soldOut
+                    ? "cursor-not-allowed text-brand-red line-through opacity-40"
+                    : size === option.size
+                      ? "text-brand-yellow"
+                      : "text-brand-red hover:text-brand-yellow",
+                )}
+              >
+                <input
+                  type="radio"
+                  name="size"
+                  value={option.size}
+                  checked={size === option.size}
+                  disabled={option.soldOut}
+                  onChange={() => setSize(option.size)}
+                  className="peer sr-only"
+                />
+                <span className="peer-focus-visible:underline peer-focus-visible:underline-offset-8">
+                  {option.size}
+                  {/* The strike-through is the sighted cue; disabled alone does
+                      not say why, so screen readers get the reason. */}
+                  {option.soldOut ? (
+                    <span className="sr-only"> sold out</span>
+                  ) : null}
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      </NameAndSizes>
 
-      <fieldset disabled={isPending}>
+      <fieldset
+        disabled={isPending}
+        className="md:col-start-1 md:row-start-2 md:self-center"
+      >
         <legend className="sr-only">DELIVERY</legend>
-        <div className="flex flex-wrap gap-x-[30px] gap-y-2 text-[11px] font-semibold tracking-[0.2em] md:text-xs">
+        <div className="brat flex flex-col items-center gap-1 text-2xl md:items-start md:text-2xl lg:text-4xl">
           {deliveryOptions.map((option) => (
             <label
               key={option.value}
@@ -214,7 +223,7 @@ export function CheckoutForm({
                 "cursor-pointer transition-colors duration-200",
                 delivery === option.value
                   ? "text-brand-yellow"
-                  : "text-cream/45 hover:text-cream",
+                  : "text-brand-red hover:text-brand-yellow",
               )}
             >
               <input
@@ -226,48 +235,65 @@ export function CheckoutForm({
                 className="peer sr-only"
               />
               <span className="peer-focus-visible:underline peer-focus-visible:underline-offset-8">
-                {option.label} &mdash; {option.price}
+                {option.label} {option.price}
               </span>
             </label>
           ))}
         </div>
       </fieldset>
 
-      <OrderLedger
-        name={name}
-        priceCents={priceCents}
-        deliveryLabel={deliveryLabel}
-        shippingCents={shippingCents}
-        size={size}
-        totalDisplay={formatUsd(totalCents)}
-      />
-
-      {errorLine ? (
-        <p role="alert" className="text-xs font-bold tracking-widest text-brand-red">
-          {errorLine}
+      <div className="brat flex flex-col items-center gap-2 text-center text-brand-red md:col-start-3 md:row-start-2 md:items-end md:self-center md:text-right">
+        <p className="text-2xl md:text-xl lg:text-3xl">
+          {deliveryLabel}{" "}
+          {shippingCents > 0 ? formatUsd(shippingCents) : orderCopy.free}
         </p>
-      ) : null}
-
-      {allGone ? (
-        <p className="font-display text-2xl tracking-[0.06em] text-cream/60 md:text-[30px]">
-          {orderCopy.soldOut}
+        <p className="text-4xl md:text-4xl lg:text-6xl">
+          {orderCopy.total} {formatUsd(totalCents)}
         </p>
-      ) : (
-        <>
-          {!size && !errorLine ? (
-            <p className="text-[10px] tracking-[0.3em] text-cream/50">
-              {orderCopy.pickSize}
-            </p>
-          ) : null}
-          <button
-            type="submit"
-            disabled={isPending || !size}
-            className="self-start font-display text-2xl tracking-[0.06em] text-brand-red transition-colors duration-200 hover:text-brand-yellow focus-visible:underline focus-visible:underline-offset-8 disabled:cursor-not-allowed disabled:text-brand-red disabled:opacity-40 md:text-[30px]"
-          >
-            {isPending ? orderCopy.submitPending : orderCopy.next}
-          </button>
-        </>
-      )}
+
+        {errorLine ? (
+          <p role="alert" className="text-xl md:text-2xl">
+            {errorLine}
+          </p>
+        ) : null}
+
+        {allGone ? (
+          <p className="text-3xl md:text-5xl">{orderCopy.soldOut}</p>
+        ) : (
+          <>
+            {!size && !errorLine ? (
+              <p className="text-lg opacity-80 md:text-xl">
+                {orderCopy.pickSize}
+              </p>
+            ) : null}
+            <button
+              type="submit"
+              disabled={isPending || !size}
+              className="brat text-5xl transition-colors duration-200 hover:text-brand-yellow focus-visible:underline focus-visible:underline-offset-8 disabled:cursor-not-allowed disabled:opacity-40 md:text-5xl lg:text-7xl"
+            >
+              {isPending ? orderCopy.submitPending : orderCopy.next}
+            </button>
+          </>
+        )}
+      </div>
     </form>
+  );
+}
+
+// Under the cutout, centred: the product's name, then whatever picks its size.
+function NameAndSizes({
+  name,
+  children,
+}: {
+  name: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-3 text-center md:col-start-2 md:row-start-3">
+      <h1 className="brat text-[clamp(2rem,5vw,3rem)] text-brand-red">
+        {name}
+      </h1>
+      {children}
+    </div>
   );
 }
