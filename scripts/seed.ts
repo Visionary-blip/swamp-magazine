@@ -220,11 +220,17 @@ async function seedProduct(product: SeedProduct) {
   );
 }
 
-for (const product of CATALOG) {
+// `bun run seed lurker-longsleeve` seeds one product and its lifestyle slot;
+// the full run needs every master in swamp-images/ and is the default.
+const only = process.argv[2];
+
+for (const product of CATALOG.filter((p) => !only || p.slug === only)) {
   await seedProduct(product);
 }
 
-for (const slot of LIFESTYLE_SLOTS) {
+for (const slot of LIFESTYLE_SLOTS.filter(
+  (s) => !only || s.slotKey.endsWith(`:${only}`),
+)) {
   const storagePath = `${slot.slotKey.replace(/[:]/g, "-")}.webp`;
   await uploadWebp("slots", storagePath, slot.file);
   await registerSlot(slot.slotKey, "slots", storagePath, slot.alt);
