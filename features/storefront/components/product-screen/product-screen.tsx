@@ -8,7 +8,7 @@ import { storefrontCopy } from "../../lib/storefront-copy";
 import { SiteFooter } from "../site-footer/site-footer";
 
 // The founder's order poster: the shoot full-bleed, the garment's cutout dead
-// centre, red Helvetica set straight onto the photograph. BACK and the model
+// centre, red Anton set straight onto the photograph. BACK and the model
 // credits sit across the top; size, delivery and place order are stacked,
 // centred, along the bottom (CheckoutForm). All of it is one type size.
 export function ProductScreen({ product }: { product: ProductDetail }) {

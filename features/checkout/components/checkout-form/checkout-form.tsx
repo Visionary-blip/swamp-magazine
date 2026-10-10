@@ -44,7 +44,7 @@ const deliveryOptions: {
   },
 ];
 
-// The poster's bottom block (the founder's order mockups): red Helvetica set
+// The poster's bottom block (the founder's order mockups): red Anton set
 // straight onto the shoot, centred like the YZY store, reading top to bottom as
 // size, delivery, place order. Same flow and states as before; only the
 // placement changed. Every line is the same size -- `brat` owns it. Red is the
