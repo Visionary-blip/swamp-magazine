@@ -49,7 +49,7 @@ const CATALOG: SeedProduct[] = [
     priceCents: 2500,
     sizes: ["S", "M", "L"],
     modelCredits: "MIA (L), DAVID (R)",
-    cutoutFile: "STAR SHORTS GRID - AUG 9.png",
+    cutoutFile: "swamp-images/STAR SHORTS GRID - AUG 9.png",
     sortOrder: 1,
   },
   {
