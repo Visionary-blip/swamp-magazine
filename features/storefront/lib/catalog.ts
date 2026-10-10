@@ -86,20 +86,27 @@ export async function getProduct(slug: string): Promise<ProductDetail | null> {
   }
 }
 
+// The founder's 16:9 hero (HERO 169, Aug 20). A bundled file rather than a
+// slot row so the landing has its real hero before any admin upload; a
+// landing_hero upload still wins. The alt is drafted, not the founder's.
+const BUNDLED_HERO: SlotImage = {
+  url: "/hero/landing-hero.jpg",
+  alt: "Two people in SWAMP MAGAZINE sweatshirts sitting in warm, low light",
+};
+
 // landing_hero / landing_mascot are founder-upload slots (P4 admin). Until
-// they exist, the hero falls back to the one clean lifestyle shot in the
-// archive and the mascot slot renders nothing.
+// they exist, the hero is the bundled shot and the mascot slot renders nothing.
 export async function getLandingImagery(): Promise<LandingImagery> {
   try {
     const supabase = await createClient();
     const slots = await getSlotMap(supabase);
     return {
-      hero: slots.get("landing_hero") ?? slots.get("product_bg:star-shorts") ?? null,
+      hero: slots.get("landing_hero") ?? BUNDLED_HERO,
       mascot: slots.get("landing_mascot") ?? null,
     };
   } catch (error) {
     console.error("[LANDING_IMAGERY]", error);
-    return { hero: null, mascot: null };
+    return { hero: BUNDLED_HERO, mascot: null };
   }
 }
 
