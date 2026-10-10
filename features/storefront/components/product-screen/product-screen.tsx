@@ -8,15 +8,13 @@ import { storefrontCopy } from "../../lib/storefront-copy";
 import { SiteFooter } from "../site-footer/site-footer";
 
 // The founder's order poster: the shoot full-bleed, the garment's cutout dead
-// centre, red Helvetica set straight onto the photograph. The grid is three
-// columns by three rows -- BACK and the model credits across the top, delivery
-// left and the order right either side of the cutout, name and sizes under it.
-// CheckoutForm supplies the middle and bottom pieces as grid items (see its
-// header); below `md` the same pieces simply stack, centred.
+// centre, red Helvetica set straight onto the photograph. BACK and the model
+// credits sit across the top; size, delivery and place order are stacked,
+// centred, along the bottom (CheckoutForm). All of it is one type size.
 export function ProductScreen({ product }: { product: ProductDetail }) {
   return (
     <main className="bg-ink">
-      <div className="relative isolate flex min-h-dvh flex-col items-stretch gap-8 overflow-hidden bg-ink px-5 py-6 md:grid md:grid-cols-[1fr_auto_1fr] md:grid-rows-[auto_1fr_auto] md:gap-x-10 md:px-16 md:py-12">
+      <div className="relative isolate flex min-h-dvh flex-col gap-6 overflow-hidden bg-ink px-5 py-6 md:px-16 md:py-12">
         {/* Background first, solid ink under it: a missing image degrades to a
             plain ink poster rather than a hole. The scrim is what keeps red
             type readable on the lighter shoots. */}
@@ -34,26 +32,24 @@ export function ProductScreen({ product }: { product: ProductDetail }) {
           </>
         ) : null}
 
-        {/* `md:contents` lifts both children into the poster grid, where BACK
-            takes the top-left cell and the credits the top-right. */}
-        <div className="flex items-start justify-between gap-4 md:contents">
+        <div className="flex items-start justify-between gap-4">
           <Link
             href="/"
-            className="brat text-3xl text-brand-red transition-colors duration-200 hover:text-brand-yellow focus-visible:text-brand-yellow focus-visible:outline-none md:col-start-1 md:row-start-1 md:text-3xl lg:text-5xl"
+            className="brat text-brand-red transition-colors duration-200 hover:text-brand-yellow focus-visible:text-brand-yellow focus-visible:outline-none"
           >
             {storefrontCopy.back}
           </Link>
           {/* The founder's credit line, from the DB rather than from any
               mockup shorthand -- `products.model_credits` is the source. */}
           {product.modelCredits ? (
-            <p className="brat text-right text-xl whitespace-pre-line text-brand-red md:col-start-3 md:row-start-1 md:text-2xl lg:text-4xl">
+            <p className="brat text-right whitespace-pre-line text-brand-red">
               {product.modelCredits}
             </p>
           ) : null}
         </div>
 
         {product.cutout ? (
-          <div className="relative mx-auto aspect-square w-[72vw] max-w-[420px] md:col-start-2 md:row-start-2 md:w-[min(34vw,460px)] md:max-w-none md:self-center">
+          <div className="relative mx-auto my-auto aspect-square w-[72vw] max-w-[420px] md:w-[min(34vw,420px)] md:max-w-none">
             <Image
               src={product.cutout.url}
               alt={product.cutout.alt}

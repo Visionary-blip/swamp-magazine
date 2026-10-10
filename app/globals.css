@@ -23,10 +23,12 @@
 }
 
 /* The product poster's type: heavy Helvetica pulled tight, all caps, set with
-   almost no leading. The soft shadow is for legibility over a busy photo, not
+   almost no leading. One size for every piece of text on the poster -- the
+   founder asked for it, so the size lives here and nowhere else. The soft shadow is for legibility over a busy photo, not
    decoration. */
 @utility brat {
   font-family: var(--font-brat);
+  font-size: clamp(1.5rem, 3.2vw, 2.5rem);
   font-weight: 700;
   letter-spacing: -0.065em;
   line-height: 0.92;

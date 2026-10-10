@@ -34,10 +34,10 @@ export const orderCopy = {
    * finally the act that actually sends the order, which is what the mockup
    * means by it. Founder's to confirm. */
   submit: "SUBMIT",
-  /** INVENTED -- the mockups have no two-step order, so nothing was lifted for
-   * the word that carries a buyer from the size row to the card fields. Kept
-   * deliberately non-terminal so it cannot be misread as SUBMIT. */
-  next: "NEXT",
+  /** INVENTED -- the founder's own wording ("place order") for the act that
+   * carries a buyer from the size row to the card fields. The card step still
+   * ends in SUBMIT, so this is where the order begins, not where it is sent. */
+  next: "PLACE ORDER",
   /** LIFTED from the P1 subscribe form's pending state, for one pending voice. */
   submitPending: "SENDING...",
   /** INVENTED -- the way back to the size row from the card step. */
