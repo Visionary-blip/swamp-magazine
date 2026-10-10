@@ -1,51 +1,44 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import { formatUsd } from "@/lib/money";
 
-import { catalogNumber, type CatalogProduct } from "../../lib/catalog";
-import { storefrontCopy } from "../../lib/storefront-copy";
+import type { CatalogProduct } from "../../lib/catalog";
 import { Reveal } from "../reveal/reveal";
 
-// Direction A's catalog: a film-credits index, not a product grid. One row per
-// product -- № / NAME / SIZES / PRICE on a hairline rule -- because the
-// photography already sells in the hero and the film band, and a second grid of
-// floating cutouts under them would say the same thing twice. The whole row is
-// the link, so the target is the width of the page rather than a thumbnail.
+// The product grid under the hero: each garment's cutout on ink, name and price
+// beneath, the whole tile the link. It replaces the film-credits index list at
+// the founder's request -- the visitor scrolls past the photograph and meets the
+// clothes themselves. A product with no cutout uploaded yet still gets a tile
+// (name and price on an empty square) rather than vanishing from the shop.
 export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
   if (products.length === 0) return null;
 
   return (
-    <section className="bg-ink px-5 pt-16 pb-14 md:px-[120px] md:pt-[88px] md:pb-[72px]">
-      <div className="mb-8 flex items-center gap-[18px] md:mb-[34px]">
-        <span className="font-body text-[11px] font-semibold tracking-[0.35em] text-brand-red">
-          {storefrontCopy.issue}
-        </span>
-        {/* Rule, not content: the row rules below repeat it down the page. */}
-        <span aria-hidden className="h-px grow bg-brand-red/40" />
-      </div>
-      <ul>
+    <section className="bg-ink px-5 py-16 md:px-[120px] md:py-[88px]">
+      <ul className="grid grid-cols-2 gap-x-4 gap-y-12 md:grid-cols-3 md:gap-x-10 md:gap-y-16">
         {products.map((product, index) => (
-          <li
-            key={product.slug}
-            className="border-t border-brand-red/35 last:border-b"
-          >
-            <Reveal delay={index * 0.06}>
+          <li key={product.slug}>
+            <Reveal delay={(index % 3) * 0.06}>
               <Link
                 href={`/product/${product.slug}`}
-                // Two columns on a phone (№ NAME PRICE, sizes beneath), the
-                // canvas's four side by side from md up.
-                className="group grid grid-cols-[2.75rem_minmax(0,1fr)_auto] items-baseline gap-x-4 gap-y-2 py-6 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand-red md:grid-cols-[90px_minmax(0,1fr)_220px_120px] md:gap-x-0 md:py-[30px]"
+                className="group flex flex-col items-center gap-4 text-center focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-red"
               >
-                <span className="col-start-1 row-start-1 font-display text-[15px] text-brand-red">
-                  {catalogNumber(index)}
-                </span>
-                <span className="col-start-2 row-start-1 font-display text-[30px] leading-none tracking-[0.02em] text-cream uppercase transition-colors duration-200 group-hover:text-brand-yellow md:text-[46px]">
+                <div className="relative aspect-square w-full">
+                  {product.cutout ? (
+                    <Image
+                      src={product.cutout.url}
+                      alt={product.cutout.alt || product.name}
+                      fill
+                      sizes="(min-width: 768px) 28vw, 46vw"
+                      className="object-contain transition-transform duration-300 group-hover:scale-105"
+                    />
+                  ) : null}
+                </div>
+                <span className="font-display text-2xl leading-none tracking-[0.02em] text-brand-red uppercase transition-colors duration-200 group-hover:text-brand-yellow md:text-[34px]">
                   {product.name}
                 </span>
-                <span className="col-start-2 row-start-2 font-body text-[11px] tracking-[0.25em] text-cream/55 md:col-start-3 md:row-start-1 md:text-xs">
-                  {product.variants.map((variant) => variant.size).join(" ")}
-                </span>
-                <span className="col-start-3 row-start-1 text-right font-display text-[22px] text-brand-red md:col-start-4 md:text-[26px]">
+                <span className="font-display text-lg text-cream/70 md:text-xl">
                   {formatUsd(product.priceCents)}
                 </span>
               </Link>
