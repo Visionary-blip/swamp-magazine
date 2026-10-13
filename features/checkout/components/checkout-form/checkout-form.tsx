@@ -245,11 +245,6 @@ export function CheckoutForm({
         <p className="brat text-brand-red">{orderCopy.soldOut}</p>
       ) : (
         <>
-          {!size && !errorLine ? (
-            <p className="brat text-brand-red opacity-80">
-              {orderCopy.pickSize}
-            </p>
-          ) : null}
           {/* The total rides the button: the ledger that used to state it is
               gone from this step, and nobody should learn the real charge
               inside the card fields. */}
