@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, useTransition, type FormEvent } from "react";
 
 import {
@@ -7,8 +8,10 @@ import {
   type DeliveryMethod,
 } from "@/actions/create-checkout-session";
 import { dials } from "@/config/dials";
+import { useCart, type CartItem } from "@/features/cart";
 import { cn } from "@/lib/utils";
 
+import type { LedgerLine } from "../order-ledger/order-ledger";
 import { PaymentStation } from "../payment-station/payment-station";
 import {
   formatUsd,
@@ -27,6 +30,8 @@ export type CheckoutFormProps = {
   name: string;
   priceCents: number;
   variants: CheckoutVariant[];
+  /** The garment's cutout, kept in the cart so its corner thumbnail can draw. */
+  cutout: { url: string; alt: string } | null;
 };
 
 const deliveryOptions: {
@@ -46,18 +51,24 @@ const deliveryOptions: {
 
 // The poster's bottom block (the founder's order mockups): red Anton set
 // straight onto the shoot, centred like the YZY store, reading top to bottom as
-// size, delivery, place order. Same flow and states as before; only the
-// placement changed. Every line is the same size -- `brat` owns it. Red is the
-// ink, yellow is "this one is live", and the card step sits on a solid panel
-// because Stripe's fields need a flat ground.
+// size, delivery, then "+" (put it in the cart and go back to the grid) and
+// place order. PLACE ORDER pays for the whole cart plus whatever size is picked
+// on this page. Every line is the same size -- `brat` owns it. Red is the ink,
+// yellow is "this one is live", and the card step sits on a solid panel because
+// Stripe's fields need a flat ground.
 export function CheckoutForm({
   slug,
   name,
   priceCents,
   variants,
+  cutout,
 }: CheckoutFormProps) {
+  const router = useRouter();
+  const cart = useCart();
+  // Delivery is one choice for the whole order, so it lives with the cart and
+  // follows the customer from product page to product page.
+  const { delivery, setDelivery } = cart;
   const [size, setSize] = useState<string | null>(null);
-  const [delivery, setDelivery] = useState<DeliveryMethod>("pickup");
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [orderId, setOrderId] = useState<string | null>(null);
   const [errorReason, setErrorReason] = useState<OrderErrorReason | null>(null);
@@ -73,20 +84,70 @@ export function CheckoutForm({
   }));
   const allGone = sizes.length === 0 || sizes.every((option) => option.soldOut);
 
+  // What would be ordered right now: the cart, plus the size picked here.
+  const selected: CartItem | null = size
+    ? {
+        slug,
+        size,
+        sizes,
+        quantity: 1,
+        name,
+        priceCents,
+        cutoutUrl: cutout?.url ?? null,
+        cutoutAlt: cutout?.alt ?? "",
+      }
+    : null;
+  const orderItems = mergeItems(
+    selected ? [...cart.items, selected] : cart.items,
+  );
+
+  const subtotalCents = orderItems.reduce(
+    (sum, item) => sum + item.priceCents * item.quantity,
+    0,
+  );
   const shippingCents =
-    delivery === "shipping" ? dials.shippingFlatRateCents : 0;
-  const totalCents = priceCents + shippingCents;
+    delivery === "shipping" && orderItems.length > 0
+      ? dials.shippingFlatRateCents
+      : 0;
+  const totalCents = subtotalCents + shippingCents;
+  // Before anything is picked the button still quotes this garment, as it did
+  // when the page sold one thing; a "$0" order would read as broken.
+  const quotedCents =
+    orderItems.length > 0
+      ? totalCents
+      : priceCents +
+        (delivery === "shipping" ? dials.shippingFlatRateCents : 0);
   const deliveryLabel =
     delivery === "shipping" ? orderCopy.shipping : orderCopy.pickup;
+  const ledgerLines: LedgerLine[] = orderItems.map((item) => ({
+    label: `${item.name.toUpperCase()} ${item.size}${item.quantity > 1 ? ` ×${item.quantity}` : ""}`,
+    amountCents: item.priceCents * item.quantity,
+  }));
+
+  // "+": the garment goes in the cart and the customer goes back to the grid to
+  // pick the next one. The size resets so coming back later starts fresh.
+  function handleAdd() {
+    if (!selected || isPending) return;
+    cart.addItem(selected);
+    setSize(null);
+    router.push("/#products");
+  }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     // The button is already disabled in both cases; pressing Enter inside the
     // form submits anyway, which is where a double order would come from.
-    if (!size || isPending) return;
+    if (orderItems.length === 0 || isPending) return;
     setErrorReason(null);
     startTransition(async () => {
-      const result = await createCheckoutSession({ slug, size, delivery });
+      const result = await createCheckoutSession({
+        items: orderItems.map((item) => ({
+          slug: item.slug,
+          size: item.size,
+          quantity: item.quantity,
+        })),
+        delivery,
+      });
       if (result.status === "success") {
         setClientSecret(result.clientSecret);
         setOrderId(result.orderId);
@@ -94,8 +155,14 @@ export function CheckoutForm({
       }
       setErrorReason(result.reason);
       if (result.reason === "sold-out") {
-        setRefusedSizes((current) => [...current, size]);
-        setSize(null);
+        const gone = result.item;
+        if (gone && gone.slug === slug) {
+          setRefusedSizes((current) => [...current, gone.size]);
+          if (size === gone.size) setSize(null);
+        }
+        // Whatever ran out, it cannot stay in the cart: leaving it would fail
+        // the next attempt the same way.
+        if (gone) cart.removeItem(gone.slug, gone.size);
       }
     });
   }
@@ -145,9 +212,7 @@ export function CheckoutForm({
         <PaymentStation
           clientSecret={clientSecret}
           orderId={orderId}
-          name={name}
-          size={size}
-          priceCents={priceCents}
+          lines={ledgerLines}
           delivery={delivery}
           deliveryLabel={deliveryLabel}
           shippingCents={shippingCents}
@@ -241,24 +306,54 @@ export function CheckoutForm({
         </p>
       ) : null}
 
-      {allGone ? (
+      {allGone && orderItems.length === 0 ? (
         <p className="brat text-brand-red">{orderCopy.soldOut}</p>
       ) : (
         <>
+          {/* Offered once a size is picked: the garment goes in the cart and the
+              customer is sent back to the grid for the next one. */}
+          {selected ? (
+            <button
+              type="button"
+              onClick={handleAdd}
+              disabled={isPending}
+              aria-label={orderCopy.addToCart}
+              className="brat text-brand-red transition-colors duration-200 hover:text-brand-yellow focus-visible:underline focus-visible:underline-offset-8 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              +
+            </button>
+          ) : null}
           {/* The total rides the button: the ledger that used to state it is
               gone from this step, and nobody should learn the real charge
-              inside the card fields. */}
+              inside the card fields. It covers everything in the cart. */}
           <button
             type="submit"
-            disabled={isPending || !size}
+            disabled={isPending || orderItems.length === 0}
             className="brat text-brand-red transition-colors duration-200 hover:text-brand-yellow focus-visible:underline focus-visible:underline-offset-8 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {isPending
               ? orderCopy.submitPending
-              : `${orderCopy.next} ${formatUsd(totalCents)}`}
+              : `${orderCopy.next} ${formatUsd(quotedCents)}`}
           </button>
         </>
       )}
     </form>
   );
+}
+
+// The same garment in the same size is one line of two, so the ledger and the
+// request both read the cart the way the server will.
+function mergeItems(items: CartItem[]): CartItem[] {
+  const merged: CartItem[] = [];
+  for (const item of items) {
+    const existing = merged.find(
+      (line) => line.slug === item.slug && line.size === item.size,
+    );
+    if (existing) {
+      existing.quantity += item.quantity;
+    } else {
+      merged.push({ ...item });
+    }
+  }
+  return merged;
 }
