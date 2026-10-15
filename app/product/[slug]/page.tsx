@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 
 import { ProductScreen, getProduct } from "@/features/storefront";
+import { isAtOrderCapacity } from "@/lib/order-capacity.server";
 import { getSiteMode } from "@/lib/site-mode.server";
 
 // Same gate as "/": product pages must not leak an unreleased drop, and
@@ -18,7 +19,7 @@ export async function generateMetadata({
 
 export default async function ProductPage({ params }: PageProps<"/product/[slug]">) {
   const mode = await getSiteMode();
-  if (mode !== "live") redirect("/");
+  if (mode !== "live" || (await isAtOrderCapacity())) redirect("/");
 
   const { slug } = await params;
   const product = await getProduct(slug);

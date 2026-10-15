@@ -3,10 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition, type FormEvent } from "react";
 
-import {
-  createCheckoutSession,
-  type DeliveryMethod,
-} from "@/actions/create-checkout-session";
+import { createCheckoutSession } from "@/actions/create-checkout-session";
 import { dials } from "@/config/dials";
 import { useCart, type CartItem } from "@/features/cart";
 import { cn } from "@/lib/utils";
@@ -17,8 +14,11 @@ import {
   formatUsd,
   orderCopy,
   orderErrorLines,
+  soldOutLine,
   type OrderErrorReason,
 } from "../../lib/order-copy";
+import { deliveryOptions } from "../../lib/delivery-options";
+import { scrollIntoViewOnMount } from "../../lib/scroll";
 import { stripePromise } from "../../lib/stripe-client";
 
 /** Structurally the storefront's `ProductVariant`, declared here so the order
@@ -33,21 +33,6 @@ export type CheckoutFormProps = {
   /** The garment's cutout, kept in the cart so its corner thumbnail can draw. */
   cutout: { url: string; alt: string } | null;
 };
-
-const deliveryOptions: {
-  value: DeliveryMethod;
-  label: string;
-  price: string;
-}[] = [
-  { value: "pickup", label: orderCopy.pickup, price: orderCopy.free },
-  {
-    value: "shipping",
-    label: orderCopy.shipping,
-    // The rate is the dial's, never a literal -- change it in config/dials.ts
-    // and this line and the Stripe shipping option move together.
-    price: formatUsd(dials.shippingFlatRateCents),
-  },
-];
 
 // The poster's bottom block (the founder's order mockups): red Anton set
 // straight onto the shoot, centred like the YZY store, reading top to bottom as
@@ -77,6 +62,12 @@ export function CheckoutForm({
   // component was handed.
   const [refusedSizes, setRefusedSizes] = useState<string[]>([]);
   const [isPending, startTransition] = useTransition();
+  // Names the garment a sold-out refusal was about ("STAR SHORTS S IS GONE").
+  const [goneLine, setGoneLine] = useState<string | null>(null);
+  // Pressing the order button with no size picked cannot show a hover on a
+  // phone, so it answers the press instead: the button says SELECT SIZE and the
+  // size row shakes, for under two seconds.
+  const [nudge, setNudge] = useState(false);
 
   const sizes = variants.map((variant) => ({
     size: variant.size,
@@ -110,13 +101,6 @@ export function CheckoutForm({
       ? dials.shippingFlatRateCents
       : 0;
   const totalCents = subtotalCents + shippingCents;
-  // Before anything is picked the button still quotes this garment, as it did
-  // when the page sold one thing; a "$0" order would read as broken.
-  const quotedCents =
-    orderItems.length > 0
-      ? totalCents
-      : priceCents +
-        (delivery === "shipping" ? dials.shippingFlatRateCents : 0);
   const deliveryLabel =
     delivery === "shipping" ? orderCopy.shipping : orderCopy.pickup;
   const ledgerLines: LedgerLine[] = orderItems.map((item) => ({
@@ -126,6 +110,25 @@ export function CheckoutForm({
 
   // "+": the garment goes in the cart and the customer goes back to the grid to
   // pick the next one. The size resets so coming back later starts fresh.
+  // What the button spells out: what is already in the cart, plus this garment
+  // (whether or not a size is picked yet), plus shipping if that is the choice
+  // -- each as its own term ("$25 + $25"), with the total drawn beneath it
+  // once there is more than one.
+  const priceTerms = [
+    ...(selected
+      ? orderItems.map((item) => item.priceCents * item.quantity)
+      : [
+          ...mergeItems(cart.items).map(
+            (item) => item.priceCents * item.quantity,
+          ),
+          priceCents,
+        ]),
+    ...(delivery === "shipping" ? [dials.shippingFlatRateCents] : []),
+  ];
+  const priceTotalCents = priceTerms.reduce((sum, term) => sum + term, 0);
+
+  const buyLabel = `${orderCopy.next} ${priceTerms.map(formatUsd).join(" + ")}`;
+
   function handleAdd() {
     if (!selected || isPending) return;
     cart.addItem(selected);
@@ -135,10 +138,14 @@ export function CheckoutForm({
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    // The button is already disabled in both cases; pressing Enter inside the
-    // form submits anyway, which is where a double order would come from.
-    if (orderItems.length === 0 || isPending) return;
+    if (isPending) return;
+    if (!selected) {
+      setNudge(true);
+      setTimeout(() => setNudge(false), 1800);
+      return;
+    }
     setErrorReason(null);
+    setGoneLine(null);
     startTransition(async () => {
       const result = await createCheckoutSession({
         items: orderItems.map((item) => ({
@@ -162,7 +169,15 @@ export function CheckoutForm({
         }
         // Whatever ran out, it cannot stay in the cart: leaving it would fail
         // the next attempt the same way.
-        if (gone) cart.removeItem(gone.slug, gone.size);
+        if (gone) {
+          const goneName =
+            gone.slug === slug
+              ? name
+              : (cart.items.find((item) => item.slug === gone.slug)?.name ??
+                "THAT ONE");
+          setGoneLine(soldOutLine(goneName, gone.size));
+          cart.removeItem(gone.slug, gone.size);
+        }
       }
     });
   }
@@ -175,6 +190,7 @@ export function CheckoutForm({
     setClientSecret(null);
     setOrderId(null);
     setErrorReason(null);
+    setGoneLine(null);
   }
 
   if (!stripePromise || errorReason === "stripe-unconfigured") {
@@ -208,7 +224,10 @@ export function CheckoutForm({
 
   if (clientSecret) {
     return (
-      <div className="mx-auto w-full max-w-md bg-ink/95 p-6">
+      <div
+        ref={scrollIntoViewOnMount}
+        className="mx-auto w-full max-w-md bg-ink/95 p-6"
+      >
         <PaymentStation
           clientSecret={clientSecret}
           orderId={orderId}
@@ -225,7 +244,8 @@ export function CheckoutForm({
 
   // `stripe-unconfigured` already returned above, so every reason that reaches
   // here is one the buyer can act on.
-  const errorLine = errorReason ? orderErrorLines[errorReason] : null;
+  const errorLine =
+    goneLine ?? (errorReason ? orderErrorLines[errorReason] : null);
 
   return (
     <form
@@ -234,14 +254,19 @@ export function CheckoutForm({
     >
       <h1 className="brat text-brand-red">{name}</h1>
 
-      <fieldset disabled={isPending}>
+      <fieldset
+        disabled={isPending}
+        // Keyed on the nudge so each press replays the shake from the start.
+        key={nudge ? "nudge" : "rest"}
+        className={nudge ? "animate-nudge" : undefined}
+      >
         <legend className="sr-only">{orderCopy.size}</legend>
-        <div className="brat flex flex-wrap justify-center gap-x-8">
+        <div className="brat flex flex-wrap justify-center gap-x-6">
           {sizes.map((option) => (
             <label
               key={option.size}
               className={cn(
-                "cursor-pointer transition-colors duration-200",
+                "cursor-pointer px-1 py-2 transition-colors duration-200",
                 option.soldOut
                   ? "cursor-not-allowed text-brand-red line-through opacity-40"
                   : size === option.size
@@ -256,6 +281,18 @@ export function CheckoutForm({
                 checked={size === option.size}
                 disabled={option.soldOut}
                 onChange={() => setSize(option.size)}
+                // A radio cannot be unchecked by clicking it (no change event
+                // fires), so the size picked is toggled off here instead; Space
+                // does the same from the keyboard.
+                onClick={() => {
+                  if (size === option.size) setSize(null);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === " " && size === option.size) {
+                    event.preventDefault();
+                    setSize(null);
+                  }
+                }}
                 className="peer sr-only"
               />
               <span className="peer-focus-visible:underline peer-focus-visible:underline-offset-8">
@@ -271,34 +308,40 @@ export function CheckoutForm({
         </div>
       </fieldset>
 
-      <fieldset disabled={isPending}>
-        <legend className="sr-only">DELIVERY</legend>
-        <div className="brat flex flex-wrap justify-center gap-x-8">
-          {deliveryOptions.map((option) => (
-            <label
-              key={option.value}
-              className={cn(
-                "cursor-pointer transition-colors duration-200",
-                delivery === option.value
-                  ? "text-brand-yellow"
-                  : "text-brand-red hover:text-brand-yellow",
-              )}
-            >
-              <input
-                type="radio"
-                name="delivery"
-                value={option.value}
-                checked={delivery === option.value}
-                onChange={() => setDelivery(option.value)}
-                className="peer sr-only"
-              />
-              <span className="peer-focus-visible:underline peer-focus-visible:underline-offset-8">
-                {option.label} {option.price}
-              </span>
-            </label>
-          ))}
-        </div>
-      </fieldset>
+      {/* With a cart, delivery is one choice for the whole order and is made on
+          the cart page; asking again on every garment's page is a step the
+          customer has already taken. The price terms below still show shipping
+          when that is what they picked. */}
+      {cart.items.length === 0 ? (
+        <fieldset disabled={isPending}>
+          <legend className="sr-only">DELIVERY</legend>
+          <div className="brat flex flex-wrap justify-center gap-x-8">
+            {deliveryOptions.map((option) => (
+              <label
+                key={option.value}
+                className={cn(
+                  "cursor-pointer px-1 py-2 transition-colors duration-200",
+                  delivery === option.value
+                    ? "text-brand-yellow"
+                    : "text-brand-red opacity-40 hover:text-brand-yellow hover:opacity-100",
+                )}
+              >
+                <input
+                  type="radio"
+                  name="delivery"
+                  value={option.value}
+                  checked={delivery === option.value}
+                  onChange={() => setDelivery(option.value)}
+                  className="peer sr-only"
+                />
+                <span className="peer-focus-visible:underline peer-focus-visible:underline-offset-8">
+                  {option.label} {option.price}
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      ) : null}
 
       {errorLine ? (
         <p role="alert" className="brat text-brand-red">
@@ -306,7 +349,7 @@ export function CheckoutForm({
         </p>
       ) : null}
 
-      {allGone && orderItems.length === 0 ? (
+      {allGone ? (
         <p className="brat text-brand-red">{orderCopy.soldOut}</p>
       ) : (
         <>
@@ -320,7 +363,10 @@ export function CheckoutForm({
               aria-label={orderCopy.addToCart}
               className="brat text-brand-red transition-colors duration-200 hover:text-brand-yellow focus-visible:underline focus-visible:underline-offset-8 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              +
+              {/* The first garment starts the cart; after that it is added to it. */}
+              {cart.items.length === 0
+                ? orderCopy.makeCart
+                : orderCopy.addToCartLabel}
             </button>
           ) : null}
           {/* The total rides the button: the ledger that used to state it is
@@ -328,13 +374,35 @@ export function CheckoutForm({
               inside the card fields. It covers everything in the cart. */}
           <button
             type="submit"
-            disabled={isPending || orderItems.length === 0}
-            className="brat text-brand-red transition-colors duration-200 hover:text-brand-yellow focus-visible:underline focus-visible:underline-offset-8 disabled:cursor-not-allowed disabled:opacity-40"
+            disabled={isPending}
+            // Not `disabled` when no size is picked: a disabled button gives a
+            // phone nothing back when pressed. It looks faded, and pressing it
+            // answers with SELECT SIZE (see handleSubmit).
+            aria-disabled={!selected}
+            className={cn(
+              "group/buy brat min-h-11 text-brand-red transition-colors duration-200 hover:text-brand-yellow focus-visible:underline focus-visible:underline-offset-8 disabled:cursor-not-allowed disabled:opacity-40",
+              !selected && "opacity-40 hover:opacity-100",
+            )}
           >
-            {isPending
-              ? orderCopy.submitPending
-              : `${orderCopy.next} ${formatUsd(quotedCents)}`}
+            {isPending ? (
+              orderCopy.submitPending
+            ) : !selected ? (
+              // The default until a size is picked: say what is missing up
+              // front rather than showing PLACE ORDER on a button that cannot
+              // place one.
+              orderCopy.selectSize
+            ) : (
+              buyLabel
+            )}
           </button>
+          {/* The sum under the button, once there is more than one term to add
+              up -- a single price needs no total. */}
+          {priceTerms.length > 1 ? (
+            <p className="brat text-brand-red">
+              {formatUsd(priceTotalCents)}
+              {cart.items.length > 0 ? ` · ${orderCopy.withCart}` : ""}
+            </p>
+          ) : null}
         </>
       )}
     </form>

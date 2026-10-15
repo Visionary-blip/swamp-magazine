@@ -1,5 +1,6 @@
 import { ComingSoonScreen } from "@/features/coming-soon";
-import { LiveLandingScreen } from "@/features/storefront";
+import { CapacityScreen, LiveLandingScreen } from "@/features/storefront";
+import { isAtOrderCapacity } from "@/lib/order-capacity.server";
 import { getSiteMode } from "@/lib/site-mode.server";
 
 // The mode gate reads site_settings on every request so a flip in the admin
@@ -8,5 +9,9 @@ export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const mode = await getSiteMode();
-  return mode === "live" ? <LiveLandingScreen /> : <ComingSoonScreen />;
+  if (mode !== "live") return <ComingSoonScreen />;
+  // Closes the whole storefront once the order cap is hit; /order and /admin
+  // stay reachable so paid buyers and the founder are unaffected.
+  if (await isAtOrderCapacity()) return <CapacityScreen />;
+  return <LiveLandingScreen />;
 }

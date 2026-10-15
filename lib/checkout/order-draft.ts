@@ -29,13 +29,26 @@ export type ProductRow = {
   product_variants: VariantRow[];
 };
 
-export type OrderDraft = {
+/** What the buyer asked for: a product, a size and how many. Prices are never
+ * part of a request -- they come off the product rows. */
+export type OrderRequestLine = {
+  slug: string;
+  size: string;
+  quantity: number;
+};
+
+export type OrderDraftLine = {
   productId: string;
   variantId: string;
   productName: string;
   size: string;
   unitPriceCents: number;
   quantity: number;
+};
+
+export type OrderDraft = {
+  lines: OrderDraftLine[];
+  subtotalCents: number;
   shippingCents: number;
   totalCents: number;
   delivery: DeliveryMethod;
@@ -48,48 +61,87 @@ type FailureReason = Extract<
 
 export type OrderDraftResult =
   | { status: "success"; draft: OrderDraft }
-  | { status: "error"; reason: FailureReason };
+  | {
+      status: "error";
+      reason: FailureReason;
+      /** Which line a `sold-out` refusal is about, so the cart can drop it. */
+      item?: { slug: string; size: string };
+    };
 
-// One item per order (BD-4); the quantity column exists for the reserved cart
-// seam, so the arithmetic below is written against it rather than assuming 1.
-const QUANTITY = 1;
-
+// One shipping charge per order, however many lines it has: the flat rate is the
+// cost of sending the parcel, not of each garment in it.
 export function resolveOrderDraft(
-  product: ProductRow | null,
-  size: string,
+  products: ProductRow[],
+  requested: OrderRequestLine[],
   delivery: DeliveryMethod,
 ): OrderDraftResult {
-  // An inactive product is invisible to the storefront's RLS policy, so reaching
-  // here with one means a stale tab or a hand-made request -- same answer either
-  // way, and deliberately not a distinct reason that would confirm it exists.
-  if (!product || !product.active) {
-    return { status: "error", reason: "not-found" };
+  if (requested.length === 0) {
+    return { status: "error", reason: "invalid-input" };
   }
 
-  const variant = product.product_variants.find((row) => row.size === size);
-  if (!variant) {
-    return { status: "error", reason: "not-found" };
+  // The same garment twice is one line of two, so stock is checked against the
+  // total being asked for rather than each tap on its own.
+  const merged = new Map<string, OrderRequestLine>();
+  for (const line of requested) {
+    const key = `${line.slug}\u0000${line.size}`;
+    const existing = merged.get(key);
+    merged.set(key, {
+      ...line,
+      quantity: (existing?.quantity ?? 0) + line.quantity,
+    });
   }
 
-  if (variant.inventory_count < QUANTITY) {
-    return { status: "error", reason: "sold-out" };
-  }
+  const lines: OrderDraftLine[] = [];
+  for (const line of merged.values()) {
+    const product = products.find((row) => row.slug === line.slug);
 
-  const shippingCents =
-    delivery === "shipping" ? dials.shippingFlatRateCents : 0;
-  const unitPriceCents = product.price_cents;
+    // An inactive product is invisible to the storefront's RLS policy, so
+    // reaching here with one means a stale tab or a hand-made request -- same
+    // answer either way, and deliberately not a distinct reason that would
+    // confirm it exists.
+    if (!product || !product.active) {
+      return { status: "error", reason: "not-found" };
+    }
 
-  return {
-    status: "success",
-    draft: {
+    const variant = product.product_variants.find(
+      (row) => row.size === line.size,
+    );
+    if (!variant) {
+      return { status: "error", reason: "not-found" };
+    }
+
+    if (variant.inventory_count < line.quantity) {
+      return {
+        status: "error",
+        reason: "sold-out",
+        item: { slug: line.slug, size: line.size },
+      };
+    }
+
+    lines.push({
       productId: product.id,
       variantId: variant.id,
       productName: product.name,
       size: variant.size,
-      unitPriceCents,
-      quantity: QUANTITY,
+      unitPriceCents: product.price_cents,
+      quantity: line.quantity,
+    });
+  }
+
+  const subtotalCents = lines.reduce(
+    (sum, line) => sum + line.unitPriceCents * line.quantity,
+    0,
+  );
+  const shippingCents =
+    delivery === "shipping" ? dials.shippingFlatRateCents : 0;
+
+  return {
+    status: "success",
+    draft: {
+      lines,
+      subtotalCents,
       shippingCents,
-      totalCents: unitPriceCents * QUANTITY + shippingCents,
+      totalCents: subtotalCents + shippingCents,
       delivery,
     },
   };

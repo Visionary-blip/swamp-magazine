@@ -7,7 +7,11 @@
   --brand-red: #e0361f;
   --brand-yellow: #f2e438;
   --cream: #f4eddd;
-  --ink: #16110d;
+  /* The site's ground: a very dark brown, not black (230F08). */
+  --ink: #230f08;
+  /* The page transition fades through the same brown as the ground, so a
+     route change never flashes a second, different dark. */
+  --brown: var(--ink);
 }
 
 @theme inline {
@@ -15,6 +19,7 @@
   --color-brand-yellow: var(--brand-yellow);
   --color-cream: var(--cream);
   --color-ink: var(--ink);
+  --color-brown: var(--brown);
   --font-display: var(--font-anton);
   --font-body: var(--font-archivo);
 }
@@ -41,6 +46,70 @@
   }
   to {
     transform: translateX(-50%);
+  }
+}
+
+/* The page transition: the dark-brown veil starts opaque on every new route and
+   fades quickly away (see features/transition). */
+@keyframes veil-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.animate-veil-out {
+  animation: veil-out 0.35s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-veil-out {
+    animation: none;
+  }
+}
+
+/* A short sideways shake that points at the size row when someone presses the
+   order button before picking a size. */
+@keyframes nudge {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-6px);
+  }
+  40%,
+  80% {
+    transform: translateX(6px);
+  }
+}
+
+.animate-nudge {
+  animation: nudge 0.45s ease-in-out;
+}
+
+/* The scroll cue's gentle bob. */
+@keyframes cue-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(5px);
+  }
+}
+
+.animate-cue-bob {
+  animation: cue-bob 1.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-nudge,
+  .animate-cue-bob {
+    animation: none;
   }
 }
 

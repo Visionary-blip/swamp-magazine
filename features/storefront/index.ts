@@ -1,4 +1,5 @@
 export { LiveLandingScreen } from "./components/live-landing-screen/live-landing-screen";
+export { CapacityScreen } from "./components/capacity-screen/capacity-screen";
 export { ProductScreen } from "./components/product-screen/product-screen";
 export { CatalogIndex } from "./components/catalog-index/catalog-index";
 export { FilmBand } from "./components/film-band/film-band";

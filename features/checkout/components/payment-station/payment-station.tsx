@@ -10,16 +10,13 @@ import type {
   StripeExpressCheckoutElementConfirmEvent,
   StripeExpressCheckoutElementReadyEvent,
 } from "@stripe/stripe-js";
-import { useState, type FormEvent } from "react";
+import { useState, useTransition, type FormEvent } from "react";
 
 import type { DeliveryMethod } from "@/actions/create-checkout-session";
+import { subscribeFromCheckout } from "@/actions/subscribe-from-checkout";
 
-import { OrderLedger } from "../order-ledger/order-ledger";
-import {
-  formatUsd,
-  orderCopy,
-  paymentErrorLine,
-} from "../../lib/order-copy";
+import { OrderLedger, type LedgerLine } from "../order-ledger/order-ledger";
+import { formatUsd, orderCopy, paymentErrorLine } from "../../lib/order-copy";
 import {
   buildCheckoutAppearance,
   checkoutFonts,
@@ -29,9 +26,7 @@ import { stripePromise } from "../../lib/stripe-client";
 export type PaymentStationProps = {
   clientSecret: string;
   orderId: string | null;
-  name: string;
-  size: string | null;
-  priceCents: number;
+  lines: LedgerLine[];
   delivery: DeliveryMethod;
   deliveryLabel: string;
   shippingCents: number;
@@ -82,9 +77,7 @@ type PaymentFieldsProps = Omit<PaymentStationProps, "clientSecret" | "orderId">;
 type ChosenMethod = "card" | null;
 
 function PaymentFields({
-  name,
-  size,
-  priceCents,
+  lines,
   delivery,
   deliveryLabel,
   shippingCents,
@@ -104,16 +97,16 @@ function PaymentFields({
   const [hasWallets, setHasWallets] = useState<boolean | null>(null);
   const [errorLine, setErrorLine] = useState<string | null>(null);
   const [isPaying, setIsPaying] = useState(false);
+  const [pulse, setPulse] = useState<"idle" | "done" | string>("idle");
+  const [isSubscribing, startSubscribe] = useTransition();
 
   if (checkoutState.type === "loading") {
     return (
       <div className="flex flex-col gap-4">
         <OrderLedger
-          name={name}
-          priceCents={priceCents}
+          lines={lines}
           deliveryLabel={deliveryLabel}
           shippingCents={shippingCents}
-          size={size}
           totalDisplay={formatUsd(totalCents)}
         />
         <p className="text-[10px] tracking-[0.3em] text-cream/50">
@@ -126,7 +119,10 @@ function PaymentFields({
   if (checkoutState.type === "error") {
     return (
       <div className="flex flex-col gap-4">
-        <p role="alert" className="text-xs font-bold tracking-widest text-brand-red">
+        <p
+          role="alert"
+          className="text-xs font-bold tracking-widest text-brand-red"
+        >
           {paymentErrorLine(checkoutState.error.message)}
         </p>
         <div className="flex flex-col items-start">
@@ -194,6 +190,27 @@ function PaymentFields({
     setIsPaying(false);
   }
 
+  // The opt-in is the press itself. The email is the one already typed into the
+  // contact fields above (the session holds it as soon as it is valid), so the
+  // buyer is not asked for it twice.
+  function handlePulse() {
+    const email = checkout.email;
+    if (!email) {
+      setPulse(orderCopy.pulseNeedsEmail);
+      return;
+    }
+    startSubscribe(async () => {
+      const result = await subscribeFromCheckout(email);
+      setPulse(
+        result.status === "success"
+          ? "done"
+          : result.reason === "invalid-email"
+            ? orderCopy.pulseBadEmail
+            : orderCopy.pulseFailed,
+      );
+    });
+  }
+
   function handleWalletReady(event: StripeExpressCheckoutElementReadyEvent) {
     const available = Boolean(event.availablePaymentMethods);
     setHasWallets(available);
@@ -205,11 +222,9 @@ function PaymentFields({
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6 md:gap-8">
       <OrderLedger
-        name={name}
-        priceCents={priceCents}
+        lines={lines}
         deliveryLabel={deliveryLabel}
         shippingCents={shippingCents}
-        size={size}
         totalDisplay={readTotal(checkout, totalCents)}
       />
 
@@ -318,7 +333,10 @@ function PaymentFields({
       </fieldset>
 
       {errorLine ? (
-        <p role="alert" className="text-xs font-bold tracking-widest text-brand-red">
+        <p
+          role="alert"
+          className="text-xs font-bold tracking-widest text-brand-red"
+        >
           {errorLine}
         </p>
       ) : null}
@@ -346,6 +364,42 @@ function PaymentFields({
           {orderCopy.changeSize}
         </QuietAction>
       </div>
+
+      {/* Card path only: it is where the email field lives. A wallet hands the
+          session its email inside its own sheet, after this button could have
+          been pressed. */}
+      {isChoosing ? null : (
+        <div className="flex flex-col items-start gap-2 border-t border-cream/20 pt-6">
+          {pulse === "done" ? (
+            <p className="font-display text-xl tracking-[0.06em] text-brand-yellow">
+              {orderCopy.pulseDone}
+            </p>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={handlePulse}
+                disabled={isSubscribing || isPaying}
+                className="font-display text-xl tracking-[0.06em] text-brand-red transition-colors duration-200 hover:text-brand-yellow focus-visible:underline focus-visible:underline-offset-8 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {orderCopy.pulse}
+              </button>
+              {pulse !== "idle" ? (
+                <p
+                  role="alert"
+                  className="text-[10px] font-bold tracking-widest text-brand-red"
+                >
+                  {pulse}
+                </p>
+              ) : (
+                <p className="text-[10px] tracking-[0.2em] text-cream/50">
+                  {orderCopy.pulseDisclosure}
+                </p>
+              )}
+            </>
+          )}
+        </div>
+      )}
     </form>
   );
 }

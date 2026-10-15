@@ -11,16 +11,17 @@ export const storefrontCopy = {
   /** LIFTED -- the byline under it, verbatim. */
   byline: "FROM LALO FARRO",
   /** LIFTED -- his own name for the drop; already shipped on coming-soon. */
-  issue: "THE THIRD ISSUE",
+  issue: "THE NATIONAL ISSUE",
   /**
-   * Issue number and season corrected by Zach on 2026-09-08 -- the drop is the
-   * THIRD issue, dated FALL 2026; the site had shipped "FIRST"/"FALL 2025".
+   * Issue name and season corrected by Zach on 2026-09-08 (the drop was then
+   * called the third issue; the founder renamed it THE NATIONAL ISSUE on
+   * 2026-10-14) -- dated FALL 2026; the site had shipped "FIRST"/"FALL 2025".
    * The dateline itself is still ours, not his: Direction A dates the issue the
    * way a film's title card does, and that placement still wants founder sign-off.
    */
-  issueDate: "THE THIRD ISSUE — FALL 2026",
+  issueDate: "THE NATIONAL ISSUE — FALL 2026",
   /** LIFTED, adapted at P2 and still flagged: the Thames-style ticker line. */
-  ticker: "SWAMP MAGAZINE * THE THIRD ISSUE * ",
+  ticker: "SWAMP MAGAZINE * THE NATIONAL ISSUE * ",
   /** LIFTED -- the order mockups' way back, verbatim. */
   back: "BACK",
   /**

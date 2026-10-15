@@ -22,6 +22,8 @@ export const orderErrorLines: Record<OrderErrorReason, string> = {
   "not-found": "CAN'T FIND THAT ONE ANYMORE",
   // INVENTED.
   "sold-out": "THAT SIZE IS GONE. PICK ANOTHER",
+  // INVENTED -- the founder asked for "we have reached order capacity".
+  "at-capacity": "WE'VE REACHED ORDER CAPACITY FOR RIGHT NOW",
   // INVENTED -- named in the P3 brief; the quiet state when keys aren't live yet.
   "stripe-unconfigured": "ORDERS OPEN SOON",
   // LIFTED from actions/subscribe's failure map, already shipped in P1.
@@ -40,6 +42,22 @@ export const orderCopy = {
   next: "PLACE ORDER",
   /** LIFTED from the P1 subscribe form's pending state, for one pending voice. */
   submitPending: "SENDING...",
+  /** INVENTED -- screen-reader name for the "+" button, which is a bare plus
+   * on the page: it files the garment in the cart and returns to the grid. */
+  addToCart: "ADD TO CART AND CHOOSE ANOTHER",
+  /** INVENTED -- tags the sum under the button when the cart is part of it. */
+  withCart: "WITH YOUR CART",
+  /** INVENTED -- the cart page when nothing is in it. */
+  cartEmpty: "YOUR CART IS EMPTY",
+  /** INVENTED -- the way out of an empty cart. */
+  shopTheGrid: "SHOP",
+  /** INVENTED -- the cart button while the cart is empty: this garment starts it. */
+  makeCart: "MAKE CART",
+  /** INVENTED -- the cart button once the cart has something in it. */
+  addToCartLabel: "ADD TO CART",
+  /** INVENTED -- what the place-order button says by default while no size is
+   * picked and the cart is empty, so it cannot yet be pressed. */
+  selectSize: "SELECT SIZE FIRST",
   /** INVENTED -- the way back to the size row from the card step. */
   changeSize: "CHANGE SIZE",
   /** INVENTED -- heads the payment chooser. The mockups pay by Venmo and so
@@ -57,6 +75,20 @@ export const orderCopy = {
   /** INVENTED -- the mockups collect NAME/PHONE/ADDRESS but never an email;
    * Stripe needs one to send the receipt. */
   email: "EMAIL",
+  /** LIFTED from the coming-soon form's headline -- the founder's own words for
+   * the newsletter button under the payment fields. */
+  pulse: "I WANT MY FINGER ON THE PULSE",
+  /** INVENTED -- the opt-in disclosure under that button, same terms as the
+   * coming-soon form. */
+  pulseDisclosure: "UPDATES ON DROPS + YOUR ORDERS. CANCEL ANY TIME.",
+  /** INVENTED -- pressed before an email has been entered above. */
+  pulseNeedsEmail: "ADD YOUR EMAIL ABOVE FIRST",
+  /** INVENTED -- the newsletter address did not validate. */
+  pulseBadEmail: "THAT EMAIL DOESN'T LOOK RIGHT",
+  /** LIFTED from the subscribe form's failure map. */
+  pulseFailed: "SOMETHING BROKE. TRY AGAIN",
+  /** INVENTED -- after signing up. */
+  pulseDone: "YOU'RE ON THE LIST",
   /** INVENTED -- shown while Stripe.js is still building the card fields. */
   paymentLoading: "ONE SECOND...",
   /** INVENTED -- last resort when a confirm fails with nothing quotable. Stripe's
@@ -81,6 +113,12 @@ export const orderCopy = {
   /** INVENTED -- the mockups state one number ("PLEASE VENMO $20"), not a total. */
   total: "TOTAL",
 } as const;
+
+/** Names the garment that ran out, so the buyer is not left guessing which of
+ * several things in the cart was dropped. */
+export function soldOutLine(name: string, size: string): string {
+  return `${name.toUpperCase()} ${size} IS GONE`;
+}
 
 /**
  * The mockups price in whole dollars ("PLEASE VENMO $20"), so cents only show

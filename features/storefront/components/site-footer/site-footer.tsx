@@ -33,18 +33,18 @@ export function SiteFooter({
   tickerLine = storefrontCopy.ticker,
 }: SiteFooterProps = {}) {
   return (
-    <footer className="border-t border-brand-red/35 bg-ink pt-6 md:pt-[26px]">
+    <footer className="border-t border-brand-red/35 bg-ink pt-4">
       <MarqueeTicker line={tickerLine} />
 
-      <div className="px-5 pt-12 pb-10 md:px-[120px] md:pt-[60px] md:pb-[34px]">
-        <div className="grid grid-cols-2 gap-x-6 gap-y-12 md:grid-cols-[1.5fr_1fr_1fr_1fr] md:gap-x-10">
+      <div className="px-5 pt-7 pb-5 md:px-[120px] md:pt-8 md:pb-4">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-6 md:grid-cols-[1.5fr_1fr_1fr_1fr] md:gap-x-10">
           <BrandBlock />
           {footerColumns.map((column) => (
             <FooterNavColumn key={column.heading} column={column} />
           ))}
         </div>
 
-        <div className="mt-12 flex flex-col items-center gap-4 border-t border-brand-red/35 pt-6 md:mt-[52px] md:flex-row md:justify-between md:gap-0">
+        <div className="mt-6 flex flex-col items-center gap-3 border-t border-brand-red/35 pt-4 md:mt-6 md:flex-row md:justify-between md:gap-0">
           <p className="font-body text-[10px] font-medium tracking-[0.3em] text-cream/45">
             {/* Statically rendered stub pages freeze this at their build year.
                 Accepted: forcing every page dynamic for a copyright line costs
@@ -71,7 +71,7 @@ export function SiteFooter({
 // footer scale, so the page closes on the same two words it opened with.
 function BrandBlock() {
   return (
-    <div className="col-span-2 flex flex-col gap-3 md:col-span-1">
+    <div className="col-span-2 flex flex-col gap-2 md:col-span-1">
       <StarMark className="w-[26px] text-brand-red" />
       <p className="font-display text-[20px] leading-none tracking-[0.04em] text-cream">
         {storefrontCopy.wordmark}
@@ -85,11 +85,11 @@ function BrandBlock() {
 
 function FooterNavColumn({ column }: { column: FooterColumn }) {
   return (
-    <nav aria-label={column.heading} className="flex flex-col gap-4">
+    <nav aria-label={column.heading} className="flex flex-col gap-2">
       <p className="font-body text-[10px] font-semibold tracking-[0.35em] text-brand-red">
         {column.heading}
       </p>
-      <ul className="flex flex-col gap-3">
+      <ul className="flex flex-col gap-0.5">
         {column.links.map((link) => (
           <li key={link.href}>
             <FooterNavLink link={link} />
@@ -110,7 +110,7 @@ function FooterNavLink({
   link: FooterLink;
   className?: string;
 }) {
-  const classes = `font-body text-[11px] tracking-[0.2em] uppercase transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-red ${className}`;
+  const classes = `inline-flex items-center py-1 pointer-coarse:min-h-11 font-body text-[11px] tracking-[0.2em] uppercase transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-red ${className}`;
 
   if (link.external) {
     return (

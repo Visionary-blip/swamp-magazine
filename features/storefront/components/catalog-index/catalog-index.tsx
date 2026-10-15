@@ -16,7 +16,7 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
   if (products.length === 0) return null;
 
   return (
-    <section className="bg-ink px-5 py-16 md:px-16 md:py-[88px]">
+    <section id="products" className="bg-ink px-5 py-16 md:px-16 md:py-[88px]">
       <ul className="grid grid-cols-2 gap-x-4 gap-y-12 md:grid-cols-4 md:gap-x-8 md:gap-y-16">
         {products.map((product, index) => (
           <li key={product.slug}>

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   MAX_LINE_QUANTITY,
+  adjustQuantity,
   addToCart,
   cartCount,
   cartSubtotalCents,
@@ -139,5 +140,24 @@ describe("changeCartSize", () => {
     const cart = [item()];
     expect(changeCartSize(cart, "star-shorts", "M", "M")).toBe(cart);
     expect(changeCartSize(cart, "star-shorts", "S", "L")).toBe(cart);
+  });
+});
+
+describe("adjustQuantity", () => {
+  it("raises and lowers a line", () => {
+    const up = adjustQuantity([item()], "star-shorts", "M", 1);
+    expect(up[0].quantity).toBe(2);
+    expect(adjustQuantity(up, "star-shorts", "M", -1)[0].quantity).toBe(1);
+  });
+
+  it("removes a line that reaches zero", () => {
+    expect(adjustQuantity([item()], "star-shorts", "M", -1)).toEqual([]);
+  });
+
+  it("stops at the cap and leaves other lines alone", () => {
+    const cart = [item({ quantity: MAX_LINE_QUANTITY }), item({ size: "L" })];
+    const next = adjustQuantity(cart, "star-shorts", "M", 1);
+    expect(next[0].quantity).toBe(MAX_LINE_QUANTITY);
+    expect(next[1]).toBe(cart[1]);
   });
 });

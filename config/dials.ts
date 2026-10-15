@@ -18,6 +18,16 @@ export const dials = {
   oversellPolicy: "refund_and_apologize" as const,
 
   /**
+   * Paid orders after which the storefront closes itself and shows "order
+   * capacity reached". The founder can only fulfil so many by hand per drop.
+   * Counts orders (not garments) in paid / fulfilled / picked_up; refunded and
+   * canceled ones free their slot. Checked when a session is created, so a few
+   * buyers already mid-payment at the 20th can still land a 21st -- acceptable
+   * at this scale, same spirit as `oversellPolicy`.
+   */
+  orderCapacity: 20,
+
+  /**
    * SMS sends stay off until A2P 10DLC registration clears (D4). The subscribe
    * form collects phone + consent from day one either way.
    */
@@ -69,6 +79,19 @@ export const dials = {
    * fails fast instead of occupying a server action for a minute.
    */
   slotImageMaxUploadBytes: 20 * 1024 * 1024,
+
+  /**
+   * Largest selfie the "I want to model" form accepts, in bytes. Phone
+   * selfies run 2-5 MB; this stays under the server-action body limit that
+   * next.config derives from `slotImageMaxUploadBytes`.
+   */
+  modelSelfieMaxUploadBytes: 10 * 1024 * 1024,
+
+  /**
+   * Largest piece of work a creative can attach on the "get me involved" form,
+   * in bytes. Same ceiling as the selfie, under the server-action body limit.
+   */
+  creativeWorkMaxUploadBytes: 10 * 1024 * 1024,
 
   /**
    * Canonical public origin (swampmagazine.com, purchased per DESIGN.md par.2).

@@ -21,8 +21,8 @@ export function SubscribeConfirmationEmail() {
           <Heading style={headingStyle}>SWAMP MAGAZINE</Heading>
           <Text style={leadStyle}>YOU HAVE YOUR FINGER ON THE PULSE.</Text>
           <Text style={textStyle}>
-            We will update you on order status + new products. The third issue
-            is coming soon.
+            We will update you on order status + new products. The national
+            issue is coming soon.
           </Text>
           <Text style={fineStyle}>
             From Lalo Farro. Cancel any time: reply to this email and say stop.

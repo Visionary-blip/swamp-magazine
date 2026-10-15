@@ -25,7 +25,10 @@ export type CatalogProduct = {
  * it says which read a caller made. */
 export type ProductDetail = CatalogProduct;
 
-export type LandingImagery = { hero: SlotImage | null; mascot: SlotImage | null };
+export type LandingImagery = {
+  hero: SlotImage | null;
+  mascot: SlotImage | null;
+};
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
@@ -41,7 +44,11 @@ type ProductRow = {
   name: string;
   price_cents: number;
   model_credits: string | null;
-  product_variants: { size: string; inventory_count: number; sort_order: number }[];
+  product_variants: {
+    size: string;
+    inventory_count: number;
+    sort_order: number;
+  }[];
 };
 
 const PRODUCT_SELECT =
@@ -71,7 +78,11 @@ export async function getProduct(slug: string): Promise<ProductDetail | null> {
   try {
     const supabase = await createClient();
     const [product, slots] = await Promise.all([
-      supabase.from("products").select(PRODUCT_SELECT).eq("slug", slug).maybeSingle(),
+      supabase
+        .from("products")
+        .select(PRODUCT_SELECT)
+        .eq("slug", slug)
+        .maybeSingle(),
       getSlotMap(supabase),
     ]);
     if (product.error) {

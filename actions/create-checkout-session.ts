@@ -5,21 +5,21 @@ import { z } from "zod";
 
 import { dials } from "@/config/dials";
 import { resolveOrderDraft, type ProductRow } from "@/lib/checkout/order-draft";
+import { isAtOrderCapacity } from "@/lib/order-capacity.server";
 import { getSiteMode } from "@/lib/site-mode.server";
 import { getStripe } from "@/lib/stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-// The order form (Lane F) builds against this signature. Contract is frozen so
-// both lanes can run in parallel: prices and stock come from the DB server-side
-// (never the client), the payment station mounts with the returned clientSecret
-// (D2), and every failure is a literal-union reason the form can render in the
-// mockups' voice.
+// The order form (Lane F) builds against this signature. Prices and stock come
+// from the DB server-side (never the client), the payment station mounts with
+// the returned clientSecret (D2), and every failure is a literal-union reason
+// the form can render in the mockups' voice. The cart widened `slug`/`size` into
+// a list of items: one order, one delivery choice, several lines.
 
 export type DeliveryMethod = "pickup" | "shipping";
 
 export type CreateCheckoutSessionInput = {
-  slug: string;
-  size: string;
+  items: { slug: string; size: string; quantity: number }[];
   delivery: DeliveryMethod;
 };
 
@@ -31,13 +31,26 @@ export type CreateCheckoutSessionResult =
         | "invalid-input"
         | "not-found"
         | "sold-out"
+        | "at-capacity"
         | "stripe-unconfigured"
         | "server-error";
+      /** Set on `sold-out`: the line that ran out, so the cart can drop it. */
+      item?: { slug: string; size: string };
     };
 
+// The caps are sanity limits on a public endpoint, not product rules: a cart is
+// a handful of garments, and an unbounded list is a free query amplifier.
 const inputSchema = z.object({
-  slug: z.string().min(1).max(200),
-  size: z.string().min(1).max(20),
+  items: z
+    .array(
+      z.object({
+        slug: z.string().min(1).max(200),
+        size: z.string().min(1).max(20),
+        quantity: z.number().int().min(1).max(10),
+      }),
+    )
+    .min(1)
+    .max(20),
   delivery: z.enum(["pickup", "shipping"]),
 });
 
@@ -51,7 +64,7 @@ export async function createCheckoutSession(
   if (!parsed.success) {
     return { status: "error", reason: "invalid-input" };
   }
-  const { slug, size, delivery } = parsed.data;
+  const { items, delivery } = parsed.data;
 
   // The product page redirects when the site is not live, but a server action is
   // a public endpoint reachable by action id -- the page's gate does not cover
@@ -61,6 +74,12 @@ export async function createCheckoutSession(
   // an unreleased drop must not be reachable.
   if ((await getSiteMode()) !== "live") {
     return { status: "error", reason: "not-found" };
+  }
+
+  // Same reasoning as the mode gate: the pages close at capacity, but the
+  // action is reachable directly.
+  if (await isAtOrderCapacity()) {
+    return { status: "error", reason: "at-capacity" };
   }
 
   const stripe = getStripe();
@@ -78,11 +97,10 @@ export async function createCheckoutSession(
 
     // Read price and stock here, server-side, every time. Anything the client
     // sent about money is ignored by construction -- it never reaches Stripe.
-    const { data: product, error: productError } = await supabase
+    const { data: products, error: productError } = await supabase
       .from("products")
       .select(PRODUCT_SELECT)
-      .eq("slug", slug)
-      .maybeSingle();
+      .in("slug", [...new Set(items.map((item) => item.slug))]);
 
     if (productError) {
       console.error("[CHECKOUT]", productError.code, productError.message);
@@ -90,8 +108,8 @@ export async function createCheckoutSession(
     }
 
     const drafted = resolveOrderDraft(
-      (product as ProductRow | null) ?? null,
-      size,
+      (products ?? []) as ProductRow[],
+      items,
       delivery,
     );
     if (drafted.status === "error") {
@@ -122,15 +140,17 @@ export async function createCheckoutSession(
 
     const orderId = order.id as string;
 
-    const { error: itemError } = await supabase.from("order_items").insert({
-      order_id: orderId,
-      product_id: draft.productId,
-      variant_id: draft.variantId,
-      product_name: draft.productName,
-      size: draft.size,
-      unit_price_cents: draft.unitPriceCents,
-      quantity: draft.quantity,
-    });
+    const { error: itemError } = await supabase.from("order_items").insert(
+      draft.lines.map((line) => ({
+        order_id: orderId,
+        product_id: line.productId,
+        variant_id: line.variantId,
+        product_name: line.productName,
+        size: line.size,
+        unit_price_cents: line.unitPriceCents,
+        quantity: line.quantity,
+      })),
+    );
 
     if (itemError) {
       console.error("[CHECKOUT]", itemError.code, itemError.message);
@@ -154,18 +174,16 @@ export async function createCheckoutSession(
       // so it exists even if storing that id fails.
       metadata: { order_id: orderId },
       payment_intent_data: { metadata: { order_id: orderId } },
-      line_items: [
-        {
-          quantity: draft.quantity,
-          // Inline price_data per BD-3 -- no Stripe Product catalog to drift
-          // out of sync with ours.
-          price_data: {
-            currency: "usd",
-            unit_amount: draft.unitPriceCents,
-            product_data: { name: `${draft.productName} (${draft.size})` },
-          },
+      line_items: draft.lines.map((line) => ({
+        quantity: line.quantity,
+        // Inline price_data per BD-3 -- no Stripe Product catalog to drift
+        // out of sync with ours.
+        price_data: {
+          currency: "usd",
+          unit_amount: line.unitPriceCents,
+          product_data: { name: `${line.productName} (${line.size})` },
         },
-      ],
+      })),
       // Naming the type at all turns off Stripe's dashboard-driven automatic
       // methods, which is the point: the founder's set is card plus the two
       // wallets, and Apple Pay / Google Pay ARE card under the hood. Anything
@@ -193,7 +211,10 @@ export async function createCheckoutSession(
     });
 
     if (!session.client_secret) {
-      console.error("[CHECKOUT] session created without a client secret", session.id);
+      console.error(
+        "[CHECKOUT] session created without a client secret",
+        session.id,
+      );
       return { status: "error", reason: "server-error" };
     }
 

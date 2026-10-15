@@ -22,7 +22,7 @@ const BG_SLOT_KEY = "coming_soon_bg";
  * break the loop's rhythm. The local marquee this replaced used
  * `whitespace-nowrap` and had that bug.
  */
-const TICKER_LINE = "SWAMP MAGAZINE * THE THIRD ISSUE * COMING SOON * ";
+const TICKER_LINE = "SWAMP MAGAZINE * THE NATIONAL ISSUE * COMING SOON * ";
 
 type BackgroundSlot = { url: string; alt: string };
 
@@ -67,7 +67,7 @@ export async function ComingSoonScreen() {
               SWAMP MAGAZINE
             </h1>
             <p className="font-body text-sm tracking-[0.35em]">
-              THE THIRD ISSUE
+              THE NATIONAL ISSUE
             </p>
           </header>
 

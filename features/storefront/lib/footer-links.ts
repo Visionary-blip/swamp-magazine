@@ -31,8 +31,6 @@ export const footerColumns: readonly FooterColumn[] = [
     heading: "THE MAGAZINE",
     links: [
       { label: "ABOUT", href: "/about" },
-      { label: "CONTACT", href: "/contact" },
-      { label: "STOCKISTS", href: "/stockists" },
     ],
   },
   {

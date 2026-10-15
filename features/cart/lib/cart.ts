@@ -146,3 +146,18 @@ export function changeCartSize(
       : [item],
   );
 }
+
+/** Nudges one line's quantity up or down by `delta`; a line that reaches zero is
+ * removed, and a line never passes the cap the server enforces. */
+export function adjustQuantity(
+  items: CartItem[],
+  slug: string,
+  size: string,
+  delta: number,
+): CartItem[] {
+  return items.flatMap((item) => {
+    if (item.slug !== slug || item.size !== size) return [item];
+    const quantity = Math.min(MAX_LINE_QUANTITY, item.quantity + delta);
+    return quantity < 1 ? [] : [{ ...item, quantity }];
+  });
+}

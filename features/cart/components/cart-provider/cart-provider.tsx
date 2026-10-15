@@ -12,6 +12,7 @@ import {
 import {
   CART_STORAGE_KEY,
   addToCart,
+  adjustQuantity,
   changeCartSize,
   parseStoredCart,
   removeFromCart,
@@ -27,6 +28,7 @@ type CartContextValue = {
   addItem: (item: CartItem) => void;
   removeItem: (slug: string, size: string) => void;
   changeSize: (slug: string, from: string, to: string) => void;
+  adjust: (slug: string, size: string, delta: number) => void;
   clear: () => void;
 };
 
@@ -108,6 +110,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
       })),
     [],
   );
+  const adjust = useCallback(
+    (slug: string, size: string, delta: number) =>
+      update((current) => ({
+        ...current,
+        items: adjustQuantity(current.items, slug, size, delta),
+      })),
+    [],
+  );
   const clear = useCallback(
     () => update((current) => ({ ...current, items: [] })),
     [],
@@ -121,9 +131,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
       addItem,
       removeItem,
       changeSize,
+      adjust,
       clear,
     }),
-    [state, setDelivery, addItem, removeItem, changeSize, clear],
+    [state, setDelivery, addItem, removeItem, changeSize, adjust, clear],
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

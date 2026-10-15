@@ -23,6 +23,7 @@ describe("orderErrorLines", () => {
       true,
     );
     expect(Object.keys(orderErrorLines).sort()).toEqual([
+      "at-capacity",
       "invalid-input",
       "not-found",
       "server-error",
