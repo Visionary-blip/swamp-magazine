@@ -25,9 +25,8 @@ export function ProductScreen({ product }: { product: ProductDetail }) {
       <div
         className={cn(
           "relative isolate flex flex-col gap-6 overflow-hidden bg-ink px-5 py-6 md:min-h-dvh md:px-16 md:py-12",
-          // With photographs below, the poster stops short of the fold on a
-          // phone so the first of them peeks in -- the cue to keep scrolling.
-          hasGallery ? "min-h-[88dvh]" : "min-h-dvh",
+          // The photographs below are desktop only, so a phone gets the poster alone.
+          "min-h-dvh",
         )}
       >
         {/* Background first, solid ink under it: a missing image degrades to a

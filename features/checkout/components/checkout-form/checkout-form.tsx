@@ -238,18 +238,21 @@ export function CheckoutForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col items-center gap-3 text-center"
+      // On a phone the steps are full-bleed bars that touch (like the WORLD page's
+      // rows): the form pulls out of the poster's side padding and each step's
+      // buttons share the screen's width equally.
+      className="flex flex-col items-center gap-3 text-center max-md:-mx-5 max-md:gap-0"
     >
-      <h1 className="brat text-brand-red">{name}</h1>
+      <h1 className="brat text-brand-red max-md:mb-4">{name}</h1>
 
-      <fieldset disabled={isPending}>
+      <fieldset disabled={isPending} className="max-md:w-full">
         <legend className="sr-only">{orderCopy.size}</legend>
-        <div className="brat flex flex-wrap justify-center gap-x-6">
+        <div className="brat flex flex-wrap justify-center gap-x-6 max-md:flex-nowrap max-md:gap-x-0 max-md:divide-x max-md:divide-brand-red/40 max-md:border-y max-md:border-brand-red/40 max-md:bg-ink/55">
           {sizes.map((option) => (
             <label
               key={option.size}
               className={cn(
-                "cursor-pointer px-1 py-2 transition-colors duration-200",
+                "cursor-pointer px-1 py-2 transition-colors duration-200 max-md:flex max-md:min-h-16 max-md:flex-1 max-md:items-center max-md:justify-center",
                 option.soldOut
                   ? "cursor-not-allowed text-brand-red line-through opacity-40"
                   : size === option.size
@@ -296,14 +299,14 @@ export function CheckoutForm({
           customer has already taken. The price terms below still show shipping
           when that is what they picked. */}
       {selected && cart.items.length === 0 ? (
-        <fieldset disabled={isPending}>
+        <fieldset disabled={isPending} className="max-md:w-full">
           <legend className="sr-only">DELIVERY</legend>
-          <div className="brat flex flex-wrap justify-center gap-x-8">
+          <div className="brat flex flex-wrap justify-center gap-x-8 max-md:flex-nowrap max-md:gap-x-0 max-md:divide-x max-md:divide-brand-red/40 max-md:border-y max-md:border-brand-red/40 max-md:bg-ink/55">
             {deliveryOptions.map((option) => (
               <label
                 key={option.value}
                 className={cn(
-                  "cursor-pointer px-1 py-2 transition-colors duration-200",
+                  "cursor-pointer px-1 py-2 transition-colors duration-200 max-md:flex max-md:min-h-16 max-md:flex-1 max-md:items-center max-md:justify-center",
                   deliveryPicked && delivery === option.value
                     ? "text-brand-yellow"
                     : "text-brand-red opacity-40 hover:text-brand-yellow hover:opacity-100",
@@ -330,25 +333,27 @@ export function CheckoutForm({
       ) : null}
 
       {errorLine ? (
-        <p role="alert" className="brat text-brand-red">
+        <p role="alert" className="brat text-brand-red max-md:px-5 max-md:py-3">
           {errorLine}
         </p>
       ) : null}
 
       {allGone ? (
-        <p className="brat text-brand-red">{orderCopy.soldOut}</p>
+        <p className="brat text-brand-red max-md:px-5 max-md:py-3">
+          {orderCopy.soldOut}
+        </p>
       ) : selected && deliveryChosen ? (
         <>
           {/* The garment goes in the cart and the customer is sent back to the
               grid for the next one. */}
           {/* Side by side like the delivery choices above. */}
-          <div className="brat flex flex-wrap justify-center gap-x-8">
+          <div className="brat flex flex-wrap justify-center gap-x-8 max-md:w-full max-md:flex-nowrap max-md:gap-x-0 max-md:divide-x max-md:divide-brand-red/40 max-md:border-y max-md:border-brand-red/40 max-md:bg-ink/55">
             <button
               type="button"
               onClick={handleAdd}
               disabled={isPending}
               aria-label={orderCopy.addToCart}
-              className="cursor-pointer px-1 py-2 text-brand-red transition-colors duration-200 hover:text-brand-yellow focus-visible:underline focus-visible:underline-offset-8 disabled:cursor-not-allowed disabled:opacity-40"
+              className="cursor-pointer px-1 py-2 text-brand-red max-md:flex max-md:min-h-16 max-md:flex-1 max-md:items-center max-md:justify-center transition-colors duration-200 hover:text-brand-yellow focus-visible:underline focus-visible:underline-offset-8 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {/* The first garment starts the cart; after that it is added to it. */}
               {cart.items.length === 0
@@ -360,7 +365,7 @@ export function CheckoutForm({
             <button
               type="submit"
               disabled={isPending}
-              className="cursor-pointer px-1 py-2 text-brand-red transition-colors duration-200 hover:text-brand-yellow focus-visible:underline focus-visible:underline-offset-8 disabled:cursor-not-allowed disabled:opacity-40"
+              className="cursor-pointer px-1 py-2 text-brand-red max-md:flex max-md:min-h-16 max-md:flex-1 max-md:items-center max-md:justify-center transition-colors duration-200 hover:text-brand-yellow focus-visible:underline focus-visible:underline-offset-8 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {isPending ? orderCopy.submitPending : buyLabel}
             </button>

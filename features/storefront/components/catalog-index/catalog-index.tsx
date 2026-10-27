@@ -18,9 +18,8 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
 
   return (
     <section id="products" className="bg-ink md:px-16 md:py-[88px]">
-      {/* A phone gets one garment per screen, each a snap point: a swipe lands
-          on the next one rather than somewhere between two. From md up it is the
-          four-across grid. */}
+      {/* A phone gets one garment per screen, each a stop in the FeedPager: a
+          swipe lands on the next one. From md up it is the four-across grid. */}
       <ul className="grid grid-cols-1 md:grid-cols-4 md:gap-x-8 md:gap-y-16">
         {products.map((product, index) => {
           // The shoot's first portrait frame suits a portrait screen far better
@@ -31,9 +30,9 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
           return (
             <li
               key={product.slug}
-              // `snap-always` is the Reels behaviour: a flick can only ever
-              // carry the page one product on, never skip past several.
-              className="relative isolate flex min-h-dvh snap-start snap-always items-center justify-center overflow-hidden px-5 md:min-h-0 md:[scroll-snap-align:none] md:items-start md:overflow-visible md:px-0"
+              // A stop for the phone's FeedPager: one swipe, one product.
+              data-feed-stop
+              className="relative isolate flex min-h-dvh items-center justify-center overflow-hidden px-5 md:min-h-0 md:items-start md:overflow-visible md:px-0"
             >
               {/* Phone only: the product page's own shoot as a full-screen
                 vertical backdrop, cropped to the portrait screen, under a
@@ -63,7 +62,7 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
                   href={`/product/${product.slug}`}
                   className="group flex w-full flex-col items-center gap-4 text-center focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-red"
                 >
-                  <div className="relative aspect-square w-full">
+                  <div className="relative aspect-square w-full max-md:w-[78%]">
                     {product.cutout ? (
                       <Image
                         src={product.cutout.url}

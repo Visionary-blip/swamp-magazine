@@ -7,7 +7,7 @@ import { PhotoLightbox } from "@/features/photo-lightbox";
 
 import type { GalleryImage } from "../../lib/product-gallery";
 
-// The scrolled-down half of a product page: the shoot, two across on every
+// The scrolled-down half of a product page (hidden on a phone): the shoot, two across on every
 // screen, full-bleed with every frame touching so each photograph runs half the
 // window wide. An odd last image would leave an empty half, so it takes a
 // full-width band of its own (cropped wide, weighted toward the people). Each
@@ -25,7 +25,12 @@ export function ProductGallery({ images }: { images: GalleryImage[] }) {
   if (images.length === 0) return null;
 
   return (
-    <section id="gallery" aria-label="Photographs" className="bg-ink">
+    <section
+      id="gallery"
+      aria-label="Photographs"
+      // Desktop only: a phone gets the poster and its order bars, nothing below.
+      className="bg-ink max-md:hidden"
+    >
       {/* The hovered frame grows a little over its neighbours (they touch, so it
           sits above them) to say it can be opened. */}
       <ul className="grid grid-cols-2 overflow-x-clip">
