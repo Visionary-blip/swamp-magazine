@@ -64,8 +64,13 @@
   animation: veil-out 0.35s ease-out forwards;
 }
 
+.animate-veil-out-slow {
+  animation: veil-out 0.6s ease-out forwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .animate-veil-out {
+  .animate-veil-out,
+  .animate-veil-out-slow {
     animation: none;
   }
 }

@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { CartCorner } from "@/features/cart";
 import { CheckoutForm } from "@/features/checkout";
+import { HandoffTarget } from "@/features/transition";
 import { cn } from "@/lib/utils";
 
 import type { ProductDetail } from "../../lib/catalog";
@@ -87,7 +88,7 @@ export function ProductScreen({ product }: { product: ProductDetail }) {
         </div>
 
         {product.cutout ? (
-          <div className="relative mx-auto my-auto aspect-square w-[72vw] max-w-[420px] md:w-[min(34vw,36dvh)] md:max-w-none">
+          <HandoffTarget className="relative mx-auto my-auto aspect-square w-[72vw] max-w-[420px] md:w-[min(34vw,36dvh)] md:max-w-none">
             <Image
               src={product.cutout.url}
               alt={product.cutout.alt}
@@ -96,7 +97,7 @@ export function ProductScreen({ product }: { product: ProductDetail }) {
               sizes="(min-width: 768px) 34vw, 72vw"
               className="object-contain drop-shadow-2xl"
             />
-          </div>
+          </HandoffTarget>
         ) : null}
 
         <CheckoutForm

@@ -1,6 +1,6 @@
 import Image from "next/image";
-import Link from "next/link";
 
+import { HandoffLink } from "@/features/transition";
 import { formatUsd } from "@/lib/money";
 
 import type { CatalogProduct } from "../../lib/catalog";
@@ -58,11 +58,14 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
                 tile's square comes out a different size, which is what staggers
                 the titles down the grid. */}
               <Reveal delay={index * 0.06} className="w-full">
-                <Link
+                <HandoffLink
                   href={`/product/${product.slug}`}
                   className="group flex w-full flex-col items-center gap-4 text-center focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-red"
                 >
-                  <div className="relative aspect-square w-full max-md:w-[78%]">
+                  <div
+                    data-handoff
+                    className="relative aspect-square w-full max-md:w-[78%]"
+                  >
                     {product.cutout ? (
                       <Image
                         src={product.cutout.url}
@@ -79,7 +82,7 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
                   <span className="font-display text-lg text-cream/70 md:text-xl">
                     {formatUsd(product.priceCents)}
                   </span>
-                </Link>
+                </HandoffLink>
               </Reveal>
             </li>
           );

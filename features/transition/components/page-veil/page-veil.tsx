@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
+import { handoffPending } from "../../lib/image-handoff";
+
 // Every route change goes through a quick fade to dark brown: the page being
 // left dims to brown as a link is pressed, and the new page fades up out of it
 // once it has arrived. One fixed layer over everything, so it works the same for
@@ -75,7 +77,12 @@ export function PageVeil() {
         "pointer-events-none fixed inset-0 z-[100] bg-brown",
         covering
           ? "opacity-100 transition-opacity duration-150 ease-in"
-          : "animate-veil-out opacity-0",
+          : cn(
+              "opacity-0",
+              // A garment is flying across (see image-handoff): fade the page up
+              // around it at the pace of its flight.
+              handoffPending() ? "animate-veil-out-slow" : "animate-veil-out",
+            ),
       )}
     />
   );
