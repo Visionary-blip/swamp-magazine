@@ -3,11 +3,10 @@
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-import { cn } from "@/lib/utils";
-
 import {
   audioTracks,
   pickTrack,
+  volumeLevelNames,
   volumeLevels,
   type AudioTrack,
 } from "../../lib/audio-tracks";
@@ -19,8 +18,8 @@ const roundButton =
 // A small player centred along the bottom edge, under the landing hero's FROM
 // LALO FARRO line. It lives in the root layout, so a
 // track keeps playing as the visitor moves between pages. Nothing plays until
-// the play button is pressed (browsers refuse sound before a gesture anyway);
-// that press picks a random track, and the next is picked the same way when it
+// the eighth note is pressed (browsers refuse sound before a gesture anyway);
+// that press opens the controls and picks a random track, and the next is picked the same way when it
 // ends.
 export function AudioPlayer() {
   const pathname = usePathname();
@@ -30,11 +29,13 @@ export function AudioPlayer() {
   const [nowPlaying, setNowPlaying] = useState<AudioTrack | null>(null);
   const [started, setStarted] = useState(false);
   const [playing, setPlaying] = useState(false);
-  const [muted, setMuted] = useState(false);
-  const [level, setLevel] = useState(2); // index into volumeLevels: full
+  const [level, setLevel] = useState(volumeLevels.length - 1); // full
+  // The far-left snap is silence; there is no separate mute switch.
+  const muted = level === 0;
   const [menuOpen, setMenuOpen] = useState(false);
-  // Closed by the X: only the eighth-note button is left to bring it back.
-  const [collapsed, setCollapsed] = useState(false);
+  // Only the eighth-note button is left when closed -- which is how every visit
+  // begins, so the page opens quiet; the X puts it back to this state.
+  const [collapsed, setCollapsed] = useState(true);
 
   useEffect(() => {
     if (audio.current) audio.current.volume = volumeLevels[level];
@@ -68,7 +69,6 @@ export function AudioPlayer() {
     setNowPlaying(next);
     element.src = next.src;
     element.volume = volumeLevels[level];
-    element.muted = muted;
     // A rejected play() (decode error, blocked) just leaves it paused.
     element.play().catch(() => setPlaying(false));
     setStarted(true);
@@ -103,12 +103,6 @@ export function AudioPlayer() {
     } else {
       playRandom();
     }
-  }
-
-  function toggleMute() {
-    const next = !muted;
-    setMuted(next);
-    if (audio.current) audio.current.muted = next;
   }
 
   return (
@@ -226,21 +220,10 @@ export function AudioPlayer() {
                   aria-label="Sound settings"
                   className="absolute bottom-full left-0 mb-1 flex min-w-36 flex-col gap-3 rounded-2xl border border-brand-red/70 bg-ink/95 p-3"
                 >
-                  <button
-                    type="button"
-                    onClick={toggleMute}
-                    aria-pressed={muted}
-                    className={cn(
-                      "font-display text-xs leading-none tracking-[0.1em] uppercase transition-colors duration-200 hover:text-brand-yellow focus-visible:text-brand-yellow focus-visible:outline-none pointer-coarse:py-2 pointer-coarse:text-sm",
-                      muted ? "text-brand-yellow" : "text-brand-red",
-                    )}
-                  >
-                    {muted ? "UNMUTE" : "MUTE"}
-                  </button>
                   <label className="flex flex-col gap-1.5 font-display text-xs leading-none tracking-[0.1em] text-brand-red uppercase">
                     VOLUME
-                    {/* Three snap positions: step 1 over 0-2 means the thumb can
-                    only rest on quiet, medium or full. */}
+                    {/* Four snap positions: step 1 means the thumb can only rest on
+                    muted (far left), quiet, medium or full. */}
                     <input
                       type="range"
                       min={0}
@@ -248,7 +231,7 @@ export function AudioPlayer() {
                       step={1}
                       value={level}
                       onChange={(event) => setLevel(Number(event.target.value))}
-                      aria-valuetext={["quiet", "medium", "full"][level]}
+                      aria-valuetext={volumeLevelNames[level]}
                       className="w-full accent-brand-red pointer-coarse:h-8"
                     />
                   </label>
@@ -283,14 +266,18 @@ export function AudioPlayer() {
           {nowPlaying ? (
             <p className="font-display text-xs leading-none tracking-[0.1em] whitespace-nowrap text-brand-red uppercase pointer-coarse:text-sm">
               {nowPlaying.credit} -{" "}
-              <a
-                href={`https://instagram.com/${nowPlaying.instagramHandle}`}
-                target="_blank"
-                rel="noreferrer"
-                className="transition-colors duration-200 hover:text-brand-yellow focus-visible:text-brand-yellow focus-visible:outline-none"
-              >
-                {nowPlaying.name}
-              </a>
+              {nowPlaying.instagramHandle ? (
+                <a
+                  href={`https://instagram.com/${nowPlaying.instagramHandle}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="transition-colors duration-200 hover:text-brand-yellow focus-visible:text-brand-yellow focus-visible:outline-none"
+                >
+                  {nowPlaying.name}
+                </a>
+              ) : (
+                nowPlaying.name
+              )}
             </p>
           ) : null}
         </>

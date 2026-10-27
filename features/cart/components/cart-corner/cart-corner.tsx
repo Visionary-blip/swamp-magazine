@@ -42,7 +42,7 @@ export function CartCorner({ placement }: { placement: "fixed" | "inline" }) {
       role="group"
       aria-label="Your cart"
       className={cn(
-        "relative flex max-w-[calc(100vw-1.5rem)] flex-wrap items-center justify-end gap-2 rounded-[2rem] p-2.5",
+        "relative flex max-w-[calc(100vw-1.5rem)] flex-col items-end gap-2 rounded-[2rem] p-2.5",
         fixed &&
           "fixed right-3 bottom-3 z-30 pb-[max(0.625rem,env(safe-area-inset-bottom))] md:top-6 md:right-8 md:bottom-auto md:pb-2.5",
       )}
@@ -55,14 +55,22 @@ export function CartCorner({ placement }: { placement: "fixed" | "inline" }) {
         aria-label={label}
         className="absolute inset-0 rounded-[2rem] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow"
       />
-      <ul className="relative z-10 flex flex-wrap justify-end gap-2">
-        {items.map((item) => (
-          <CartThumb
-            key={`${item.slug}:${item.size}`}
-            item={item}
-            fixed={fixed}
-          />
-        ))}
+      {/* What the cart comes to, left of the garments. Not a target of its
+          own: the link behind it takes the press. */}
+      <p className="pointer-events-none relative z-10 font-display text-[15px] leading-none text-brand-red md:text-[19px]">
+        {formatUsd(cartSubtotalCents(items))}
+      </p>
+      <ul className="relative z-10 flex flex-col items-end gap-2">
+        {/* Add-ons are not garments: they ride in the total, not the row. */}
+        {items
+          .filter((item) => !item.addOn)
+          .map((item) => (
+            <CartThumb
+              key={`${item.slug}:${item.size}`}
+              item={item}
+              fixed={fixed}
+            />
+          ))}
       </ul>
     </div>
   );
@@ -103,16 +111,10 @@ function CartThumb({ item, fixed }: { item: CartItem; fixed: boolean }) {
   // change to, so its size is shown but is not a button.
   const canChange = sizes.length > 1;
   const label = `${item.name}, size ${item.size}${item.quantity > 1 ? `, quantity ${item.quantity}` : ""}`;
-  // On the bottom bar the controls and the menu open upward, so they never run
-  // off the bottom of a phone screen; from md up (a floating corner) they open
-  // downward as before.
-  const up = fixed
-    ? "bottom-full mb-1 md:top-full md:bottom-auto md:mt-1 md:mb-0"
-    : "top-full mt-1";
-  const menuUp = fixed
-    ? "bottom-full mb-1 md:top-full md:bottom-auto md:mt-1 md:mb-0"
-    : "top-full mt-1";
-
+  // The cart runs down the screen, so a garment's two controls sit to its left,
+  // size above remove (there is always room: the corner hugs the right edge),
+  // rather than under it, where they would cover the next garment. The size menu continues the
+  // same way: a row of sizes opening further left, level with its button.
   return (
     <li ref={root} className="group relative">
       <Link
@@ -128,7 +130,9 @@ function CartThumb({ item, fixed }: { item: CartItem; fixed: boolean }) {
         }}
         className={cn(
           "relative block",
-          fixed ? "size-14 md:size-24" : "size-[84px] md:size-24",
+          fixed
+            ? "size-[70px] md:size-[120px]"
+            : "size-[105px] md:size-[120px]",
         )}
       >
         {item.cutoutUrl ? (
@@ -136,7 +140,7 @@ function CartThumb({ item, fixed }: { item: CartItem; fixed: boolean }) {
             src={item.cutoutUrl}
             alt={item.cutoutAlt || item.name}
             fill
-            sizes="96px"
+            sizes="120px"
             className="object-contain drop-shadow-lg"
           />
         ) : (
@@ -153,16 +157,32 @@ function CartThumb({ item, fixed }: { item: CartItem; fixed: boolean }) {
 
       <div
         className={cn(
-          "absolute left-1/2 z-40 flex -translate-x-1/2 items-start gap-1.5 opacity-0 transition-opacity duration-150 group-focus-within:opacity-100 group-hover:opacity-100",
-          up,
+          "absolute top-1/2 right-full z-40 mr-1 flex -translate-y-1/2 flex-col items-center gap-1.5 opacity-0 transition-opacity duration-150 group-focus-within:opacity-100 group-hover:opacity-100",
           open && "opacity-100",
         )}
       >
-        <div className="relative">
+        {/* A mouse opens the sizes by pointing at the button and closes them on
+            leaving; a finger has no hover, so a tap toggles as before. The
+            menu is a child of this wrapper, so moving onto it is not leaving. */}
+        <div
+          className="relative"
+          onPointerEnter={(event) => {
+            if (event.pointerType === "mouse" && canChange) setMenuOpen(true);
+          }}
+          onPointerLeave={(event) => {
+            if (event.pointerType === "mouse") setMenuOpen(false);
+          }}
+        >
           <button
             type="button"
             disabled={!canChange}
-            onClick={() => setMenuOpen((current) => !current)}
+            onClick={(event) => {
+              // After a hover has opened it, a mouse click keeps it open
+              // rather than snapping it shut under the pointer.
+              const mouse =
+                (event.nativeEvent as PointerEvent).pointerType === "mouse";
+              setMenuOpen((current) => (mouse ? true : !current));
+            }}
             aria-haspopup="listbox"
             aria-expanded={menuOpen}
             aria-label={`Size ${item.size}. ${canChange ? "Change size" : "Only size"}`}
@@ -171,45 +191,46 @@ function CartThumb({ item, fixed }: { item: CartItem; fixed: boolean }) {
             {item.size}
           </button>
           {menuOpen ? (
-            <ul
-              role="listbox"
-              aria-label="Choose a size"
-              className={cn(
-                "absolute left-1/2 flex -translate-x-1/2 flex-col overflow-hidden rounded-2xl border border-brand-red/70 bg-ink/95",
-                menuUp,
-              )}
-            >
-              {sizes.map((option) => (
-                <li
-                  key={option.size}
-                  role="option"
-                  aria-selected={option.size === item.size}
-                >
-                  <button
-                    type="button"
-                    disabled={option.soldOut && option.size !== item.size}
-                    onClick={() => {
-                      changeSize(item.slug, item.size, option.size);
-                      setMenuOpen(false);
-                    }}
-                    className={cn(
-                      "block w-full px-3 py-1 text-center font-display text-xs leading-none uppercase transition-colors duration-200 hover:text-brand-yellow focus-visible:text-brand-yellow focus-visible:outline-none pointer-coarse:min-w-11 pointer-coarse:py-3 pointer-coarse:text-sm",
-                      option.size === item.size
-                        ? "text-brand-yellow"
-                        : "text-brand-red",
-                      option.soldOut &&
-                        option.size !== item.size &&
-                        "cursor-not-allowed line-through opacity-40 hover:text-brand-red",
-                    )}
+            // The padding is the gap between the button and the row, kept
+            // inside the wrapper so the pointer never crosses dead space.
+            <div className="absolute top-1/2 right-full -translate-y-1/2 pr-1">
+              <ul
+                role="listbox"
+                aria-label="Choose a size"
+                className="flex flex-row overflow-hidden rounded-2xl border border-brand-red/70 bg-ink/95"
+              >
+                {sizes.map((option) => (
+                  <li
+                    key={option.size}
+                    role="option"
+                    aria-selected={option.size === item.size}
                   >
-                    {option.size}
-                    {option.soldOut && option.size !== item.size ? (
-                      <span className="sr-only"> sold out</span>
-                    ) : null}
-                  </button>
-                </li>
-              ))}
-            </ul>
+                    <button
+                      type="button"
+                      disabled={option.soldOut && option.size !== item.size}
+                      onClick={() => {
+                        changeSize(item.slug, item.size, option.size);
+                        setMenuOpen(false);
+                      }}
+                      className={cn(
+                        "block w-full px-3 py-1 text-center font-display text-xs leading-none uppercase transition-colors duration-200 hover:text-brand-yellow focus-visible:text-brand-yellow focus-visible:outline-none pointer-coarse:min-w-11 pointer-coarse:py-3 pointer-coarse:text-sm",
+                        option.size === item.size
+                          ? "text-brand-yellow"
+                          : "text-brand-red",
+                        option.soldOut &&
+                          option.size !== item.size &&
+                          "cursor-not-allowed line-through opacity-40 hover:text-brand-red",
+                      )}
+                    >
+                      {option.size}
+                      {option.soldOut && option.size !== item.size ? (
+                        <span className="sr-only"> sold out</span>
+                      ) : null}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
           ) : null}
         </div>
         <button

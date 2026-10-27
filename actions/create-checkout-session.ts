@@ -55,6 +55,10 @@ const inputSchema = z.object({
 });
 
 const PRODUCT_SELECT =
+  "id, slug, name, price_cents, active, is_add_on, product_variants(id, size, inventory_count)";
+// For a database the add_ons migration has not reached (Postgres 42703, undefined
+// column): selling garments must not stop because a column is missing.
+const LEGACY_PRODUCT_SELECT =
   "id, slug, name, price_cents, active, product_variants(id, size, inventory_count)";
 
 export async function createCheckoutSession(
@@ -97,21 +101,27 @@ export async function createCheckoutSession(
 
     // Read price and stock here, server-side, every time. Anything the client
     // sent about money is ignored by construction -- it never reaches Stripe.
-    const { data: products, error: productError } = await supabase
+    const slugs = [...new Set(items.map((item) => item.slug))];
+    const first = await supabase
       .from("products")
       .select(PRODUCT_SELECT)
-      .in("slug", [...new Set(items.map((item) => item.slug))]);
+      .in("slug", slugs);
+    const result =
+      first.error?.code === "42703"
+        ? await supabase
+            .from("products")
+            .select(LEGACY_PRODUCT_SELECT)
+            .in("slug", slugs)
+        : first;
+    const products = result.data as ProductRow[] | null;
+    const productError = result.error;
 
     if (productError) {
       console.error("[CHECKOUT]", productError.code, productError.message);
       return { status: "error", reason: "server-error" };
     }
 
-    const drafted = resolveOrderDraft(
-      (products ?? []) as ProductRow[],
-      items,
-      delivery,
-    );
+    const drafted = resolveOrderDraft(products ?? [], items, delivery);
     if (drafted.status === "error") {
       return drafted;
     }

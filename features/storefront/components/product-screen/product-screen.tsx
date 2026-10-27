@@ -113,7 +113,9 @@ export function ProductScreen({ product }: { product: ProductDetail }) {
           <ScrollCue
             href="#gallery"
             label="Scroll to the photographs"
-            className="absolute bottom-1 left-1/2 size-8 -translate-x-1/2"
+            // Bottom-right, its glyph on the same right edge as the credit line above
+            // (the poster's side padding, less the button's own 6px inset).
+            className="absolute right-[0.875rem] bottom-4 size-8 md:right-[3.625rem] md:bottom-10"
           />
         ) : null}
       </div>

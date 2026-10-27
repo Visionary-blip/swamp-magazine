@@ -64,15 +64,17 @@ export function CheckoutForm({
   const [isPending, startTransition] = useTransition();
   // Names the garment a sold-out refusal was about ("STAR SHORTS S IS GONE").
   const [goneLine, setGoneLine] = useState<string | null>(null);
-  // Pressing the order button with no size picked cannot show a hover on a
-  // phone, so it answers the press instead: the button says SELECT SIZE and the
-  // size row shakes, for under two seconds.
-  const [nudge, setNudge] = useState(false);
+  // The form reveals itself one step at a time: size, then delivery, then the
+  // buttons. A cart already carries a delivery choice (made on the cart page);
+  // otherwise it counts only once it has been picked on this page, because the
+  // cart's default is not a choice the customer made.
+  const [deliveryPicked, setDeliveryPicked] = useState(false);
 
   const sizes = variants.map((variant) => ({
     size: variant.size,
     soldOut: variant.soldOut || refusedSizes.includes(variant.size),
   }));
+  const deliveryChosen = cart.items.length > 0 || deliveryPicked;
   const allGone = sizes.length === 0 || sizes.every((option) => option.soldOut);
 
   // What would be ordered right now: the cart, plus the size picked here.
@@ -104,31 +106,21 @@ export function CheckoutForm({
   const deliveryLabel =
     delivery === "shipping" ? orderCopy.shipping : orderCopy.pickup;
   const ledgerLines: LedgerLine[] = orderItems.map((item) => ({
-    label: `${item.name.toUpperCase()} ${item.size}${item.quantity > 1 ? ` ×${item.quantity}` : ""}`,
+    label: `${item.name.toUpperCase()}${item.addOn ? "" : ` ${item.size}`}${item.quantity > 1 ? ` ×${item.quantity}` : ""}`,
     amountCents: item.priceCents * item.quantity,
   }));
 
+  // The button states the whole charge as one number: the order plus shipping
+  // if that is the choice. Nobody should learn it inside the card fields.
+  // "TOTAL" only says something once the number adds several garments up.
+  const buyLabel = `${orderCopy.next} ${formatUsd(totalCents)}${
+    orderItems.reduce((sum, item) => sum + item.quantity, 0) > 1
+      ? ` ${orderCopy.total}`
+      : ""
+  }`;
+
   // "+": the garment goes in the cart and the customer goes back to the grid to
   // pick the next one. The size resets so coming back later starts fresh.
-  // What the button spells out: what is already in the cart, plus this garment
-  // (whether or not a size is picked yet), plus shipping if that is the choice
-  // -- each as its own term ("$25 + $25"), with the total drawn beneath it
-  // once there is more than one.
-  const priceTerms = [
-    ...(selected
-      ? orderItems.map((item) => item.priceCents * item.quantity)
-      : [
-          ...mergeItems(cart.items).map(
-            (item) => item.priceCents * item.quantity,
-          ),
-          priceCents,
-        ]),
-    ...(delivery === "shipping" ? [dials.shippingFlatRateCents] : []),
-  ];
-  const priceTotalCents = priceTerms.reduce((sum, term) => sum + term, 0);
-
-  const buyLabel = `${orderCopy.next} ${priceTerms.map(formatUsd).join(" + ")}`;
-
   function handleAdd() {
     if (!selected || isPending) return;
     cart.addItem(selected);
@@ -139,11 +131,7 @@ export function CheckoutForm({
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (isPending) return;
-    if (!selected) {
-      setNudge(true);
-      setTimeout(() => setNudge(false), 1800);
-      return;
-    }
+    if (!selected || !deliveryChosen) return;
     setErrorReason(null);
     setGoneLine(null);
     startTransition(async () => {
@@ -254,12 +242,7 @@ export function CheckoutForm({
     >
       <h1 className="brat text-brand-red">{name}</h1>
 
-      <fieldset
-        disabled={isPending}
-        // Keyed on the nudge so each press replays the shake from the start.
-        key={nudge ? "nudge" : "rest"}
-        className={nudge ? "animate-nudge" : undefined}
-      >
+      <fieldset disabled={isPending}>
         <legend className="sr-only">{orderCopy.size}</legend>
         <div className="brat flex flex-wrap justify-center gap-x-6">
           {sizes.map((option) => (
@@ -312,7 +295,7 @@ export function CheckoutForm({
           the cart page; asking again on every garment's page is a step the
           customer has already taken. The price terms below still show shipping
           when that is what they picked. */}
-      {cart.items.length === 0 ? (
+      {selected && cart.items.length === 0 ? (
         <fieldset disabled={isPending}>
           <legend className="sr-only">DELIVERY</legend>
           <div className="brat flex flex-wrap justify-center gap-x-8">
@@ -321,7 +304,7 @@ export function CheckoutForm({
                 key={option.value}
                 className={cn(
                   "cursor-pointer px-1 py-2 transition-colors duration-200",
-                  delivery === option.value
+                  deliveryPicked && delivery === option.value
                     ? "text-brand-yellow"
                     : "text-brand-red opacity-40 hover:text-brand-yellow hover:opacity-100",
                 )}
@@ -330,8 +313,11 @@ export function CheckoutForm({
                   type="radio"
                   name="delivery"
                   value={option.value}
-                  checked={delivery === option.value}
-                  onChange={() => setDelivery(option.value)}
+                  checked={deliveryPicked && delivery === option.value}
+                  onChange={() => {
+                    setDelivery(option.value);
+                    setDeliveryPicked(true);
+                  }}
                   className="peer sr-only"
                 />
                 <span className="peer-focus-visible:underline peer-focus-visible:underline-offset-8">
@@ -351,60 +337,36 @@ export function CheckoutForm({
 
       {allGone ? (
         <p className="brat text-brand-red">{orderCopy.soldOut}</p>
-      ) : (
+      ) : selected && deliveryChosen ? (
         <>
-          {/* Offered once a size is picked: the garment goes in the cart and the
-              customer is sent back to the grid for the next one. */}
-          {selected ? (
+          {/* The garment goes in the cart and the customer is sent back to the
+              grid for the next one. */}
+          {/* Side by side like the delivery choices above. */}
+          <div className="brat flex flex-wrap justify-center gap-x-8">
             <button
               type="button"
               onClick={handleAdd}
               disabled={isPending}
               aria-label={orderCopy.addToCart}
-              className="brat text-brand-red transition-colors duration-200 hover:text-brand-yellow focus-visible:underline focus-visible:underline-offset-8 disabled:cursor-not-allowed disabled:opacity-40"
+              className="cursor-pointer px-1 py-2 text-brand-red transition-colors duration-200 hover:text-brand-yellow focus-visible:underline focus-visible:underline-offset-8 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {/* The first garment starts the cart; after that it is added to it. */}
               {cart.items.length === 0
                 ? orderCopy.makeCart
                 : orderCopy.addToCartLabel}
             </button>
-          ) : null}
-          {/* The total rides the button: the ledger that used to state it is
-              gone from this step, and nobody should learn the real charge
+            {/* The total rides the button: nobody should learn the real charge
               inside the card fields. It covers everything in the cart. */}
-          <button
-            type="submit"
-            disabled={isPending}
-            // Not `disabled` when no size is picked: a disabled button gives a
-            // phone nothing back when pressed. It looks faded, and pressing it
-            // answers with SELECT SIZE (see handleSubmit).
-            aria-disabled={!selected}
-            className={cn(
-              "group/buy brat min-h-11 text-brand-red transition-colors duration-200 hover:text-brand-yellow focus-visible:underline focus-visible:underline-offset-8 disabled:cursor-not-allowed disabled:opacity-40",
-              !selected && "opacity-40 hover:opacity-100",
-            )}
-          >
-            {isPending ? (
-              orderCopy.submitPending
-            ) : !selected ? (
-              // The default until a size is picked: say what is missing up
-              // front rather than showing PLACE ORDER on a button that cannot
-              // place one.
-              orderCopy.selectSize
-            ) : (
-              buyLabel
-            )}
-          </button>
-          {/* The sum under the button, once there is more than one term to add
-              up -- a single price needs no total. */}
-          {priceTerms.length > 1 ? (
-            <p className="brat text-brand-red">
-              {formatUsd(priceTotalCents)}
-              {cart.items.length > 0 ? ` · ${orderCopy.withCart}` : ""}
-            </p>
-          ) : null}
+            <button
+              type="submit"
+              disabled={isPending}
+              className="cursor-pointer px-1 py-2 text-brand-red transition-colors duration-200 hover:text-brand-yellow focus-visible:underline focus-visible:underline-offset-8 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {isPending ? orderCopy.submitPending : buyLabel}
+            </button>
+          </div>
         </>
-      )}
+      ) : null}
     </form>
   );
 }

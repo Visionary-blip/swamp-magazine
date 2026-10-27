@@ -20,7 +20,10 @@ const payload = JSON.stringify({
 });
 
 function sign(body: string): string {
-  return stripe.webhooks.generateTestHeaderString({ payload: body, secret: SECRET });
+  return stripe.webhooks.generateTestHeaderString({
+    payload: body,
+    secret: SECRET,
+  });
 }
 
 describe("webhook signature verification", () => {

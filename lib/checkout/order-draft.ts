@@ -26,6 +26,9 @@ export type ProductRow = {
   name: string;
   price_cents: number;
   active: boolean;
+  /** Sold only alongside a garment. Absent on a database the add_ons migration
+   * has not reached, which reads as a plain garment. */
+  is_add_on?: boolean;
   product_variants: VariantRow[];
 };
 
@@ -92,6 +95,7 @@ export function resolveOrderDraft(
   }
 
   const lines: OrderDraftLine[] = [];
+  let hasGarment = false;
   for (const line of merged.values()) {
     const product = products.find((row) => row.slug === line.slug);
 
@@ -118,6 +122,8 @@ export function resolveOrderDraft(
       };
     }
 
+    if (!product.is_add_on) hasGarment = true;
+
     lines.push({
       productId: product.id,
       variantId: variant.id,
@@ -126,6 +132,13 @@ export function resolveOrderDraft(
       unitPriceCents: product.price_cents,
       quantity: line.quantity,
     });
+  }
+
+  // An add-on is the gum at the register: it rides along with a real purchase.
+  // The cart already drops add-ons when the last garment goes, but a request is
+  // a request -- the rule lives here, where it cannot be skipped.
+  if (!hasGarment) {
+    return { status: "error", reason: "invalid-input" };
   }
 
   const subtotalCents = lines.reduce(

@@ -6,6 +6,7 @@ import { CartCorner } from "@/features/cart";
 import { getCatalog, getLandingImagery } from "../../lib/catalog";
 import { storefrontCopy } from "../../lib/storefront-copy";
 import { CatalogIndex } from "../catalog-index/catalog-index";
+import { GlideLink } from "../glide-link/glide-link";
 import { Reveal } from "../reveal/reveal";
 import { ScrollCue } from "../scroll-cue/scroll-cue";
 import { SiteFooter } from "../site-footer/site-footer";
@@ -34,25 +35,18 @@ export async function LiveLandingScreen() {
   ]);
 
   return (
-    <main className="bg-ink pb-[4.5rem] md:pb-0">
+    // `data-snap-page` is what globals.css keys the phone's scroll snapping on.
+    <main data-snap-page className="bg-ink pb-[4.5rem] md:pb-0">
       <CartCorner placement="fixed" />
       {/* Full-bleed. The image sits outside any Reveal so the LCP is never held
           behind an entrance animation, and a null hero leaves a plain ink
           screen with the same masthead on it. The scrim keeps cream type
           readable on the lighter parts of the shoot. */}
-      {/* On a phone the hero stops short of the fold (86dvh) so the top of the
-          product grid peeks in -- the cue that there is more -- and the shoot is
-          the portrait frame, since a 16:9 photograph cropped to a phone loses
-          half of the people in it. From md up it is the full-height widescreen
-          hero with a small arrow instead. */}
-      <section className="relative h-[86dvh] w-full overflow-hidden bg-ink md:h-dvh">
-        <Image
-          src="/hero/landing-hero-portrait.webp"
-          alt=""
-          fill
-          sizes="100vw"
-          className="object-cover md:hidden"
-        />
+      {/* On a phone there is no hero: the visitor lands straight on the first
+          product, one garment to a screen (see CatalogIndex), and every swipe
+          snaps the next one into focus. The hero is the widescreen, full-height
+          opening from md up, with a small arrow instead. */}
+      <section className="relative hidden h-dvh w-full overflow-hidden bg-ink md:block">
         {imagery.hero && (
           <Image
             src={imagery.hero.url}
@@ -75,9 +69,9 @@ export async function LiveLandingScreen() {
               pieces of front-of-house are each a link to the grid and go
               yellow together; a click lands on the products. */}
           <h1 className="w-full text-center font-display text-[14vw] leading-none whitespace-nowrap">
-            <a href="#products" className={hoverYellow}>
+            <GlideLink href="#products" className={hoverYellow}>
               {storefrontCopy.wordmark}
-            </a>
+            </GlideLink>
           </h1>
           {/* Goblin line-art is a founder upload (landing_mascot, P4). Until
               it exists the slot stays honestly empty -- never faked. It is the
@@ -86,7 +80,7 @@ export async function LiveLandingScreen() {
               the image goes through Next's own optimiser URL so the mask loads
               same-origin (a mask from another origin needs CORS headers). */}
           {imagery.mascot && (
-            <a
+            <GlideLink
               href="#products"
               role="img"
               aria-label={imagery.mascot.alt || "Shop the products"}
@@ -106,37 +100,32 @@ export async function LiveLandingScreen() {
                   WebkitMaskPosition: "center",
                 }}
               />
-            </a>
+            </GlideLink>
           )}
           <p className="font-body text-[16.5px] font-semibold tracking-[0.4em] md:text-lg">
-            <a href="#products" className={hoverYellow}>
+            <GlideLink href="#products" className={hoverYellow}>
               {storefrontCopy.byline}
-            </a>
+            </GlideLink>
           </p>
         </Reveal>
       </section>
 
       <CatalogIndex products={products} />
 
-      {/* The founder's three red links under the grid, left to right; each goes
-          straight to its own page. */}
-      <div className="flex flex-wrap justify-center gap-x-12 gap-y-4 bg-ink px-5 pb-16 md:gap-x-20 md:pb-[88px]">
-        {[
-          { label: "GALLERY", href: "/world/gallery" },
-          { label: "RADIO", href: "/world/radio" },
-          { label: "INVOLVE ME", href: "/get-involved" },
-        ].map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            className="font-display text-4xl tracking-[0.05em] text-brand-red transition-colors duration-200 hover:text-brand-yellow focus-visible:text-brand-yellow focus-visible:outline-none"
-          >
-            {link.label}
-          </Link>
-        ))}
+      {/* One red link under the grid: WORLD holds the gallery, cinema, radio
+          and the get-involved forms. */}
+      <div className="flex min-h-dvh snap-start items-center justify-center bg-ink px-5 md:min-h-0 md:[scroll-snap-align:none] md:items-start md:pb-[88px]">
+        <Link
+          href="/world"
+          className="font-display text-4xl tracking-[0.05em] text-brand-red transition-colors duration-200 hover:text-brand-yellow focus-visible:text-brand-yellow focus-visible:outline-none"
+        >
+          WORLD
+        </Link>
       </div>
 
-      <SiteFooter />
+      <div className="snap-end md:[scroll-snap-align:none]">
+        <SiteFooter />
+      </div>
     </main>
   );
 }

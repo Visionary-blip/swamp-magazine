@@ -22,6 +22,9 @@ export type CartItem = {
   priceCents: number;
   cutoutUrl: string | null;
   cutoutAlt: string;
+  /** A small extra that is only sold alongside a garment. Optional so carts
+   * saved before add-ons existed still read as plain garments. */
+  addOn?: boolean;
 };
 
 export type CartState = { items: CartItem[]; delivery: DeliveryChoice };
@@ -51,6 +54,7 @@ const cartSchema = z.object({
         priceCents: z.number().int().min(0),
         cutoutUrl: z.string().nullable(),
         cutoutAlt: z.string(),
+        addOn: z.boolean().optional(),
       }),
     )
     .max(MAX_LINES),
@@ -71,6 +75,14 @@ export function parseStoredCart(raw: string | null): CartState {
 
 /** The same garment in the same size is one line with a higher quantity; first
  * added stays first, which is the order the corner draws them in. */
+/** An add-on is never bought on its own: with no garment left in the cart, the
+ * add-ons go too, so the cart can never hold an order the server would refuse. */
+export function pruneAddOns(items: CartItem[]): CartItem[] {
+  return items.some((item) => !item.addOn)
+    ? items
+    : items.filter((item) => !item.addOn);
+}
+
 export function addToCart(items: CartItem[], added: CartItem): CartItem[] {
   const index = items.findIndex(
     (item) => item.slug === added.slug && item.size === added.size,
@@ -145,6 +157,43 @@ export function changeCartSize(
         : []
       : [item],
   );
+}
+
+/** Moves ONE unit of a line to another size, for a cart that shows each unit as
+ * its own copy of the garment. A single unit just changes size in place; one of
+ * several leaves the rest where they are and the moved one lands in the line of
+ * the new size, or in a new line right after the source so it sits beside it. */
+export function moveOneToSize(
+  items: CartItem[],
+  slug: string,
+  from: string,
+  to: string,
+): CartItem[] {
+  if (from === to) return items;
+  const sourceIndex = items.findIndex(
+    (item) => item.slug === slug && item.size === from,
+  );
+  if (sourceIndex === -1) return items;
+  const source = items[sourceIndex];
+  if (source.quantity <= 1) return changeCartSize(items, slug, from, to);
+
+  const twin = items.find((item) => item.slug === slug && item.size === to);
+  if (twin && twin.quantity >= MAX_LINE_QUANTITY) return items;
+  if (!twin && items.length >= MAX_LINES) return items;
+
+  const lowered = items.map((item, index) =>
+    index === sourceIndex ? { ...item, quantity: item.quantity - 1 } : item,
+  );
+  if (twin) {
+    return lowered.map((item) =>
+      item === twin ? { ...item, quantity: item.quantity + 1 } : item,
+    );
+  }
+  return [
+    ...lowered.slice(0, sourceIndex + 1),
+    { ...source, size: to, quantity: 1 },
+    ...lowered.slice(sourceIndex + 1),
+  ];
 }
 
 /** Nudges one line's quantity up or down by `delta`; a line that reaches zero is

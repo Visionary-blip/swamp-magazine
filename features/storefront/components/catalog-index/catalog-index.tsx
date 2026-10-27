@@ -4,6 +4,7 @@ import Link from "next/link";
 import { formatUsd } from "@/lib/money";
 
 import type { CatalogProduct } from "../../lib/catalog";
+import { getProductGallery } from "../../lib/product-gallery";
 import { Reveal } from "../reveal/reveal";
 
 // The product grid under the hero (one row of four from md up, two across on a
@@ -16,36 +17,74 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
   if (products.length === 0) return null;
 
   return (
-    <section id="products" className="bg-ink px-5 py-16 md:px-16 md:py-[88px]">
-      <ul className="grid grid-cols-2 gap-x-4 gap-y-12 md:grid-cols-4 md:gap-x-8 md:gap-y-16">
-        {products.map((product, index) => (
-          <li key={product.slug}>
-            <Reveal delay={index * 0.06}>
-              <Link
-                href={`/product/${product.slug}`}
-                className="group flex flex-col items-center gap-4 text-center focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-red"
-              >
-                <div className="relative aspect-square w-full">
-                  {product.cutout ? (
-                    <Image
-                      src={product.cutout.url}
-                      alt={product.cutout.alt || product.name}
-                      fill
-                      sizes="(min-width: 768px) 22vw, 46vw"
-                      className="object-contain transition-transform duration-300 group-hover:scale-105"
-                    />
-                  ) : null}
-                </div>
-                <span className="font-display text-2xl leading-none tracking-[0.02em] text-brand-red uppercase transition-colors duration-200 group-hover:text-brand-yellow md:text-2xl lg:text-[30px]">
-                  {product.name}
-                </span>
-                <span className="font-display text-lg text-cream/70 md:text-xl">
-                  {formatUsd(product.priceCents)}
-                </span>
-              </Link>
-            </Reveal>
-          </li>
-        ))}
+    <section id="products" className="bg-ink md:px-16 md:py-[88px]">
+      {/* A phone gets one garment per screen, each a snap point: a swipe lands
+          on the next one rather than somewhere between two. From md up it is the
+          four-across grid. */}
+      <ul className="grid grid-cols-1 md:grid-cols-4 md:gap-x-8 md:gap-y-16">
+        {products.map((product, index) => {
+          // The shoot's first portrait frame suits a portrait screen far better
+          // than cropping the landscape poster background down to a strip; the
+          // poster background is the fallback for a product with no gallery.
+          const backdrop =
+            getProductGallery(product.slug)[0]?.src ?? product.background?.url;
+          return (
+            <li
+              key={product.slug}
+              // `snap-always` is the Reels behaviour: a flick can only ever
+              // carry the page one product on, never skip past several.
+              className="relative isolate flex min-h-dvh snap-start snap-always items-center justify-center overflow-hidden px-5 md:min-h-0 md:[scroll-snap-align:none] md:items-start md:overflow-visible md:px-0"
+            >
+              {/* Phone only: the product page's own shoot as a full-screen
+                vertical backdrop, cropped to the portrait screen, under a
+                scrim so the red type reads. A product with no shoot is plain
+                ink. */}
+              {backdrop ? (
+                <>
+                  <Image
+                    src={backdrop}
+                    alt=""
+                    fill
+                    sizes="100vw"
+                    priority={index === 0}
+                    className="-z-20 object-cover md:hidden"
+                  />
+                  <span
+                    aria-hidden
+                    className="absolute inset-0 -z-10 bg-linear-to-b from-ink/30 via-ink/20 to-ink/70 md:hidden"
+                  />
+                </>
+              ) : null}
+              {/* Full width, or the flex <li> shrinks it to its title and every
+                tile's square comes out a different size, which is what staggers
+                the titles down the grid. */}
+              <Reveal delay={index * 0.06} className="w-full">
+                <Link
+                  href={`/product/${product.slug}`}
+                  className="group flex w-full flex-col items-center gap-4 text-center focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-red"
+                >
+                  <div className="relative aspect-square w-full">
+                    {product.cutout ? (
+                      <Image
+                        src={product.cutout.url}
+                        alt={product.cutout.alt || product.name}
+                        fill
+                        sizes="(min-width: 768px) 22vw, 90vw"
+                        className="object-contain transition-transform duration-300 group-hover:scale-105"
+                      />
+                    ) : null}
+                  </div>
+                  <span className="font-display text-2xl leading-none tracking-[0.02em] text-brand-red uppercase transition-colors duration-200 group-hover:text-brand-yellow md:text-2xl lg:text-[30px]">
+                    {product.name}
+                  </span>
+                  <span className="font-display text-lg text-cream/70 md:text-xl">
+                    {formatUsd(product.priceCents)}
+                  </span>
+                </Link>
+              </Reveal>
+            </li>
+          );
+        })}
       </ul>
     </section>
   );

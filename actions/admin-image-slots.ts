@@ -81,7 +81,8 @@ export async function uploadSlotImage(
   if (result.status === "error") {
     return {
       status: "error",
-      reason: result.reason === "not-an-image" ? "not-an-image" : "server-error",
+      reason:
+        result.reason === "not-an-image" ? "not-an-image" : "server-error",
     };
   }
 
@@ -97,8 +98,7 @@ export type SlotClearFailure =
   | "server-error";
 
 export type SlotClearResult =
-  | { status: "success" }
-  | { status: "error"; reason: SlotClearFailure };
+  { status: "success" } | { status: "error"; reason: SlotClearFailure };
 
 /**
  * Takes one slot back off the site.

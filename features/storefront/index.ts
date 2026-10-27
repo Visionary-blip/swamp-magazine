@@ -21,8 +21,10 @@ export {
 export {
   getCatalog,
   getProduct,
+  getAddOns,
   getLandingImagery,
   catalogNumber,
+  type AddOn,
   type CatalogProduct,
   type ProductDetail,
   type ProductVariant,

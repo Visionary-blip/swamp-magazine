@@ -29,9 +29,7 @@ export type FooterColumn = {
 export const footerColumns: readonly FooterColumn[] = [
   {
     heading: "THE MAGAZINE",
-    links: [
-      { label: "ABOUT", href: "/about" },
-    ],
+    links: [{ label: "ABOUT", href: "/about" }],
   },
   {
     heading: "ORDERS",

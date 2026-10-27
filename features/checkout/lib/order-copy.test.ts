@@ -19,9 +19,9 @@ describe("orderErrorLines", () => {
   // Every reason in the frozen E<->F contract has to reach the buyer as words;
   // a silently unhandled failure is the one outcome this form can't have.
   it("has a line for every failure reason", () => {
-    expect(Object.values(orderErrorLines).every((line) => line.length > 0)).toBe(
-      true,
-    );
+    expect(
+      Object.values(orderErrorLines).every((line) => line.length > 0),
+    ).toBe(true);
     expect(Object.keys(orderErrorLines).sort()).toEqual([
       "at-capacity",
       "invalid-input",

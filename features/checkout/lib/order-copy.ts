@@ -39,14 +39,12 @@ export const orderCopy = {
   /** INVENTED -- the founder's own wording ("place order") for the act that
    * carries a buyer from the size row to the card fields. The card step still
    * ends in SUBMIT, so this is where the order begins, not where it is sent. */
-  next: "PLACE ORDER",
+  next: "ORDER",
   /** LIFTED from the P1 subscribe form's pending state, for one pending voice. */
   submitPending: "SENDING...",
   /** INVENTED -- screen-reader name for the "+" button, which is a bare plus
    * on the page: it files the garment in the cart and returns to the grid. */
   addToCart: "ADD TO CART AND CHOOSE ANOTHER",
-  /** INVENTED -- tags the sum under the button when the cart is part of it. */
-  withCart: "WITH YOUR CART",
   /** INVENTED -- the cart page when nothing is in it. */
   cartEmpty: "YOUR CART IS EMPTY",
   /** INVENTED -- the way out of an empty cart. */
@@ -55,9 +53,6 @@ export const orderCopy = {
   makeCart: "MAKE CART",
   /** INVENTED -- the cart button once the cart has something in it. */
   addToCartLabel: "ADD TO CART",
-  /** INVENTED -- what the place-order button says by default while no size is
-   * picked and the cart is empty, so it cannot yet be pressed. */
-  selectSize: "SELECT SIZE FIRST",
   /** INVENTED -- the way back to the size row from the card step. */
   changeSize: "CHANGE SIZE",
   /** INVENTED -- heads the payment chooser. The mockups pay by Venmo and so

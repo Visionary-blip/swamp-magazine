@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { CheckoutScreen } from "@/features/checkout";
+import { getAddOns } from "@/features/storefront";
 import { isAtOrderCapacity } from "@/lib/order-capacity.server";
 import { getSiteMode } from "@/lib/site-mode.server";
 
@@ -16,5 +17,5 @@ export const metadata: Metadata = {
 export default async function CheckoutPage() {
   const mode = await getSiteMode();
   if (mode !== "live" || (await isAtOrderCapacity())) redirect("/");
-  return <CheckoutScreen />;
+  return <CheckoutScreen addOns={await getAddOns()} />;
 }

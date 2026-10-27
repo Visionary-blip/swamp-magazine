@@ -1,16 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import {
-  CreativeForm,
-  IdeaForm,
-  ModelApplicationForm,
-} from "@/features/model-application";
 import { PlaceholderScreen } from "@/features/storefront";
 
 export const metadata: Metadata = {
   title: "GET ME INVOLVED — SWAMP MAGAZINE",
 };
+
+// The three ways in, stacked in the founder's order; each opens its own form.
+const paths = [
+  { label: "MODEL", href: "/get-involved/model" },
+  { label: "CREATIVE", href: "/get-involved/creative" },
+  { label: "GENERAL IDEA", href: "/get-involved/idea" },
+] as const;
 
 // No site-mode gate, same as the other footer pages: it leaks nothing about an
 // unreleased drop.
@@ -27,26 +29,21 @@ export default function GetInvolvedPage() {
         </figcaption>
       </figure>
 
-      <div className="grid w-full max-w-6xl grid-cols-1 gap-8 md:grid-cols-3">
-        <section className="flex flex-col gap-4">
-          <h2 className="font-display text-2xl tracking-[0.05em] text-cream">
-            MODEL
-          </h2>
-          <ModelApplicationForm />
-        </section>
-        <section className="flex flex-col gap-4">
-          <h2 className="font-display text-2xl tracking-[0.05em] text-cream">
-            CREATIVE
-          </h2>
-          <CreativeForm />
-        </section>
-        <section className="flex flex-col gap-4">
-          <h2 className="font-display text-2xl tracking-[0.05em] text-cream">
-            GENERAL IDEA
-          </h2>
-          <IdeaForm />
-        </section>
-      </div>
+      {/* Equal rectangles, as wide as the form column they open onto. */}
+      <nav aria-label="Ways to get involved" className="w-full max-w-md">
+        <ul className="flex flex-col gap-4">
+          {paths.map((path) => (
+            <li key={path.href}>
+              <Link
+                href={path.href}
+                className="flex h-24 w-full items-center justify-center border-2 border-brand-red font-display text-4xl tracking-[0.05em] text-brand-red transition-colors duration-200 hover:border-brand-yellow hover:text-brand-yellow focus-visible:border-brand-yellow focus-visible:text-brand-yellow focus-visible:outline-none"
+              >
+                {path.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
 
       {/* INVENTED -- the founder's wording; the way out for a shopper who
           wandered in. The grid is the product page's home. */}

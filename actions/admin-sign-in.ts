@@ -10,8 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 export type AdminSignInFailure = "no-allowlist" | "google-unreachable";
 
 export type AdminSignInState =
-  | { status: "idle" }
-  | { status: "error"; reason: AdminSignInFailure };
+  { status: "idle" } | { status: "error"; reason: AdminSignInFailure };
 
 /**
  * Hands the browser to Google. Authorizes nobody.

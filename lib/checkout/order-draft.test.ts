@@ -35,6 +35,48 @@ const line = (slug: string, size: string, quantity = 1) => ({
   quantity,
 });
 
+describe("resolveOrderDraft add-ons", () => {
+  const gum = product({
+    id: "prod-gum",
+    slug: "sticker-pack",
+    name: "Sticker Pack",
+    price_cents: 300,
+    is_add_on: true,
+    product_variants: [{ id: "var-gum", size: "ONE SIZE", inventory_count: 5 }],
+  });
+
+  it("refuses an order made only of add-ons", () => {
+    expect(
+      resolveOrderDraft([gum], [line("sticker-pack", "ONE SIZE")], "pickup"),
+    ).toEqual({ status: "error", reason: "invalid-input" });
+  });
+
+  it("sells an add-on alongside a garment, priced from the row", () => {
+    const result = resolveOrderDraft(
+      [product(), gum],
+      [line("vamp-tee", "S"), line("sticker-pack", "ONE SIZE", 2)],
+      "pickup",
+    );
+    expect(result.status).toBe("success");
+    if (result.status === "success") {
+      expect(result.draft.totalCents).toBe(2000 + 2 * 300);
+    }
+  });
+
+  it("still checks an add-on's stock", () => {
+    const result = resolveOrderDraft(
+      [product(), gum],
+      [line("vamp-tee", "S"), line("sticker-pack", "ONE SIZE", 6)],
+      "pickup",
+    );
+    expect(result).toEqual({
+      status: "error",
+      reason: "sold-out",
+      item: { slug: "sticker-pack", size: "ONE SIZE" },
+    });
+  });
+});
+
 describe("resolveOrderDraft", () => {
   it("refuses a size with no stock and names the line", () => {
     expect(

@@ -7,7 +7,9 @@ import {
   cartCount,
   cartSubtotalCents,
   changeCartSize,
+  moveOneToSize,
   parseStoredCart,
+  pruneAddOns,
   removeFromCart,
   sortSizes,
   type CartItem,
@@ -140,6 +142,61 @@ describe("changeCartSize", () => {
     const cart = [item()];
     expect(changeCartSize(cart, "star-shorts", "M", "M")).toBe(cart);
     expect(changeCartSize(cart, "star-shorts", "S", "L")).toBe(cart);
+  });
+});
+
+describe("pruneAddOns", () => {
+  const gum = item({ slug: "sticker-pack", size: "ONE SIZE", addOn: true });
+
+  it("keeps add-ons while a garment is in the cart", () => {
+    const cart = [item(), gum];
+    expect(pruneAddOns(cart)).toBe(cart);
+  });
+
+  it("drops add-ons when no garment is left", () => {
+    expect(pruneAddOns([gum])).toEqual([]);
+  });
+});
+
+describe("moveOneToSize", () => {
+  const key = (line: CartItem) => `${line.slug}:${line.size}:${line.quantity}`;
+
+  it("changes a lone unit's size in place", () => {
+    expect(moveOneToSize([item()], "star-shorts", "M", "L").map(key)).toEqual([
+      "star-shorts:L:1",
+    ]);
+  });
+
+  it("splits one of several into a new line right beside the original", () => {
+    const cart = moveOneToSize(
+      [item({ quantity: 2 }), item({ slug: "college-arch" })],
+      "star-shorts",
+      "M",
+      "L",
+    );
+    expect(cart.map(key)).toEqual([
+      "star-shorts:M:1",
+      "star-shorts:L:1",
+      "college-arch:M:1",
+    ]);
+  });
+
+  it("joins an existing line of the new size", () => {
+    const cart = moveOneToSize(
+      [item({ quantity: 2 }), item({ size: "L" })],
+      "star-shorts",
+      "M",
+      "L",
+    );
+    expect(cart.map(key)).toEqual(["star-shorts:M:1", "star-shorts:L:2"]);
+  });
+
+  it("leaves the cart alone when the target line is full", () => {
+    const cart = [
+      item({ quantity: 2 }),
+      item({ size: "L", quantity: MAX_LINE_QUANTITY }),
+    ];
+    expect(moveOneToSize(cart, "star-shorts", "M", "L")).toBe(cart);
   });
 });
 

@@ -14,7 +14,9 @@ import {
   addToCart,
   adjustQuantity,
   changeCartSize,
+  moveOneToSize,
   parseStoredCart,
+  pruneAddOns,
   removeFromCart,
   type CartItem,
   type CartState,
@@ -28,6 +30,8 @@ type CartContextValue = {
   addItem: (item: CartItem) => void;
   removeItem: (slug: string, size: string) => void;
   changeSize: (slug: string, from: string, to: string) => void;
+  /** One unit of a line to another size; see `moveOneToSize`. */
+  moveOneToSize: (slug: string, from: string, to: string) => void;
   adjust: (slug: string, size: string, delta: number) => void;
   clear: () => void;
 };
@@ -74,7 +78,8 @@ function subscribe(listener: () => void) {
 }
 
 function update(change: (current: CartState) => CartState) {
-  writeRaw(JSON.stringify(change(parseStoredCart(readRaw()))));
+  const next = change(parseStoredCart(readRaw()));
+  writeRaw(JSON.stringify({ ...next, items: pruneAddOns(next.items) }));
 }
 
 export function CartProvider({ children }: { children: ReactNode }) {
@@ -110,6 +115,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
       })),
     [],
   );
+  const moveOne = useCallback(
+    (slug: string, from: string, to: string) =>
+      update((current) => ({
+        ...current,
+        items: moveOneToSize(current.items, slug, from, to),
+      })),
+    [],
+  );
   const adjust = useCallback(
     (slug: string, size: string, delta: number) =>
       update((current) => ({
@@ -131,10 +144,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
       addItem,
       removeItem,
       changeSize,
+      moveOneToSize: moveOne,
       adjust,
       clear,
     }),
-    [state, setDelivery, addItem, removeItem, changeSize, adjust, clear],
+    [
+      state,
+      setDelivery,
+      addItem,
+      removeItem,
+      changeSize,
+      moveOne,
+      adjust,
+      clear,
+    ],
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

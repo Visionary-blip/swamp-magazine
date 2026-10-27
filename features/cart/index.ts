@@ -7,6 +7,7 @@ export { ClearCart } from "./components/clear-cart/clear-cart";
 export {
   cartCount,
   cartSubtotalCents,
+  sortSizes,
   type CartItem,
   type DeliveryChoice,
 } from "./lib/cart";

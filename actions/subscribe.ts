@@ -3,7 +3,8 @@
 import { subscribeSchema } from "@/features/coming-soon/lib/subscribe-schema";
 import { addSubscriber } from "@/lib/subscribe.server";
 
-export type SubscribeFailure = "invalid-email" | "invalid-phone" | "server-error";
+export type SubscribeFailure =
+  "invalid-email" | "invalid-phone" | "server-error";
 
 export type SubscribeState =
   | { status: "idle" }

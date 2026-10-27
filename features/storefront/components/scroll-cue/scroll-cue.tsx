@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useState, type MouseEvent } from "react";
+import { useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
+
+import { glideToAnchor } from "../../lib/glide-to-anchor";
 
 // A small bobbing arrow that says "there is more below" -- for desktop only.
 // On a phone the next section simply peeks in under the fold, and a thumb
@@ -35,52 +37,10 @@ export function ScrollCue({
     };
   }, []);
 
-  // Pressing the arrow glides to the section rather than jumping: a slow
-  // ease-in-out (about two seconds for a screen's distance), cancelled
-  // the moment the visitor scrolls, touches or types. With reduced motion it
-  // jumps, as an ordinary anchor does.
-  function glideToTarget(event: MouseEvent<HTMLAnchorElement>) {
-    const target = document.querySelector(href);
-    if (
-      !target ||
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
-      return;
-    }
-    event.preventDefault();
-
-    const from = window.scrollY;
-    const to = from + target.getBoundingClientRect().top;
-    const distance = to - from;
-    const duration = Math.min(3000, Math.max(1500, Math.abs(distance) * 2.2));
-    const started = performance.now();
-    let frame = 0;
-
-    function stop() {
-      cancelAnimationFrame(frame);
-      window.removeEventListener("wheel", stop);
-      window.removeEventListener("touchstart", stop);
-      window.removeEventListener("keydown", stop);
-    }
-    function step(now: number) {
-      const progress = Math.min(1, (now - started) / duration);
-      // Ease-in-out sine: gentle at both ends, no sharp middle.
-      const eased = -(Math.cos(Math.PI * progress) - 1) / 2;
-      window.scrollTo(0, from + distance * eased);
-      if (progress < 1) frame = requestAnimationFrame(step);
-      else stop();
-    }
-
-    window.addEventListener("wheel", stop, { passive: true });
-    window.addEventListener("touchstart", stop, { passive: true });
-    window.addEventListener("keydown", stop);
-    frame = requestAnimationFrame(step);
-  }
-
   return (
     <a
       href={href}
-      onClick={glideToTarget}
+      onClick={(event) => glideToAnchor(event, href)}
       aria-label={label}
       className={cn(
         "hidden items-center justify-center text-brand-red transition-opacity duration-300 hover:text-brand-yellow focus-visible:text-brand-yellow focus-visible:outline-none md:flex",

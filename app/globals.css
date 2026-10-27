@@ -116,3 +116,12 @@
 .animate-marquee {
   animation: marquee 24s linear infinite;
 }
+
+/* The phone's landing is a stack of full-screen sections (one garment each,
+   then WORLD, then the footer); mandatory snapping makes any scroll land the
+   next one in focus. Desktop keeps free scrolling. */
+@media (max-width: 767px) {
+  html:has([data-snap-page]) {
+    scroll-snap-type: y mandatory;
+  }
+}
