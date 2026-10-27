@@ -75,6 +75,27 @@
   }
 }
 
+/* A plain fade-in; `both` keeps the element hidden through its animation-delay,
+   so a stack of them can arrive one after another (the WORLD rows). */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in {
+    animation: none;
+  }
+}
+
 /* A short sideways shake that points at the size row when someone presses the
    order button before picking a size. */
 @keyframes nudge {

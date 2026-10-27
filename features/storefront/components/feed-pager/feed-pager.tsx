@@ -20,6 +20,8 @@ import { useEffect } from "react";
 const PHONE = "(max-width: 767px)";
 // A finger that moved less than this is a tap, not a swipe.
 const SWIPE_PX = 8;
+// How long the arriving product takes to fade in.
+const FADE_MS = 500;
 const EASE = "transform 450ms cubic-bezier(0.22, 0.8, 0.3, 1)";
 // How far past the first or last stop the track follows the finger (a rubber
 // band), as a fraction of the drag.
@@ -70,9 +72,32 @@ export function FeedPager() {
       feed.style.transition = animate ? EASE : "none";
       feed.style.transform = `translate3d(0, ${-offset}px, 0)`;
     }
+    // The product the track is moving to fades in over the slide.
+    function fadeIn() {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const height = feed.parentElement?.clientHeight ?? window.innerHeight;
+      const max = Math.max(0, feed.scrollHeight - height);
+      const feedTop = feed.getBoundingClientRect().top;
+      for (const stop of feed.querySelectorAll<HTMLElement>(
+        "[data-feed-stop]",
+      )) {
+        const top = Math.round(
+          Math.min(max, stop.getBoundingClientRect().top - feedTop),
+        );
+        if (top === points[index]) {
+          stop.animate([{ opacity: 0 }, { opacity: 1 }], {
+            duration: FADE_MS,
+            easing: "ease-out",
+          });
+          return;
+        }
+      }
+    }
     function go(to: number) {
+      const before = index;
       index = Math.max(0, Math.min(points.length - 1, to));
       place(points[index], true);
+      if (index !== before) fadeIn();
     }
 
     function enable() {

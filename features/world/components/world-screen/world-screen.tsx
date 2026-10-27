@@ -68,11 +68,13 @@ export function WorldScreen() {
         aria-label="World"
         className="grid h-[calc(100dvh-4rem)] min-h-[32rem] w-full grid-rows-4 overflow-x-clip"
       >
-        {rows.map((row) => (
+        {rows.map((row, index) => (
           <Link
             key={row.href}
             href={row.href}
-            className="relative isolate flex w-full items-center justify-center overflow-hidden border-t transition-[color,transform] duration-300 hover:z-10 hover:scale-[1.03] hover:shadow-2xl hover:shadow-ink/60 focus-visible:z-10 focus-visible:scale-[1.03] border-brand-red/40 font-display text-[16vw] leading-none tracking-[0.03em] text-brand-red last:border-b hover:text-brand-yellow focus-visible:text-brand-yellow focus-visible:outline-none md:text-[8vw]"
+            // Top to bottom, a quarter second apart.
+            style={{ animationDelay: `${index * 0.25}s` }}
+            className="animate-fade-in relative isolate flex w-full items-center justify-center overflow-hidden border-t transition-[color,transform] duration-300 hover:z-10 hover:scale-[1.03] hover:shadow-2xl hover:shadow-ink/60 focus-visible:z-10 focus-visible:scale-[1.03] border-brand-red/40 font-display text-[16vw] leading-none tracking-[0.03em] text-brand-red last:border-b hover:text-brand-yellow focus-visible:text-brand-yellow focus-visible:outline-none md:text-[8vw]"
           >
             {row.photo ? (
               <>
