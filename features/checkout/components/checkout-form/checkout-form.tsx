@@ -6,6 +6,7 @@ import { useState, useTransition, type FormEvent } from "react";
 import { createCheckoutSession } from "@/actions/create-checkout-session";
 import { dials } from "@/config/dials";
 import { useCart, type CartItem } from "@/features/cart";
+import { useProductOverlay } from "@/features/transition";
 import { cn } from "@/lib/utils";
 
 import type { LedgerLine } from "../order-ledger/order-ledger";
@@ -49,6 +50,7 @@ export function CheckoutForm({
   cutout,
 }: CheckoutFormProps) {
   const router = useRouter();
+  const overlay = useProductOverlay();
   const cart = useCart();
   // Delivery is one choice for the whole order, so it lives with the cart and
   // follows the customer from product page to product page.
@@ -125,7 +127,9 @@ export function CheckoutForm({
     if (!selected || isPending) return;
     cart.addItem(selected);
     setSize(null);
-    router.push("/#products");
+    // In the landing's overlay "back to the grid" is closing the overlay.
+    if (overlay) overlay.close();
+    else router.push("/#products");
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {

@@ -60,6 +60,7 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
               <Reveal delay={index * 0.06} className="w-full">
                 <HandoffLink
                   href={`/product/${product.slug}`}
+                  overlaySlug={product.slug}
                   className="group flex w-full flex-col items-center gap-4 text-center focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-red"
                 >
                   <div

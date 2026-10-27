@@ -25,6 +25,11 @@ const EASE = "transform 450ms cubic-bezier(0.22, 0.8, 0.3, 1)";
 // band), as a fraction of the drag.
 const RUBBER = 0.3;
 
+// A product page open over the feed (see ProductOverlay) owns the gestures.
+function productOpen() {
+  return document.body.hasAttribute("data-product-open");
+}
+
 export function FeedPager() {
   useEffect(() => {
     const phone = window.matchMedia(PHONE);
@@ -84,7 +89,7 @@ export function FeedPager() {
     }
 
     function onTouchStart(event: TouchEvent) {
-      if (!phone.matches || event.touches.length !== 1) return;
+      if (!phone.matches || productOpen() || event.touches.length !== 1) return;
       dragging = true;
       startY = lastY = event.touches[0].clientY;
       // Catch the track where it is if it was still easing, so a new touch
@@ -112,7 +117,13 @@ export function FeedPager() {
     // gesture, however long the wheel keeps reporting.
     let wheelLocked = false;
     function onWheel(event: WheelEvent) {
-      if (!phone.matches || event.ctrlKey || event.deltaY === 0) return;
+      if (
+        !phone.matches ||
+        productOpen() ||
+        event.ctrlKey ||
+        event.deltaY === 0
+      )
+        return;
       event.preventDefault();
       if (wheelLocked) return;
       wheelLocked = true;
@@ -120,7 +131,7 @@ export function FeedPager() {
       go(index + (event.deltaY > 0 ? 1 : -1));
     }
     function onKeyDown(event: KeyboardEvent) {
-      if (!phone.matches) return;
+      if (!phone.matches || productOpen()) return;
       const target = event.target as HTMLElement | null;
       if (target?.closest("input, textarea, select, [contenteditable]")) return;
       if (event.key === "ArrowDown" || event.key === "PageDown") {

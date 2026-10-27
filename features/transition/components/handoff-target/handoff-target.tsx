@@ -17,7 +17,7 @@ export function HandoffTarget({
     if (ref.current) landHandoff(ref.current);
   }, []);
   return (
-    <div ref={ref} className={className}>
+    <div ref={ref} data-handoff-target className={className}>
       {children}
     </div>
   );

@@ -2,12 +2,14 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { CartCorner } from "@/features/cart";
+import { ProductOverlay } from "@/features/transition";
 
-import { getCatalog, getLandingImagery } from "../../lib/catalog";
+import { getCatalog, getLandingImagery, getProduct } from "../../lib/catalog";
 import { storefrontCopy } from "../../lib/storefront-copy";
 import { CatalogIndex } from "../catalog-index/catalog-index";
 import { FeedPager } from "../feed-pager/feed-pager";
 import { GlideLink } from "../glide-link/glide-link";
+import { ProductScreen } from "../product-screen/product-screen";
 import { Reveal } from "../reveal/reveal";
 import { ScrollCue } from "../scroll-cue/scroll-cue";
 import { SiteFooter } from "../site-footer/site-footer";
@@ -35,10 +37,22 @@ export async function LiveLandingScreen() {
     getLandingImagery(),
   ]);
 
+  // Every product page rides along so a phone can open one in place with
+  // nothing left to fetch (see ProductOverlay).
+  const details = await Promise.all(
+    products.map((product) => getProduct(product.slug)),
+  );
+  const panels = details.flatMap((detail) =>
+    detail
+      ? [{ slug: detail.slug, node: <ProductScreen product={detail} /> }]
+      : [],
+  );
+
   return (
     <main className="bg-ink max-md:fixed max-md:inset-0 max-md:overflow-hidden">
       <FeedPager />
       <CartCorner placement="fixed" />
+      <ProductOverlay panels={panels} />
       {/* On a phone <main> is pinned to the screen and this track is slid up
           and down by the FeedPager, so the page itself never scrolls. */}
       <div data-feed-track className="max-md:pb-[4.5rem]">

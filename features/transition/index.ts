@@ -1,3 +1,6 @@
 export { PageVeil } from "./components/page-veil/page-veil";
 export { HandoffLink } from "./components/handoff-link/handoff-link";
 export { HandoffTarget } from "./components/handoff-target/handoff-target";
+export { ProductOverlay } from "./components/product-overlay/product-overlay";
+export { ProductBackLink } from "./components/product-back-link/product-back-link";
+export { useProductOverlay } from "./components/product-overlay/product-overlay-context";

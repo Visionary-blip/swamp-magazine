@@ -1,9 +1,8 @@
 import Image from "next/image";
-import Link from "next/link";
 
 import { CartCorner } from "@/features/cart";
 import { CheckoutForm } from "@/features/checkout";
-import { HandoffTarget } from "@/features/transition";
+import { HandoffTarget, ProductBackLink } from "@/features/transition";
 import { cn } from "@/lib/utils";
 
 import type { ProductDetail } from "../../lib/catalog";
@@ -51,12 +50,12 @@ export function ProductScreen({ product }: { product: ProductDetail }) {
         ) : null}
 
         <div className="flex items-start justify-between gap-4">
-          <Link
+          <ProductBackLink
             href="/#products"
             className="brat text-brand-red transition-colors duration-200 hover:text-brand-yellow focus-visible:text-brand-yellow focus-visible:outline-none"
           >
             {storefrontCopy.back}
-          </Link>
+          </ProductBackLink>
           {/* The cart sits above the founder's credit line, in the same corner,
               so a filled cart pushes the credits down instead of covering
               them. */}
