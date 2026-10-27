@@ -110,7 +110,8 @@ export function AudioPlayer() {
       ref={root}
       role="group"
       aria-label="Music"
-      className="fixed bottom-3 left-1/2 z-30 flex w-max max-w-[calc(100vw-1.5rem)] -translate-x-1/2 items-center gap-1.5 pb-[max(0px,env(safe-area-inset-bottom))]"
+      // No player on a phone: hidden, so nothing there can start playing.
+      className="fixed bottom-3 left-1/2 z-30 flex max-md:hidden w-max max-w-[calc(100vw-1.5rem)] -translate-x-1/2 items-center gap-1.5 pb-[max(0px,env(safe-area-inset-bottom))]"
     >
       <audio
         ref={audio}
