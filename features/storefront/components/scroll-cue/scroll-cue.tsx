@@ -2,16 +2,17 @@
 
 import { useEffect, useState } from "react";
 
+import { FEED_STEP_EVENT, PHONE } from "@/features/transition";
 import { cn } from "@/lib/utils";
 
 import { glideToAnchor } from "../../lib/glide-to-anchor";
 
-// A small bobbing arrow that says "there is more below" -- for desktop only.
-// On a phone the next section simply peeks in under the fold, and a thumb
-// already knows how to scroll; a mouse user has no such cue, so this is theirs.
-// It fades out once the page has been scrolled and returns if the visitor goes
-// back to the top, and it is a link to the section it points at, so clicking it
-// does the scrolling.
+// A small bobbing arrow that says "there is more below". It fades out once the
+// page has been scrolled and returns if the visitor goes back to the top, and it
+// is a link to the section it points at, so clicking it does the scrolling. On a
+// phone the page is paged rather than scrolled (see createFeedPager): the arrow
+// sits on the screen it belongs to and leaves with it, and a tap on it steps to
+// the next screen.
 export function ScrollCue({
   href,
   label,
@@ -40,10 +41,23 @@ export function ScrollCue({
   return (
     <a
       href={href}
-      onClick={(event) => glideToAnchor(event, href)}
+      onClick={(event) => {
+        // A phone's feed takes the step itself (and cancels the event to say
+        // so); anywhere else the anchor glides.
+        if (
+          window.matchMedia(PHONE).matches &&
+          !window.dispatchEvent(
+            new CustomEvent(FEED_STEP_EVENT, { detail: 1, cancelable: true }),
+          )
+        ) {
+          event.preventDefault();
+          return;
+        }
+        glideToAnchor(event, href);
+      }}
       aria-label={label}
       className={cn(
-        "hidden items-center justify-center text-brand-red transition-opacity duration-300 hover:text-brand-yellow focus-visible:text-brand-yellow focus-visible:outline-none md:flex",
+        "flex items-center justify-center text-brand-red transition-opacity duration-300 hover:text-brand-yellow focus-visible:text-brand-yellow focus-visible:outline-none",
         "size-10 rounded-full",
         scrolled && "pointer-events-none opacity-0",
         className,

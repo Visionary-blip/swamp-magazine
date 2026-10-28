@@ -9,6 +9,7 @@ import type { ProductDetail } from "../../lib/catalog";
 import { parseModelCredits } from "../../lib/model-credits";
 import { getProductGallery } from "../../lib/product-gallery";
 import { storefrontCopy } from "../../lib/storefront-copy";
+import { ProductFeed } from "../product-feed/product-feed";
 import { ProductGallery } from "../product-gallery/product-gallery";
 import { ScrollCue } from "../scroll-cue/scroll-cue";
 
@@ -21,11 +22,12 @@ export function ProductScreen({ product }: { product: ProductDetail }) {
   const hasGallery = gallery.length > 0;
 
   return (
-    <main className="bg-ink">
+    <ProductFeed>
       <div
+        data-feed-stop
         className={cn(
           "relative isolate flex flex-col gap-6 overflow-hidden bg-ink px-5 py-6 md:min-h-dvh md:px-16 md:py-12",
-          // The photographs below are desktop only, so a phone gets the poster alone.
+          // A phone pages through the poster and then each photograph.
           "min-h-dvh",
         )}
       >
@@ -107,7 +109,7 @@ export function ProductScreen({ product }: { product: ProductDetail }) {
           cutout={product.cutout}
         />
 
-        {/* Desktop only: a small arrow to the photographs below. */}
+        {/* A small arrow to the photographs below (a tap steps the phone feed). */}
         {hasGallery ? (
           <ScrollCue
             href="#gallery"
@@ -120,6 +122,6 @@ export function ProductScreen({ product }: { product: ProductDetail }) {
       </div>
 
       <ProductGallery images={gallery} />
-    </main>
+    </ProductFeed>
   );
 }

@@ -7,8 +7,7 @@ import { PhotoLightbox } from "@/features/photo-lightbox";
 
 import type { GalleryImage } from "../../lib/product-gallery";
 
-// The scrolled-down half of a product page (hidden on a phone): the shoot, two across on every
-// screen, full-bleed with every frame touching so each photograph runs half the
+// The scrolled-down half of a product page: the shoot, two across from md up, full-bleed with every frame touching so each photograph runs half the
 // window wide. An odd last image would leave an empty half, so it takes a
 // full-width band of its own (cropped wide, weighted toward the people). Each
 // frame opens the same zoomed view as the world gallery.
@@ -25,25 +24,23 @@ export function ProductGallery({ images }: { images: GalleryImage[] }) {
   if (images.length === 0) return null;
 
   return (
-    <section
-      id="gallery"
-      aria-label="Photographs"
-      // Desktop only: a phone gets the poster and its order bars, nothing below.
-      className="bg-ink max-md:hidden"
-    >
+    <section id="gallery" aria-label="Photographs" className="bg-ink">
       {/* The hovered frame grows a little over its neighbours (they touch, so it
           sits above them) to say it can be opened. */}
-      <ul className="grid grid-cols-2 overflow-x-clip">
+      {/* A phone gets one photograph to a screen, each a stop in the product
+          page's feed. */}
+      <ul className="grid grid-cols-1 overflow-x-clip md:grid-cols-2">
         {images.map((image, index) => {
           const isOrphan =
             images.length % 2 === 1 && index === images.length - 1;
           return (
             <li
               key={image.src}
+              data-feed-stop
               className={
                 isOrphan
-                  ? "relative col-span-2 aspect-4/3 hover:z-10 focus-within:z-10 md:aspect-video"
-                  : "relative aspect-4/5 hover:z-10 focus-within:z-10"
+                  ? "relative h-dvh hover:z-10 focus-within:z-10 md:col-span-2 md:aspect-video md:h-auto"
+                  : "relative h-dvh hover:z-10 focus-within:z-10 md:aspect-4/5 md:h-auto"
               }
             >
               <button
@@ -59,7 +56,7 @@ export function ProductGallery({ images }: { images: GalleryImage[] }) {
                   src={image.src}
                   alt={image.alt}
                   fill
-                  sizes={isOrphan ? "100vw" : "50vw"}
+                  sizes={isOrphan ? "100vw" : "(min-width: 768px) 50vw, 100vw"}
                   className={
                     isOrphan ? "object-cover object-[50%_38%]" : "object-cover"
                   }
