@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+
+import { cn } from "@/lib/utils";
 
 // The phone landing as a Reels-style feed, with NO native scrolling at all.
 //
@@ -32,12 +34,17 @@ function productOpen() {
   return document.body.hasAttribute("data-product-open");
 }
 
-export function FeedPager() {
+export function FeedPager({ count }: { count: number }) {
+  const [active, setActive] = useState(0);
+
   useEffect(() => {
     const phone = window.matchMedia(PHONE);
     const track = document.querySelector<HTMLElement>("[data-feed-track]");
     if (!track) return;
     const feed = track;
+    const products = [
+      ...feed.querySelectorAll<HTMLElement>("[data-feed-product]"),
+    ];
 
     let points: number[] = [0];
     let index = 0;
@@ -72,9 +79,8 @@ export function FeedPager() {
       feed.style.transition = animate ? EASE : "none";
       feed.style.transform = `translate3d(0, ${-offset}px, 0)`;
     }
-    // The product the track is moving to fades in over the slide.
-    function fadeIn() {
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // The stop whose top is the point the track rests on, if any.
+    function stopAt(point: number): HTMLElement | null {
       const height = feed.parentElement?.clientHeight ?? window.innerHeight;
       const max = Math.max(0, feed.scrollHeight - height);
       const feedTop = feed.getBoundingClientRect().top;
@@ -84,20 +90,31 @@ export function FeedPager() {
         const top = Math.round(
           Math.min(max, stop.getBoundingClientRect().top - feedTop),
         );
-        if (top === points[index]) {
-          stop.animate([{ opacity: 0 }, { opacity: 1 }], {
-            duration: FADE_MS,
-            easing: "ease-out",
-          });
-          return;
-        }
+        if (top === point) return stop;
       }
+      return null;
+    }
+    // The dots follow the product the track is on (none lit on WORLD).
+    function syncDots() {
+      const stop = stopAt(points[index]);
+      setActive(stop ? products.indexOf(stop) : -1);
+    }
+    // The product the track is moving to fades in over the slide.
+    function fadeIn() {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      stopAt(points[index])?.animate([{ opacity: 0 }, { opacity: 1 }], {
+        duration: FADE_MS,
+        easing: "ease-out",
+      });
     }
     function go(to: number) {
       const before = index;
       index = Math.max(0, Math.min(points.length - 1, to));
       place(points[index], true);
-      if (index !== before) fadeIn();
+      if (index !== before) {
+        fadeIn();
+        syncDots();
+      }
     }
 
     function enable() {
@@ -107,6 +124,7 @@ export function FeedPager() {
       // Measured with the track at rest so the stop tops are its natural ones.
       measure();
       place(points[index], false);
+      syncDots();
     }
     function disable() {
       feed.style.transform = "";
@@ -177,6 +195,7 @@ export function FeedPager() {
       feed.style.transform = "";
       measure();
       place(points[Math.min(index, points.length - 1)] ?? at, false);
+      syncDots();
     }
 
     if (phone.matches) enable();
@@ -201,5 +220,23 @@ export function FeedPager() {
     };
   }, []);
 
-  return null;
+  if (count < 2) return null;
+  // Phone only; the pager's own rest stops are what it tracks, so it sits with
+  // the pager rather than in the catalog.
+  return (
+    <ol
+      aria-hidden
+      className="pointer-events-none fixed top-1/2 right-2 z-30 flex -translate-y-1/2 flex-col gap-2 md:hidden"
+    >
+      {Array.from({ length: count }, (_, dot) => (
+        <li
+          key={dot}
+          className={cn(
+            "size-1.5 rounded-full bg-brand-red transition-[opacity,transform] duration-300",
+            dot === active ? "scale-125 opacity-100" : "opacity-35",
+          )}
+        />
+      ))}
+    </ol>
+  );
 }

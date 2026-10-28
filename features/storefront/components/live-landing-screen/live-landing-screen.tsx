@@ -50,7 +50,7 @@ export async function LiveLandingScreen() {
 
   return (
     <main className="bg-ink max-md:fixed max-md:inset-0 max-md:overflow-hidden">
-      <FeedPager />
+      <FeedPager count={products.length} />
       <CartCorner placement="fixed" />
       <ProductOverlay panels={panels} />
       {/* On a phone <main> is pinned to the screen and this track is slid up

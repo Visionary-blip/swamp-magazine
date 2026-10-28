@@ -32,6 +32,7 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
               key={product.slug}
               // A stop for the phone's FeedPager: one swipe, one product.
               data-feed-stop
+              data-feed-product
               className="relative isolate flex min-h-dvh items-center justify-center overflow-hidden px-5 md:min-h-0 md:items-start md:overflow-visible md:px-0"
             >
               {/* Phone only: the product page's own shoot as a full-screen
