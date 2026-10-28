@@ -226,14 +226,14 @@ export function FeedPager({ count }: { count: number }) {
   return (
     <ol
       aria-hidden
-      className="pointer-events-none fixed top-1/2 right-2 z-30 flex -translate-y-1/2 flex-col gap-2 md:hidden"
+      className="pointer-events-none fixed top-1/2 right-3.5 z-30 flex -translate-y-1/2 flex-col gap-2 md:hidden"
     >
       {Array.from({ length: count }, (_, dot) => (
         <li
           key={dot}
           className={cn(
-            "size-1.5 rounded-full bg-brand-red transition-[opacity,transform] duration-300",
-            dot === active ? "scale-125 opacity-100" : "opacity-35",
+            "size-2 rounded-full bg-brand-red transition-[opacity,transform] duration-300",
+            dot === active ? "scale-125 opacity-100" : "opacity-60",
           )}
         />
       ))}
