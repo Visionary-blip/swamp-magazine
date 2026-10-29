@@ -19,7 +19,7 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
   return (
     <section
       id="products"
-      className="bg-ink max-md:group-data-[view=grid]/landing:px-2 max-md:group-data-[view=grid]/landing:pt-14 md:px-16 md:py-[88px]"
+      className="bg-ink max-md:group-data-[view=grid]/landing:bg-transparent max-md:group-data-[view=grid]/landing:px-2 max-md:group-data-[view=grid]/landing:pt-14 md:px-16 md:py-[88px]"
     >
       {/* A phone gets one garment per screen, each a stop in the FeedPager: a
           swipe lands on the next one. From md up it is the four-across grid. */}

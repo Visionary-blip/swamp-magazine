@@ -53,6 +53,21 @@ export async function LiveLandingScreen() {
       <FeedPager count={products.length} />
       <CartCorner placement="fixed" />
       <ProductOverlay panels={panels} />
+      {/* The phone's all-products grid sits on a photograph, fixed behind the
+          scrolling tiles under a scrim so the red type reads. */}
+      <div
+        aria-hidden
+        className="fixed inset-0 -z-10 hidden max-md:group-data-[view=grid]/landing:block"
+      >
+        <Image
+          src="/world/grid-background.webp"
+          alt=""
+          fill
+          sizes="100vw"
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-ink/65" />
+      </div>
       {/* On a phone <main> is pinned to the screen and this track is slid up
           and down by the FeedPager, so the page itself never scrolls. */}
       <div data-feed-track className="max-md:pb-[4.5rem]">
@@ -135,7 +150,7 @@ export async function LiveLandingScreen() {
         <div
           data-feed-stop
           data-feed-world
-          className="flex min-h-dvh items-center justify-center bg-ink px-5 max-md:group-data-[view=grid]/landing:min-h-0 max-md:group-data-[view=grid]/landing:py-12 md:min-h-0 md:items-start md:pb-[88px]"
+          className="flex min-h-dvh items-center justify-center bg-ink max-md:group-data-[view=grid]/landing:bg-transparent px-5 max-md:group-data-[view=grid]/landing:min-h-0 max-md:group-data-[view=grid]/landing:py-12 md:min-h-0 md:items-start md:pb-[88px]"
         >
           <Link
             href="/world"

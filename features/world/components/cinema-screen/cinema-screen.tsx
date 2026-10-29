@@ -18,14 +18,15 @@ export function CinemaScreen() {
         </Link>
       </header>
 
-      <section className="flex flex-1 flex-col items-center justify-center pb-16">
-        <h1 className="mb-8 px-5 text-center font-display text-6xl leading-none tracking-[0.03em] text-cream uppercase">
+      <section className="flex flex-1 flex-col items-center justify-center pb-16 max-md:justify-start max-md:pb-8">
+        <h1 className="mb-8 px-5 text-center font-display text-6xl leading-none max-md:mb-4 max-md:text-3xl tracking-[0.03em] text-cream uppercase">
           CINEMA
         </h1>
         <CinemaPlayer
           src="/world/cinema-final-cut.mp4"
           poster="/world/cinema-final-cut-poster.webp"
-          className="w-4/5"
+          // Edge to edge on a phone, 16:9 kept by the player.
+          className="w-full md:w-4/5"
         />
       </section>
 
