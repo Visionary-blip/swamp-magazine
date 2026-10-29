@@ -29,7 +29,10 @@ export function CinemaScreen() {
         />
       </section>
 
-      <SiteFooter />
+      {/* No footer on a phone: the film has the whole screen. */}
+      <div className="max-md:hidden">
+        <SiteFooter />
+      </div>
     </main>
   );
 }

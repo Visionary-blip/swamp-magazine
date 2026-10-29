@@ -49,7 +49,7 @@ export async function LiveLandingScreen() {
   );
 
   return (
-    <main className="bg-ink max-md:fixed max-md:inset-0 max-md:overflow-hidden">
+    <main className="group/landing bg-ink max-md:fixed max-md:inset-0 max-md:overflow-hidden max-md:data-[view=grid]:overflow-y-auto">
       <FeedPager count={products.length} />
       <CartCorner placement="fixed" />
       <ProductOverlay panels={panels} />
@@ -134,7 +134,8 @@ export async function LiveLandingScreen() {
           and the get-involved forms. */}
         <div
           data-feed-stop
-          className="flex min-h-dvh items-center justify-center bg-ink px-5 md:min-h-0 md:items-start md:pb-[88px]"
+          data-feed-world
+          className="flex min-h-dvh items-center justify-center bg-ink px-5 max-md:group-data-[view=grid]/landing:min-h-0 max-md:group-data-[view=grid]/landing:py-12 md:min-h-0 md:items-start md:pb-[88px]"
         >
           <Link
             href="/world"

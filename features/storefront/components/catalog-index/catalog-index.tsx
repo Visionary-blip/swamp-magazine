@@ -17,10 +17,13 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
   if (products.length === 0) return null;
 
   return (
-    <section id="products" className="bg-ink md:px-16 md:py-[88px]">
+    <section
+      id="products"
+      className="bg-ink max-md:group-data-[view=grid]/landing:px-2 max-md:group-data-[view=grid]/landing:pt-14 md:px-16 md:py-[88px]"
+    >
       {/* A phone gets one garment per screen, each a stop in the FeedPager: a
           swipe lands on the next one. From md up it is the four-across grid. */}
-      <ul className="grid grid-cols-1 md:grid-cols-4 md:gap-x-8 md:gap-y-16">
+      <ul className="grid grid-cols-1 max-md:group-data-[view=grid]/landing:grid-cols-2 max-md:group-data-[view=grid]/landing:gap-y-4 md:grid-cols-4 md:gap-x-8 md:gap-y-16">
         {products.map((product, index) => {
           // The shoot's first portrait frame suits a portrait screen far better
           // than cropping the landscape poster background down to a strip; the
@@ -33,7 +36,7 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
               // A stop for the phone's FeedPager: one swipe, one product.
               data-feed-stop
               data-feed-product
-              className="relative isolate flex min-h-dvh items-center justify-center overflow-hidden px-5 md:min-h-0 md:items-start md:overflow-visible md:px-0"
+              className="relative isolate flex min-h-dvh items-center justify-center overflow-hidden px-5 max-md:group-data-[view=grid]/landing:min-h-0 max-md:group-data-[view=grid]/landing:items-start max-md:group-data-[view=grid]/landing:px-0 md:min-h-0 md:items-start md:overflow-visible md:px-0"
             >
               {/* Phone only: the product page's own shoot as a full-screen
                 vertical backdrop, cropped to the portrait screen, under a
@@ -47,11 +50,11 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
                     fill
                     sizes="100vw"
                     priority={index === 0}
-                    className="-z-20 object-cover md:hidden"
+                    className="-z-20 object-cover max-md:group-data-[view=grid]/landing:hidden md:hidden"
                   />
                   <span
                     aria-hidden
-                    className="absolute inset-0 -z-10 bg-linear-to-b from-ink/30 via-ink/20 to-ink/70 md:hidden"
+                    className="absolute inset-0 -z-10 bg-linear-to-b from-ink/30 via-ink/20 to-ink/70 max-md:group-data-[view=grid]/landing:hidden md:hidden"
                   />
                 </>
               ) : null}
@@ -66,7 +69,7 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
                 >
                   <div
                     data-handoff
-                    className="relative aspect-square w-full max-md:w-[78%]"
+                    className="relative aspect-square w-full max-md:w-[78%] max-md:group-data-[view=grid]/landing:w-full"
                   >
                     {product.cutout ? (
                       <Image
@@ -78,7 +81,7 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
                       />
                     ) : null}
                   </div>
-                  <span className="font-display text-2xl leading-none tracking-[0.02em] text-brand-red uppercase transition-colors duration-200 group-hover:text-brand-yellow md:text-2xl lg:text-[30px]">
+                  <span className="font-display text-2xl leading-none tracking-[0.02em] text-brand-red uppercase transition-colors duration-200 group-hover:text-brand-yellow max-md:group-data-[view=grid]/landing:text-lg md:text-2xl lg:text-[30px]">
                     {product.name}
                   </span>
                   <span className="font-display text-lg text-cream/70 md:text-xl">
