@@ -71,13 +71,13 @@ export function FeedPager({ count }: { count: number }) {
         aria-label={
           view === "feed" ? "Show all products" : "Show one at a time"
         }
-        // A large touch target around a small glyph, top centre.
-        className="fixed top-1 left-1/2 z-30 flex size-11 -translate-x-1/2 items-center justify-center text-brand-red transition-colors duration-200 focus-visible:text-brand-yellow focus-visible:outline-none md:hidden"
+        // A touch target a little larger than the glyph, top centre.
+        className="fixed top-1 left-1/2 z-30 flex size-12 -translate-x-1/2 items-center justify-center text-brand-red transition-colors duration-200 focus-visible:text-brand-yellow focus-visible:outline-none md:hidden"
       >
         <svg
           aria-hidden
           viewBox="0 0 14 14"
-          className="size-4"
+          className="size-8"
           fill="currentColor"
         >
           {view === "feed" ? (
