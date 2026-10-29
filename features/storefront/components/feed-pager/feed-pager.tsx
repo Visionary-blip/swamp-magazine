@@ -72,12 +72,12 @@ export function FeedPager({ count }: { count: number }) {
           view === "feed" ? "Show all products" : "Show one at a time"
         }
         // A touch target a little larger than the glyph, top centre.
-        className="fixed top-1 left-1/2 z-30 flex size-12 -translate-x-1/2 items-center justify-center text-brand-red transition-colors duration-200 focus-visible:text-brand-yellow focus-visible:outline-none md:hidden"
+        className="fixed top-3 left-1/2 z-30 flex size-12 -translate-x-1/2 items-center justify-center text-brand-red transition-colors duration-200 focus-visible:text-brand-yellow focus-visible:outline-none md:hidden"
       >
         <svg
           aria-hidden
           viewBox="0 0 14 14"
-          className="size-8"
+          className="size-4"
           fill="currentColor"
         >
           {view === "feed" ? (
@@ -92,7 +92,7 @@ export function FeedPager({ count }: { count: number }) {
       {view === "feed" ? (
         <ol
           aria-hidden
-          className="pointer-events-none fixed top-1/2 right-3.5 z-30 flex -translate-y-1/2 flex-col gap-2 md:hidden"
+          className="pointer-events-none fixed top-1/2 right-3.5 z-30 flex -translate-y-1/2 flex-col items-center gap-2 md:hidden"
         >
           {Array.from({ length: count }, (_, dot) => (
             <li

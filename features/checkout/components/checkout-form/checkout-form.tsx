@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition, type FormEvent } from "react";
+import { useState, useTransition, type FormEvent, type ReactNode } from "react";
 
 import { createCheckoutSession } from "@/actions/create-checkout-session";
 import { dials } from "@/config/dials";
@@ -33,6 +33,8 @@ export type CheckoutFormProps = {
   variants: CheckoutVariant[];
   /** The garment's cutout, kept in the cart so its corner thumbnail can draw. */
   cutout: { url: string; alt: string } | null;
+  /** Drawn between the title and the size bars (the page's "more below" arrow). */
+  scrollCue?: ReactNode;
 };
 
 // The poster's bottom block (the founder's order mockups): red Anton set
@@ -48,6 +50,7 @@ export function CheckoutForm({
   priceCents,
   variants,
   cutout,
+  scrollCue,
 }: CheckoutFormProps) {
   const router = useRouter();
   const overlay = useProductOverlay();
@@ -248,6 +251,7 @@ export function CheckoutForm({
       className="flex flex-col items-center gap-3 text-center max-md:-mx-5 max-md:gap-0"
     >
       <h1 className="brat text-brand-red max-md:mb-4">{name}</h1>
+      {scrollCue}
 
       <fieldset disabled={isPending} className="max-md:w-full">
         <legend className="sr-only">{orderCopy.size}</legend>

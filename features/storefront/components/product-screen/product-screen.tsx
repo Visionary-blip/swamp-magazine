@@ -107,18 +107,18 @@ export function ProductScreen({ product }: { product: ProductDetail }) {
           priceCents={product.priceCents}
           variants={product.variants}
           cutout={product.cutout}
+          // A small arrow to the photographs below, between the title and the
+          // size bars (a tap steps the phone feed).
+          scrollCue={
+            hasGallery ? (
+              <ScrollCue
+                href="#gallery"
+                label="Scroll to the photographs"
+                className="size-8"
+              />
+            ) : null
+          }
         />
-
-        {/* A small arrow to the photographs below (a tap steps the phone feed). */}
-        {hasGallery ? (
-          <ScrollCue
-            href="#gallery"
-            label="Scroll to the photographs"
-            // Bottom-right, its glyph on the same right edge as the credit line above
-            // (the poster's side padding, less the button's own 6px inset).
-            className="absolute right-[0.875rem] bottom-4 size-8 md:right-[3.625rem] md:bottom-10"
-          />
-        ) : null}
       </div>
 
       <ProductGallery images={gallery} />
