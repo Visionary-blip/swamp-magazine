@@ -96,6 +96,48 @@
   }
 }
 
+/* Three yellow blinks that point at a control (the film's buttons). The ring and
+   the glyph go brand yellow and come back; `color` drives both, the glyphs being
+   currentColor, and the border is set alongside. */
+@keyframes blink-yellow {
+  0%,
+  100% {
+    color: var(--color-brand-red);
+    border-color: color-mix(in oklab, var(--color-brand-red) 70%, transparent);
+  }
+  50% {
+    color: var(--color-brand-yellow);
+    border-color: var(--color-brand-yellow);
+  }
+}
+
+.animate-blink-yellow {
+  animation: blink-yellow 0.7s ease-in-out 3;
+}
+
+/* Visible while the blinks play (three 0.7s blinks), then gone: the element's own
+   resting opacity is 0, so the last keyframe lands on it with no jump. */
+@keyframes linger {
+  0%,
+  88% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.animate-linger {
+  animation: linger 2.4s ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-linger,
+  .animate-blink-yellow {
+    animation: none;
+  }
+}
+
 /* A short sideways shake that points at the size row when someone presses the
    order button before picking a size. */
 @keyframes nudge {
