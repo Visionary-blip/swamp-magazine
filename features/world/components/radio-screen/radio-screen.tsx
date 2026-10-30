@@ -9,7 +9,7 @@ import { radioPlaylists } from "../../lib/radio-playlists";
 // yellow on hover.
 export function RadioScreen() {
   return (
-    <PlaceholderScreen title="RADIO" pending={false}>
+    <PlaceholderScreen title="RADIO" pending={false} backToWorld>
       <ul className="flex w-full max-w-2xl flex-col items-center justify-center gap-10 sm:flex-row sm:items-start">
         {radioPlaylists.map((playlist) => (
           <li key={playlist.href} className="w-full max-w-64 sm:w-1/2">

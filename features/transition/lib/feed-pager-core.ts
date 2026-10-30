@@ -204,14 +204,20 @@ export function createFeedPager(
   // Brings an element to the middle of the screen, the job `scrollIntoView` does
   // on a page that can scroll.
   function reveal(element: Element) {
-    const top =
-      element.getBoundingClientRect().top - feed.getBoundingClientRect().top;
-    const height = element.getBoundingClientRect().height;
-    const target = Math.max(
-      0,
-      Math.min(maxOffset(), top + height / 2 - viewport() / 2),
-    );
-    settle(target, true);
+    const feedTop = feed.getBoundingClientRect().top;
+    const box = element.getBoundingClientRect();
+    let target = box.top - feedTop + box.height / 2 - viewport() / 2;
+    // Stay inside the stop the element is part of: centring a control near the
+    // bottom of a product's poster must not slide the next stop (the photographs)
+    // into view under it.
+    const stop = element.closest<HTMLElement>("[data-feed-stop]");
+    if (stop) {
+      const stopBox = stop.getBoundingClientRect();
+      const stopTop = stopBox.top - feedTop;
+      target = Math.min(target, stopTop + stopBox.height - viewport());
+      target = Math.max(target, stopTop);
+    }
+    settle(Math.max(0, Math.min(maxOffset(), target)), true);
   }
   function onRevealEvent(event: Event) {
     const element = (event as CustomEvent<Element>).detail;

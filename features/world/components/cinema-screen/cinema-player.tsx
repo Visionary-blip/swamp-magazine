@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 // The music player's round, thin-red-ring buttons, so the film's controls read
 // as the same family.
 const roundButton =
-  "animate-blink-yellow flex size-8 items-center justify-center rounded-full border border-brand-red/70 bg-ink/80 text-brand-red transition-colors duration-200 hover:text-brand-yellow focus-visible:text-brand-yellow focus-visible:outline-none pointer-coarse:size-11";
+  "animate-blink-yellow flex size-8 items-center justify-center rounded-full border border-brand-red/70 bg-ink/80 text-brand-red transition-colors duration-200 hover:text-brand-yellow hover:border-brand-yellow focus-visible:text-brand-yellow focus-visible:border-brand-yellow focus-visible:outline-none pointer-coarse:size-11";
 
 // The film with only what the founder asked for: play/pause and a volume
 // button laid out exactly as the music player's (four snap positions, the far

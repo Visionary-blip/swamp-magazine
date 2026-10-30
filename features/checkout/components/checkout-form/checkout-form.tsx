@@ -19,6 +19,7 @@ import {
   type OrderErrorReason,
 } from "../../lib/order-copy";
 import { deliveryOptions } from "../../lib/delivery-options";
+import { ExModelDialog } from "../ex-model-dialog/ex-model-dialog";
 import { scrollIntoViewOnMount } from "../../lib/scroll";
 import { stripePromise } from "../../lib/stripe-client";
 
@@ -74,6 +75,8 @@ export function CheckoutForm({
   // otherwise it counts only once it has been picked on this page, because the
   // cart's default is not a choice the customer made.
   const [deliveryPicked, setDeliveryPicked] = useState(false);
+  const [exModelOpen, setExModelOpen] = useState(false);
+  const [exModelPlaced, setExModelPlaced] = useState(false);
 
   const sizes = variants.map((variant) => ({
     size: variant.size,
@@ -232,6 +235,42 @@ export function CheckoutForm({
           shippingCents={shippingCents}
           totalCents={totalCents}
           onChangeSize={handleChangeSize}
+          topSlot={
+            <>
+              {/* For people who have the password: the order goes through
+                  without a charge. */}
+              <button
+                type="button"
+                onClick={() => setExModelOpen(true)}
+                className="brat cursor-pointer px-1 py-2 text-brand-red transition-colors duration-200 hover:text-brand-yellow focus-visible:underline focus-visible:underline-offset-8"
+              >
+                EX-MODEL
+              </button>
+              {exModelOpen ? (
+                <ExModelDialog
+                  items={orderItems.map((item) => ({
+                    slug: item.slug,
+                    size: item.size,
+                    quantity: item.quantity,
+                  }))}
+                  delivery={delivery}
+                  onClose={() => {
+                    setExModelOpen(false);
+                    // The order is made, so the card step has nothing left to do.
+                    if (exModelPlaced) {
+                      setExModelPlaced(false);
+                      handleChangeSize();
+                    }
+                  }}
+                  onPlaced={() => {
+                    cart.clear();
+                    setSize(null);
+                    setExModelPlaced(true);
+                  }}
+                />
+              ) : null}
+            </>
+          }
         />
       </div>
     );

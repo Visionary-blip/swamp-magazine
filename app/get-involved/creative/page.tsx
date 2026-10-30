@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function GetInvolvedCreativePage() {
   return (
-    <PlaceholderScreen title="CREATIVE" pending={false}>
+    <PlaceholderScreen title="CREATIVE" pending={false} backToWorld>
       <div className="flex w-full max-w-md flex-col gap-6">
         <CreativeForm />
         <Link

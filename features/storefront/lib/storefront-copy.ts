@@ -24,6 +24,8 @@ export const storefrontCopy = {
   ticker: "SWAMP MAGAZINE * THE NATIONAL ISSUE * ",
   /** LIFTED -- the order mockups' way back, verbatim. */
   back: "BACK",
+  /** The founder's words: the way back up from a page inside WORLD. */
+  backToWorld: "BACK TO WORLD",
   /**
    * INVENTED -- the holding line on a footer page whose copy the founder has
    * not written yet (/about, /contact, /stockists, /shipping, /faq, /privacy,

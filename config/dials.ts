@@ -11,6 +11,13 @@ export const dials = {
   shippingFlatRateCents: 500,
 
   /**
+   * Price in cents of the lighter add-on. It lives in code (lib/checkout/
+   * code-add-ons.ts), not in the products table, so it has no stock count and
+   * is never sold out. Founder's call; $5 is a placeholder.
+   */
+  lighterPriceCents: 500,
+
+  /**
    * Oversell policy: stock is checked at checkout-session creation; if a
    * webhook race oversells anyway, the remedy is refund + apologize (real
    * reservation is overkill at this scale). Implemented in P3.

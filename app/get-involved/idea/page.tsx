@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function GetInvolvedIdeaPage() {
   return (
-    <PlaceholderScreen title="GENERAL IDEA" pending={false}>
+    <PlaceholderScreen title="GENERAL IDEA" pending={false} backToWorld>
       <div className="flex w-full max-w-md flex-col gap-6">
         <IdeaForm />
         <Link

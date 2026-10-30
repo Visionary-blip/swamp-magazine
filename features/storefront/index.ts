@@ -9,6 +9,9 @@ export {
   PlaceholderScreen,
   type PlaceholderScreenProps,
 } from "./components/placeholder-screen/placeholder-screen";
+export { MastheadLink } from "./components/masthead-link/masthead-link";
+export { PolicyScreen } from "./components/policy-screen/policy-screen";
+export { shippingReturnsCopy } from "./lib/shipping-returns-copy";
 export { Reveal } from "./components/reveal/reveal";
 export { StarMark } from "./components/star-mark/star-mark";
 export { storefrontCopy } from "./lib/storefront-copy";

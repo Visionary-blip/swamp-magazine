@@ -154,9 +154,26 @@ export async function LiveLandingScreen() {
         >
           <Link
             href="/world"
-            className="font-display text-4xl tracking-[0.05em] text-brand-red transition-colors duration-200 hover:text-brand-yellow focus-visible:text-brand-yellow focus-visible:outline-none"
+            className="group/world flex flex-col items-center gap-2 font-display text-4xl tracking-[0.05em] text-brand-red transition-colors duration-200 hover:text-brand-yellow focus-visible:text-brand-yellow focus-visible:outline-none"
           >
             WORLD
+            {/* A small globe under the word, tilted like the real one; it takes
+                the link's colour and spins while the link is pointed at. */}
+            <span className="block -rotate-[23deg]">
+              <svg
+                aria-hidden
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                className="size-7 motion-safe:group-hover/world:animate-[spin_2.5s_linear_infinite] motion-safe:group-focus-visible/world:animate-[spin_2.5s_linear_infinite]"
+              >
+                <circle cx="12" cy="12" r="9.5" />
+                <ellipse cx="12" cy="12" rx="4" ry="9.5" />
+                <path d="M2.5 12h19M4 7h16M4 17h16" />
+              </svg>
+            </span>
           </Link>
         </div>
 

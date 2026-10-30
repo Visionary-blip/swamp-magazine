@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { SiteFooter, storefrontCopy } from "@/features/storefront";
+import { MastheadLink, SiteFooter } from "@/features/storefront";
 
 type WorldRow = {
   label: string;
@@ -9,7 +9,14 @@ type WorldRow = {
   /** A photograph behind the type; rows without one are type on ink until the
    * founder's pictures arrive. `position` is the CSS object-position that keeps
    * the subject in the middle of the wide, short crop. */
-  photo?: { src: string; alt: string; position: string };
+  photo?: {
+    src: string;
+    alt: string;
+    position: string;
+    /** The darkening layer over the photo; a literal class so Tailwind sees it.
+     * Defaults to bg-ink/45. */
+    scrim?: string;
+  };
 };
 
 // The founder's order. Each row is a single button to its own page.
@@ -35,7 +42,19 @@ const rows: readonly WorldRow[] = [
       position: "50% 22%",
     },
   },
-  { label: "RADIO", href: "/world/radio" },
+  {
+    label: "RADIO",
+    href: "/world/radio",
+    photo: {
+      src: "/world/world-radio.webp",
+      alt: "A shirtless young man in pale blue sweat shorts, hands at his waistband, looking off to the side against a black night",
+      // His eyes sit about 34% down the portrait frame and his chin about 41%;
+      // this puts the band across forehead to mouth, the whole face when the band is tall.
+      position: "50% 35%",
+      // The photograph is already near black, so it needs less darkening.
+      scrim: "bg-ink/25",
+    },
+  },
   {
     label: "INVOLVE ME",
     href: "/get-involved",
@@ -56,12 +75,7 @@ export function WorldScreen() {
   return (
     <main className="flex min-h-dvh flex-col bg-ink">
       <header className="flex h-16 shrink-0 items-center px-5 md:px-10">
-        <Link
-          href="/"
-          className="font-display text-[15px] tracking-[0.05em] text-brand-red transition-colors duration-200 hover:text-brand-yellow focus-visible:text-brand-yellow focus-visible:outline-none md:text-[17px]"
-        >
-          {storefrontCopy.wordmark}
-        </Link>
+        <MastheadLink />
       </header>
 
       <nav
@@ -89,7 +103,7 @@ export function WorldScreen() {
                 {/* Keeps the red type readable on the brightest bricks. */}
                 <span
                   aria-hidden
-                  className="absolute inset-0 -z-10 bg-ink/45"
+                  className={`absolute inset-0 -z-10 ${row.photo.scrim ?? "bg-ink/45"}`}
                 />
               </>
             ) : null}

@@ -10,7 +10,7 @@ import type {
   StripeExpressCheckoutElementConfirmEvent,
   StripeExpressCheckoutElementReadyEvent,
 } from "@stripe/stripe-js";
-import { useState, useTransition, type FormEvent } from "react";
+import { useState, useTransition, type FormEvent, type ReactNode } from "react";
 
 import type { DeliveryMethod } from "@/actions/create-checkout-session";
 import { subscribeFromCheckout } from "@/actions/subscribe-from-checkout";
@@ -32,6 +32,8 @@ export type PaymentStationProps = {
   shippingCents: number;
   totalCents: number;
   onChangeSize: () => void;
+  /** Drawn centred above the order details (the EX-MODEL button). */
+  topSlot?: ReactNode;
 };
 
 // The card step. Under D2 this was Stripe's own page inside an iframe; it is now
@@ -42,6 +44,7 @@ export type PaymentStationProps = {
 export function PaymentStation({
   clientSecret,
   orderId,
+  topSlot,
   ...fields
 }: PaymentStationProps) {
   // The appearance resolves the palette off :root, so it can only be built in
@@ -56,6 +59,7 @@ export function PaymentStation({
       data-order-id={orderId}
       className="flex w-full flex-col gap-4 font-body text-cream"
     >
+      {topSlot ? <div className="flex justify-center">{topSlot}</div> : null}
       <CheckoutElementsProvider
         stripe={stripePromise}
         options={{

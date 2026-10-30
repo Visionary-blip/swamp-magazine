@@ -1,7 +1,7 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { storefrontCopy } from "../../lib/storefront-copy";
+import { MastheadLink } from "../masthead-link/masthead-link";
 import { SiteFooter } from "../site-footer/site-footer";
 import { StarMark } from "../star-mark/star-mark";
 
@@ -17,6 +17,8 @@ export type PlaceholderScreenProps = {
   /** Keeps the heading for screen readers and the tab title but not on the
    * page, for screens whose content speaks for itself. */
   hideTitle?: boolean;
+  /** Pages inside WORLD get a BACK TO WORLD link under the masthead. */
+  backToWorld?: boolean;
 };
 
 // One screen behind every footer destination the founder has not written yet.
@@ -33,16 +35,12 @@ export function PlaceholderScreen({
   children,
   pending = true,
   hideTitle = false,
+  backToWorld = false,
 }: PlaceholderScreenProps) {
   return (
     <main className="flex min-h-dvh flex-col bg-ink">
-      <header className="flex h-16 shrink-0 items-center justify-between gap-4 px-5 md:px-10">
-        <Link
-          href="/"
-          className="font-display text-[15px] tracking-[0.05em] text-brand-red transition-colors duration-200 hover:text-brand-yellow focus-visible:text-brand-yellow focus-visible:outline-none md:text-[17px]"
-        >
-          {storefrontCopy.wordmark}
-        </Link>
+      <header className="flex min-h-16 shrink-0 items-center justify-between gap-4 px-5 py-2 md:px-10">
+        <MastheadLink backToWorld={backToWorld} />
       </header>
 
       <section className="flex grow flex-col items-center justify-center gap-7 px-5 py-24 text-center md:py-32">

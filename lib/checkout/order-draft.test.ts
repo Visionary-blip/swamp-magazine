@@ -212,3 +212,39 @@ describe("resolveOrderDraft", () => {
     expect(result).toMatchObject({ status: "error", reason: "sold-out" });
   });
 });
+
+describe("resolveOrderDraft code add-ons", () => {
+  it("prices the lighter from the server's list, with no row behind it", () => {
+    const result = resolveOrderDraft(
+      [shorts],
+      [line("star-shorts", "M"), line("lighter", "ONE SIZE", 2)],
+      "pickup",
+    );
+    expect(result.status).toBe("success");
+    if (result.status !== "success") return;
+    expect(result.draft.lines[1]).toMatchObject({
+      productId: null,
+      variantId: null,
+      unitPriceCents: dials.lighterPriceCents,
+      quantity: 2,
+    });
+  });
+
+  it("refuses the lighter on its own", () => {
+    const result = resolveOrderDraft(
+      [],
+      [line("lighter", "ONE SIZE")],
+      "pickup",
+    );
+    expect(result.status).toBe("error");
+  });
+
+  it("refuses a size the lighter does not come in", () => {
+    const result = resolveOrderDraft(
+      [shorts],
+      [line("star-shorts", "M"), line("lighter", "XL")],
+      "pickup",
+    );
+    expect(result).toMatchObject({ status: "error", reason: "not-found" });
+  });
+});

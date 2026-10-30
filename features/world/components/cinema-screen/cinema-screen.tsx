@@ -1,6 +1,4 @@
-import Link from "next/link";
-
-import { SiteFooter, storefrontCopy } from "@/features/storefront";
+import { MastheadLink, SiteFooter } from "@/features/storefront";
 
 import { CinemaPlayer } from "./cinema-player";
 
@@ -9,13 +7,8 @@ import { CinemaPlayer } from "./cinema-player";
 export function CinemaScreen() {
   return (
     <main className="flex min-h-dvh flex-col bg-ink">
-      <header className="flex h-16 shrink-0 items-center px-5 md:px-10">
-        <Link
-          href="/"
-          className="font-display text-[15px] tracking-[0.05em] text-brand-red transition-colors duration-200 hover:text-brand-yellow focus-visible:text-brand-yellow focus-visible:outline-none md:text-[17px]"
-        >
-          {storefrontCopy.wordmark}
-        </Link>
+      <header className="flex min-h-16 shrink-0 items-center px-5 py-2 md:px-10">
+        <MastheadLink backToWorld />
       </header>
 
       <section className="flex flex-1 flex-col items-center justify-center pb-16 max-md:justify-start max-md:pb-8">

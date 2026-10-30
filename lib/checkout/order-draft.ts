@@ -4,6 +4,8 @@ import type {
 } from "@/actions/create-checkout-session";
 import { dials } from "@/config/dials";
 
+import { findCodeAddOn } from "./code-add-ons";
+
 // The pure half of createCheckoutSession: given rows already read from the DB,
 // decide whether this is a sellable order and what it costs. Pulled out of the
 // server action so the guards that lose money when they are wrong -- sold-out
@@ -41,8 +43,9 @@ export type OrderRequestLine = {
 };
 
 export type OrderDraftLine = {
-  productId: string;
-  variantId: string;
+  /** Null for an add-on that lives in code rather than the products table. */
+  productId: string | null;
+  variantId: string | null;
   productName: string;
   size: string;
   unitPriceCents: number;
@@ -98,6 +101,24 @@ export function resolveOrderDraft(
   let hasGarment = false;
   for (const line of merged.values()) {
     const product = products.find((row) => row.slug === line.slug);
+
+    // Add-ons that live in code have no row to read: price and name come from
+    // the server's own list, never the request, and there is no stock to check.
+    const codeAddOn = product ? undefined : findCodeAddOn(line.slug);
+    if (codeAddOn) {
+      if (line.size !== codeAddOn.size) {
+        return { status: "error", reason: "not-found" };
+      }
+      lines.push({
+        productId: null,
+        variantId: null,
+        productName: codeAddOn.name,
+        size: codeAddOn.size,
+        unitPriceCents: codeAddOn.priceCents,
+        quantity: line.quantity,
+      });
+      continue;
+    }
 
     // An inactive product is invisible to the storefront's RLS policy, so
     // reaching here with one means a stale tab or a hand-made request -- same

@@ -174,8 +174,24 @@
   animation: cue-bob 1.8s ease-in-out infinite;
 }
 
+/* The same bob sideways, for the back arrow that points left. */
+@keyframes cue-bob-left {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-5px);
+  }
+}
+
+.animate-cue-bob-left {
+  animation: cue-bob-left 1.8s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-nudge,
+  .animate-cue-bob-left,
   .animate-cue-bob {
     animation: none;
   }

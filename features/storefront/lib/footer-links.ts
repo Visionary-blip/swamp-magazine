@@ -33,10 +33,7 @@ export const footerColumns: readonly FooterColumn[] = [
   },
   {
     heading: "ORDERS",
-    links: [
-      { label: "SHIPPING & RETURNS", href: "/shipping" },
-      { label: "FAQ", href: "/faq" },
-    ],
+    links: [{ label: "SHIPPING & RETURNS", href: "/shipping" }],
   },
   {
     // Instagram only -- no TikTok (Zach, 2026-09-21). Two accounts, because the

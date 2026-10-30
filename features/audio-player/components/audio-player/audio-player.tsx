@@ -13,7 +13,7 @@ import {
 
 // Same round, thin-red-ring language as the cart corner's controls.
 const roundButton =
-  "flex size-8 items-center justify-center rounded-full border border-brand-red/70 bg-ink/80 text-brand-red transition-colors duration-200 hover:text-brand-yellow focus-visible:text-brand-yellow focus-visible:outline-none pointer-coarse:size-11";
+  "flex size-8 items-center justify-center rounded-full border border-brand-red/70 bg-ink/80 text-brand-red transition-colors duration-200 hover:text-brand-yellow hover:border-brand-yellow focus-visible:text-brand-yellow focus-visible:border-brand-yellow focus-visible:outline-none pointer-coarse:size-11";
 
 // A small player centred along the bottom edge, under the landing hero's FROM
 // LALO FARRO line. It lives in the root layout, so a

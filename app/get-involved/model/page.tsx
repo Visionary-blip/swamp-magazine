@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function GetInvolvedModelPage() {
   return (
-    <PlaceholderScreen title="MODEL" pending={false}>
+    <PlaceholderScreen title="MODEL" pending={false} backToWorld>
       <div className="flex w-full max-w-md flex-col gap-6">
         <ModelApplicationForm />
         <Link

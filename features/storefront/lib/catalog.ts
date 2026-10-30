@@ -1,3 +1,4 @@
+import { CODE_ADD_ONS } from "@/lib/checkout/code-add-ons";
 import { createClient } from "@/lib/supabase/server";
 
 // Storefront data layer. Reads go through the anon server client, so RLS is
@@ -97,6 +98,22 @@ export async function getCatalog(): Promise<CatalogProduct[]> {
 // Every active add-on, for the cart page's ADD-ONS section. Fails soft to none:
 // a missing column or a broken read just hides the section.
 export async function getAddOns(): Promise<AddOn[]> {
+  const fromDb = await readDatabaseAddOns();
+  // The ones that live in code come after, unless a row already covers the slug.
+  const inCode = CODE_ADD_ONS.filter(
+    (addOn) => !fromDb.some((row) => row.slug === addOn.slug),
+  ).map((addOn) => ({
+    slug: addOn.slug,
+    name: addOn.name,
+    priceCents: addOn.priceCents,
+    size: addOn.size,
+    soldOut: false,
+    cutout: addOn.cutout,
+  }));
+  return [...fromDb, ...inCode];
+}
+
+async function readDatabaseAddOns(): Promise<AddOn[]> {
   try {
     const supabase = await createClient();
     const [products, slots] = await Promise.all([

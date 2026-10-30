@@ -18,7 +18,7 @@ const paths = [
 // unreleased drop.
 export default function GetInvolvedPage() {
   return (
-    <PlaceholderScreen title="GET ME INVOLVED" pending={false} hideTitle>
+    <PlaceholderScreen title="GET ME INVOLVED" pending={false} hideTitle backToWorld>
       {/* The founder's line, attributed to Virgil Abloh as he asked. */}
       <figure className="flex flex-col gap-1">
         <blockquote className="font-display text-3xl tracking-[0.03em] text-brand-red uppercase sm:text-4xl">

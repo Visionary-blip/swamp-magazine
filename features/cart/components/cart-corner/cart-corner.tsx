@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { formatUsd } from "@/lib/money";
@@ -30,7 +31,19 @@ import { useCart } from "../cart-provider/cart-provider";
 //
 // Renders nothing while the cart is empty, so a first-time visitor never sees an
 // empty widget.
+// The add-ons step is a desktop page: a phone goes straight to the cart.
+function sendPhoneToCart(
+  event: { preventDefault: () => void },
+  router: ReturnType<typeof useRouter>,
+): boolean {
+  if (!window.matchMedia("(max-width: 767px)").matches) return false;
+  event.preventDefault();
+  router.push("/checkout");
+  return true;
+}
+
 export function CartCorner({ placement }: { placement: "fixed" | "inline" }) {
+  const router = useRouter();
   const { items } = useCart();
   if (items.length === 0) return null;
 
@@ -51,8 +64,11 @@ export function CartCorner({ placement }: { placement: "fixed" | "inline" }) {
           so the padding around them is pressable too. It draws nothing; a
           keyboard focus ring is the only time it shows. */}
       <Link
-        href="/checkout"
+        href="/add-ons"
         aria-label={label}
+        onClick={(event) => {
+          sendPhoneToCart(event, router);
+        }}
         className="absolute inset-0 rounded-[2rem] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow"
       />
       {/* What the cart comes to, left of the garments. Not a target of its
@@ -77,6 +93,7 @@ export function CartCorner({ placement }: { placement: "fixed" | "inline" }) {
 }
 
 function CartThumb({ item, fixed }: { item: CartItem; fixed: boolean }) {
+  const router = useRouter();
   const { removeItem, changeSize } = useCart();
   const [menuOpen, setMenuOpen] = useState(false);
   // Touch only: a tap opens the controls. On a pointer that can hover they show
@@ -118,7 +135,7 @@ function CartThumb({ item, fixed }: { item: CartItem; fixed: boolean }) {
   return (
     <li ref={root} className="group relative">
       <Link
-        href="/checkout"
+        href="/add-ons"
         aria-label={label}
         onClick={(event) => {
           // On a phone the first tap on a garment opens its controls and a
@@ -126,7 +143,9 @@ function CartThumb({ item, fixed }: { item: CartItem; fixed: boolean }) {
           if (!tapped && window.matchMedia("(hover: none)").matches) {
             event.preventDefault();
             setTapped(true);
+            return;
           }
+          sendPhoneToCart(event, router);
         }}
         className={cn(
           "relative block",
@@ -186,7 +205,7 @@ function CartThumb({ item, fixed }: { item: CartItem; fixed: boolean }) {
             aria-haspopup="listbox"
             aria-expanded={menuOpen}
             aria-label={`Size ${item.size}. ${canChange ? "Change size" : "Only size"}`}
-            className="flex size-6 items-center justify-center rounded-full border border-brand-red/70 bg-ink/80 font-display text-xs leading-none text-brand-red uppercase transition-colors duration-200 hover:text-brand-yellow focus-visible:text-brand-yellow focus-visible:outline-none disabled:cursor-default disabled:hover:text-brand-red pointer-coarse:size-10 pointer-coarse:text-sm"
+            className="flex size-6 items-center justify-center rounded-full border border-brand-red/70 bg-ink/80 font-display text-xs leading-none text-brand-red uppercase transition-colors duration-200 hover:text-brand-yellow hover:border-brand-yellow focus-visible:text-brand-yellow focus-visible:border-brand-yellow focus-visible:outline-none disabled:cursor-default disabled:hover:text-brand-red disabled:hover:border-brand-red/70 pointer-coarse:size-10 pointer-coarse:text-sm"
           >
             {item.size}
           </button>
@@ -237,7 +256,7 @@ function CartThumb({ item, fixed }: { item: CartItem; fixed: boolean }) {
           type="button"
           onClick={() => removeItem(item.slug, item.size)}
           aria-label={`Remove ${item.name}, size ${item.size}`}
-          className="flex size-6 items-center justify-center rounded-full border border-brand-red/70 bg-ink/80 text-brand-red transition-colors duration-200 hover:text-brand-yellow focus-visible:text-brand-yellow focus-visible:outline-none pointer-coarse:size-10"
+          className="flex size-6 items-center justify-center rounded-full border border-brand-red/70 bg-ink/80 text-brand-red transition-colors duration-200 hover:text-brand-yellow hover:border-brand-yellow focus-visible:text-brand-yellow focus-visible:border-brand-yellow focus-visible:outline-none pointer-coarse:size-10"
         >
           {/* A drawn X rather than the font's multiplication sign: Anton's is a
               speck at any size. Only the mark is sized; the round button around

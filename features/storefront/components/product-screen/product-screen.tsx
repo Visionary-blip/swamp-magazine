@@ -7,8 +7,10 @@ import { cn } from "@/lib/utils";
 
 import type { ProductDetail } from "../../lib/catalog";
 import { parseModelCredits } from "../../lib/model-credits";
+import { getModelFit } from "../../lib/model-fit";
 import { getProductGallery } from "../../lib/product-gallery";
 import { storefrontCopy } from "../../lib/storefront-copy";
+import { ModelFitButton } from "../model-fit/model-fit-button";
 import { ProductFeed } from "../product-feed/product-feed";
 import { ProductGallery } from "../product-gallery/product-gallery";
 import { ScrollCue } from "../scroll-cue/scroll-cue";
@@ -66,24 +68,48 @@ export function ProductScreen({ product }: { product: ProductDetail }) {
             {/* The founder's credit line, from the DB rather than from any
                 mockup shorthand -- `products.model_credits` is the source. */}
             {product.modelCredits ? (
-              <ul className="brat text-right text-brand-red">
-                {parseModelCredits(product.modelCredits).map((credit) => (
-                  <li key={credit.text}>
-                    {credit.href ? (
-                      <a
-                        href={credit.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="transition-colors duration-200 hover:text-brand-yellow focus-visible:text-brand-yellow focus-visible:outline-none"
-                      >
-                        {credit.text}
-                      </a>
-                    ) : (
-                      credit.text
-                    )}
-                  </li>
-                ))}
-              </ul>
+              // `w-fit`, so the ruler bar under the credits is as wide as the
+              // longest of them, (L)/(R) included.
+              <div className="flex w-fit flex-col">
+                <ul className="brat flex flex-col items-end gap-1.5 text-right text-brand-red">
+                  {parseModelCredits(product.modelCredits).map((credit) => (
+                    <li key={credit.text}>
+                      {credit.href ? (
+                        <a
+                          href={credit.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="transition-colors duration-200 hover:text-brand-yellow focus-visible:text-brand-yellow focus-visible:outline-none"
+                        >
+                          {credit.text}
+                        </a>
+                      ) : (
+                        credit.text
+                      )}
+                    </li>
+                  ))}
+                </ul>
+                {/* Desktop only: one ruler bar for all the models; it opens how
+                  tall each is and the size they wear. */}
+                <ModelFitButton
+                  models={parseModelCredits(product.modelCredits).map(
+                    (credit) =>
+                      getModelFit(
+                        product.slug,
+                        credit.text.split("(")[0].trim(),
+                      ),
+                  )}
+                  // Only where there are photographs below to look at.
+                  note={
+                    hasGallery
+                      ? "LOOK AT GALLERY BELOW TO GET AN IDEA"
+                      : undefined
+                  }
+                  noteHref="#gallery"
+                  // Half the credits' width, flush right under them.
+                  className="mt-2.5 hidden self-end md:block md:w-1/2"
+                />
+              </div>
             ) : null}
           </div>
         </div>
