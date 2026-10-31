@@ -1,7 +1,5 @@
 "use server";
 
-import { createHash, timingSafeEqual } from "node:crypto";
-
 import { revalidatePath } from "next/cache";
 import { Resend } from "resend";
 import { z } from "zod";
@@ -15,19 +13,17 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 import type { DeliveryMethod } from "./create-checkout-session";
 
-// The EX-MODEL order: someone who has been given the password places the order
-// they built without paying. Everything else is the paid path's -- prices and
-// stock read from the DB here, the same draft rules (an add-on never rides
-// alone) -- but the order lands as paid for 0 and the founder is emailed what
-// was asked for. The password is checked here, on the server, against an env
-// secret; nothing about it reaches the browser.
+// The EX-MODEL order: a former model places the order they built without
+// paying. Everything else is the paid path's -- prices and stock read from the
+// DB here, the same draft rules (an add-on never rides alone) -- but the order
+// lands as paid for 0 and the founder is emailed what was asked for. There is no
+// password; the button hides itself in the browser once it has been used.
 
 export type CreateExModelOrderInput = {
   items: { slug: string; size: string; quantity: number }[];
   delivery: DeliveryMethod;
   name: string;
   email: string;
-  password: string;
 };
 
 export type CreateExModelOrderResult =
@@ -36,8 +32,6 @@ export type CreateExModelOrderResult =
       status: "error";
       reason:
         | "invalid-input"
-        | "wrong-password"
-        | "not-configured"
         | "not-found"
         | "sold-out"
         | "at-capacity"
@@ -58,7 +52,6 @@ const inputSchema = z.object({
   delivery: z.enum(["pickup", "shipping"]),
   name: z.string().trim().min(1).max(120),
   email: z.string().trim().email().max(200),
-  password: z.string().min(1).max(200),
 });
 
 const PRODUCT_SELECT =
@@ -66,27 +59,12 @@ const PRODUCT_SELECT =
 const LEGACY_PRODUCT_SELECT =
   "id, slug, name, price_cents, active, product_variants(id, size, inventory_count)";
 
-// Hashing first makes both sides the same length, which timingSafeEqual needs,
-// and keeps the comparison from leaking how much of a guess was right.
-function passwordMatches(given: string, expected: string): boolean {
-  const digest = (value: string) => createHash("sha256").update(value).digest();
-  return timingSafeEqual(digest(given), digest(expected));
-}
-
 export async function createExModelOrder(
   input: CreateExModelOrderInput,
 ): Promise<CreateExModelOrderResult> {
   const parsed = inputSchema.safeParse(input);
   if (!parsed.success) return { status: "error", reason: "invalid-input" };
-  const { items, delivery, name, email, password } = parsed.data;
-
-  const expected = serverEnv.exModelPassword;
-  if (!expected) return { status: "error", reason: "not-configured" };
-  if (!passwordMatches(password, expected)) {
-    // A pause on every miss, so guessing is slow.
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    return { status: "error", reason: "wrong-password" };
-  }
+  const { items, delivery, name, email } = parsed.data;
 
   // Same gates as the paid path: an unreleased drop is not reachable by id.
   if ((await getSiteMode()) !== "live") {

@@ -20,9 +20,6 @@ const serverEnvSchema = z
     STRIPE_SECRET_KEY: z.string().min(1).optional(),
     STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
     ADMIN_EMAILS: z.string().optional(),
-    // The password that lets an EX-MODEL place an order without paying. Unset
-    // switches the whole path off rather than leaving it open.
-    EX_MODEL_PASSWORD: z.string().min(1).optional(),
   })
   .transform((raw) => ({
     supabaseSecretKey: raw.SUPABASE_SECRET_KEY,
@@ -30,7 +27,6 @@ const serverEnvSchema = z
     resendFrom: raw.RESEND_FROM,
     stripeSecretKey: raw.STRIPE_SECRET_KEY,
     stripeWebhookSecret: raw.STRIPE_WEBHOOK_SECRET,
-    exModelPassword: raw.EX_MODEL_PASSWORD,
     adminEmails: (raw.ADMIN_EMAILS ?? "")
       .split(",")
       .map((email) => email.trim().toLowerCase())
@@ -44,5 +40,4 @@ export const serverEnv = serverEnvSchema.parse({
   STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
   STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
   ADMIN_EMAILS: process.env.ADMIN_EMAILS,
-  EX_MODEL_PASSWORD: process.env.EX_MODEL_PASSWORD,
 });

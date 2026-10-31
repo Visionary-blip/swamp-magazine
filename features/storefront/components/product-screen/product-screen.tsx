@@ -60,11 +60,7 @@ export function ProductScreen({ product }: { product: ProductDetail }) {
           >
             {storefrontCopy.back}
           </ProductBackLink>
-          {/* The cart sits above the founder's credit line, in the same corner,
-              so a filled cart pushes the credits down instead of covering
-              them. */}
           <div className="flex flex-col items-end gap-3">
-            <CartCorner placement="inline" />
             {/* The founder's credit line, from the DB rather than from any
                 mockup shorthand -- `products.model_credits` is the source. */}
             {product.modelCredits ? (
@@ -111,6 +107,14 @@ export function ProductScreen({ product }: { product: ProductDetail }) {
                 />
               </div>
             ) : null}
+            {/* The cart floats under the credits and the sizing bar and takes no
+                room, so a filled cart never pushes the page's text and pictures
+                down. Its layer sits below the sizing panel, which opens over it. */}
+            <div className="relative -mb-3 h-0 w-full">
+              <div className="absolute top-0 right-0 z-[5] w-max max-w-[calc(100vw-2.5rem)]">
+                <CartCorner placement="inline" />
+              </div>
+            </div>
           </div>
         </div>
 

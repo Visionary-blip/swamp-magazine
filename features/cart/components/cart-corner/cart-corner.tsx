@@ -55,7 +55,7 @@ export function CartCorner({ placement }: { placement: "fixed" | "inline" }) {
       role="group"
       aria-label="Your cart"
       className={cn(
-        "relative flex max-w-[calc(100vw-1.5rem)] flex-col items-end gap-2 rounded-[2rem] p-2.5",
+        "relative flex max-w-[calc(100vw-1.5rem)] items-center gap-2 rounded-[2rem] p-2.5 md:flex-col md:items-end",
         fixed &&
           "fixed right-3 bottom-3 z-30 pb-[max(0.625rem,env(safe-area-inset-bottom))] md:top-6 md:right-8 md:bottom-auto md:pb-2.5",
       )}
@@ -76,7 +76,7 @@ export function CartCorner({ placement }: { placement: "fixed" | "inline" }) {
       <p className="pointer-events-none relative z-10 font-display text-[15px] leading-none text-brand-red md:text-[19px]">
         {formatUsd(cartSubtotalCents(items))}
       </p>
-      <ul className="relative z-10 flex flex-col items-end gap-2">
+      <ul className="relative z-10 flex flex-wrap items-center justify-end gap-2 md:flex-col md:flex-nowrap md:items-end">
         {/* Add-ons are not garments: they ride in the total, not the row. */}
         {items
           .filter((item) => !item.addOn)
@@ -128,10 +128,11 @@ function CartThumb({ item, fixed }: { item: CartItem; fixed: boolean }) {
   // change to, so its size is shown but is not a button.
   const canChange = sizes.length > 1;
   const label = `${item.name}, size ${item.size}${item.quantity > 1 ? `, quantity ${item.quantity}` : ""}`;
-  // The cart runs down the screen, so a garment's two controls sit to its left,
-  // size above remove (there is always room: the corner hugs the right edge),
-  // rather than under it, where they would cover the next garment. The size menu continues the
-  // same way: a row of sizes opening further left, level with its button.
+  // On desktop the cart runs down the screen, so a garment's two controls sit to
+  // its left, size above remove (there is always room: the corner hugs the right
+  // edge), rather than under it, where they would cover the next garment. On a
+  // phone the cart runs across, so they sit above the garment side by side. The
+  // size menu opens further left either way, level with its button.
   return (
     <li ref={root} className="group relative">
       <Link
@@ -176,7 +177,7 @@ function CartThumb({ item, fixed }: { item: CartItem; fixed: boolean }) {
 
       <div
         className={cn(
-          "absolute top-1/2 right-full z-40 mr-1 flex -translate-y-1/2 flex-col items-center gap-1.5 opacity-0 transition-opacity duration-150 group-focus-within:opacity-100 group-hover:opacity-100",
+          "absolute bottom-full left-1/2 z-40 mb-1 flex -translate-x-1/2 flex-row items-center gap-1.5 opacity-0 md:top-1/2 md:right-full md:bottom-auto md:left-auto md:mr-1 md:mb-0 md:translate-x-0 md:-translate-y-1/2 md:flex-col transition-opacity duration-150 group-focus-within:opacity-100 group-hover:opacity-100",
           open && "opacity-100",
         )}
       >

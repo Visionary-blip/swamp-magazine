@@ -14,8 +14,6 @@ type Reason = Extract<CreateExModelOrderResult, { status: "error" }>["reason"];
 // INVENTED wording, in the order block's register; the founder's to review.
 const errorLines: Record<Reason, string> = {
   "invalid-input": "CHECK YOUR NAME AND EMAIL",
-  "wrong-password": "THAT'S NOT THE PASSWORD",
-  "not-configured": "NOT OPEN YET",
   "not-found": "CAN'T FIND THAT ONE ANYMORE",
   "sold-out": "THAT SIZE IS GONE. PICK ANOTHER",
   "at-capacity": "WE'VE REACHED ORDER CAPACITY FOR RIGHT NOW",
@@ -28,9 +26,9 @@ const fieldClass =
 const buttonClass =
   "cursor-pointer whitespace-nowrap px-1 py-2 text-brand-red transition-colors duration-200 hover:text-brand-yellow focus-visible:text-brand-yellow focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40";
 
-// EX-MODEL: a pop-up asking for the password (and a name and email so the order
-// has someone on it). A right password places the order for nothing and says it
-// is being made; the password is checked on the server, never here.
+// EX-MODEL: a pop-up asking for a name and email so the order has someone on it.
+// Placing it makes the order for nothing, says it is being made, and the founder
+// is emailed by the server.
 export function ExModelDialog({
   items,
   delivery,
@@ -69,7 +67,6 @@ export function ExModelDialog({
         delivery,
         name: String(form.get("name") ?? ""),
         email: String(form.get("email") ?? ""),
-        password: String(form.get("password") ?? ""),
       });
       if (result.status === "success") {
         setPlaced(true);
@@ -110,19 +107,10 @@ export function ExModelDialog({
               THANK YOU FOR YOUR TIME WITH US
             </p>
             <input
-              name="password"
-              type="password"
-              required
-              autoFocus
-              autoComplete="off"
-              placeholder="PASSWORD"
-              aria-label="Password"
-              className={fieldClass}
-            />
-            <input
               name="name"
               type="text"
               required
+              autoFocus
               autoComplete="name"
               placeholder="NAME"
               aria-label="Name"

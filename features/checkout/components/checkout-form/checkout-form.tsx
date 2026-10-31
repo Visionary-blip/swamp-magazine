@@ -20,6 +20,7 @@ import {
 } from "../../lib/order-copy";
 import { deliveryOptions } from "../../lib/delivery-options";
 import { ExModelDialog } from "../ex-model-dialog/ex-model-dialog";
+import { markExModelUsed, useExModelUsed } from "../../lib/ex-model-used";
 import { scrollIntoViewOnMount } from "../../lib/scroll";
 import { stripePromise } from "../../lib/stripe-client";
 
@@ -77,6 +78,7 @@ export function CheckoutForm({
   const [deliveryPicked, setDeliveryPicked] = useState(false);
   const [exModelOpen, setExModelOpen] = useState(false);
   const [exModelPlaced, setExModelPlaced] = useState(false);
+  const exModelUsed = useExModelUsed();
 
   const sizes = variants.map((variant) => ({
     size: variant.size,
@@ -237,15 +239,17 @@ export function CheckoutForm({
           onChangeSize={handleChangeSize}
           topSlot={
             <>
-              {/* For people who have the password: the order goes through
-                  without a charge. */}
-              <button
-                type="button"
-                onClick={() => setExModelOpen(true)}
-                className="brat cursor-pointer px-1 py-2 text-brand-red transition-colors duration-200 hover:text-brand-yellow focus-visible:underline focus-visible:underline-offset-8"
-              >
-                EX-MODEL
-              </button>
+              {/* For former models: the order goes through without a charge,
+                  once, and the button is gone afterwards. */}
+              {exModelUsed ? null : (
+                <button
+                  type="button"
+                  onClick={() => setExModelOpen(true)}
+                  className="brat cursor-pointer px-1 py-2 text-brand-red transition-colors duration-200 hover:text-brand-yellow focus-visible:underline focus-visible:underline-offset-8"
+                >
+                  I&apos;M AN EX-MODEL
+                </button>
+              )}
               {exModelOpen ? (
                 <ExModelDialog
                   items={orderItems.map((item) => ({
@@ -263,6 +267,7 @@ export function CheckoutForm({
                     }
                   }}
                   onPlaced={() => {
+                    markExModelUsed();
                     cart.clear();
                     setSize(null);
                     setExModelPlaced(true);

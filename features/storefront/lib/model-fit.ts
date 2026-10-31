@@ -19,6 +19,10 @@ export type ModelFit = {
 const MODEL_FIT: Record<string, ModelFit[]> = {
   // Joe Vargas, per the founder.
   "lurker-tee": [{ name: "JOE", height: `5'7"`, size: "M" }],
+  "star-shorts": [
+    { name: "MIA", height: `5'5"`, size: "S" },
+    { name: "DAVID", height: `6'3"`, size: "M" },
+  ],
   "college-arch": [
     { name: "ANANYA", height: `5'7"`, size: "L" },
     { name: "JESSICA", height: `5'6"`, size: "M" },
