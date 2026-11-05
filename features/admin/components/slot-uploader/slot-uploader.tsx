@@ -174,7 +174,11 @@ export function SlotUploader({
         onClick={submit}
         className="border-2 border-current px-4 py-3 font-display text-xl tracking-wide transition-opacity hover:opacity-70 disabled:opacity-40"
       >
-        {pending && job === "upload" ? "UPLOADING..." : "REPLACE"}
+        {pending && job === "upload"
+          ? "UPLOADING..."
+          : preview
+            ? "REPLACE"
+            : "CONFIRM"}
       </button>
 
       {/* Only offered while something is actually registered -- the founder

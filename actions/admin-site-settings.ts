@@ -5,20 +5,14 @@ import { z } from "zod";
 
 import { resolveAdminAccess } from "@/features/admin/lib/admin-guard";
 import { adminRoutes } from "@/features/admin/lib/admin-routes";
-import {
-  writeDropAt,
-  writeSiteMode,
-} from "@/features/admin/lib/site-settings";
+import { writeDropAt, writeSiteMode } from "@/features/admin/lib/site-settings";
 import type { SiteMode } from "@/lib/site-mode";
 
 export type AdminSettingsFailure =
-  | "not-authorized"
-  | "invalid-input"
-  | "server-error";
+  "not-authorized" | "invalid-input" | "server-error";
 
 export type AdminSettingsResult =
-  | { status: "success" }
-  | { status: "error"; reason: AdminSettingsFailure };
+  { status: "success" } | { status: "error"; reason: AdminSettingsFailure };
 
 /**
  * Closing the site can disarm a spent countdown as a side effect, so this one

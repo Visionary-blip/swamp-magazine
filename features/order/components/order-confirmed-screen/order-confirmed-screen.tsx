@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { ClearCart } from "@/features/cart";
+
 // COPY FLAG: written in the mockups' voice but invented -- the founder has no
 // order-confirmation mock. The pickup line promises a follow-up email rather
 // than naming a spot, since where and when pickup happens is his to say.
@@ -26,22 +28,23 @@ export function OrderConfirmedScreen({
   items,
 }: OrderConfirmedScreenProps) {
   return (
-    <main className="flex min-h-dvh flex-col items-center justify-center bg-cream px-6 py-16 text-ink">
+    <main className="flex min-h-dvh flex-col items-center justify-center bg-ink px-6 py-16 text-cream">
+      <ClearCart />
       <div className="w-full max-w-lg">
         <h1 className="font-display text-5xl leading-none text-brand-red sm:text-6xl">
           {name ? `${name.toUpperCase()}, ` : ""}YOU&rsquo;RE IN.
         </h1>
 
-        <p className="mt-6 font-body text-sm uppercase tracking-wide">
+        <p className="mt-6 font-body text-sm tracking-wide text-cream/80 uppercase">
           Your order is placed.
           {email ? ` A receipt is on its way to ${email}.` : ""}
         </p>
 
-        <ul className="mt-8 border-t border-ink/20 font-body text-sm uppercase">
+        <ul className="mt-8 border-t border-cream/20 font-body text-sm uppercase">
           {items.map((item) => (
             <li
               key={item.description}
-              className="flex justify-between border-b border-ink/20 py-3"
+              className="flex justify-between border-b border-cream/20 py-3"
             >
               <span>
                 {item.description}
@@ -56,17 +59,17 @@ export function OrderConfirmedScreen({
           </li>
         </ul>
 
-        <p className="mt-8 font-body text-sm uppercase tracking-wide">
+        <p className="mt-8 font-body text-sm tracking-wide text-cream/80 uppercase">
           {delivery === "pickup"
             ? "Pickup: we’ll email you the spot and the time before the drop."
             : "Shipping: it goes out to the address you gave at checkout."}
         </p>
 
         <Link
-          href="/"
-          className="mt-10 inline-block font-display text-2xl text-brand-red transition-colors hover:text-brand-yellow"
+          href="/#products"
+          className="mt-10 inline-flex min-h-11 items-center font-display text-2xl text-brand-red transition-colors hover:text-brand-yellow focus-visible:text-brand-yellow focus-visible:outline-none"
         >
-          BACK
+          KEEP SHOPPING
         </Link>
       </div>
     </main>

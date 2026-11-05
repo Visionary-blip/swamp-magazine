@@ -35,7 +35,7 @@ export function DropAnnouncementEmail({
   body,
   shopUrl,
   unsubscribeUrl,
-  ctaLabel = "SHOP THE THIRD ISSUE",
+  ctaLabel = "SHOP THE NATIONAL ISSUE",
   postalAddress,
 }: DropAnnouncementEmailProps) {
   return (
@@ -62,7 +62,9 @@ export function DropAnnouncementEmail({
             </Link>
             .
           </Text>
-          {postalAddress ? <Text style={fineStyle}>{postalAddress}</Text> : null}
+          {postalAddress ? (
+            <Text style={fineStyle}>{postalAddress}</Text>
+          ) : null}
         </Container>
       </Body>
     </Html>

@@ -49,7 +49,7 @@ const CATALOG: SeedProduct[] = [
     priceCents: 2500,
     sizes: ["S", "M", "L"],
     modelCredits: "MIA (L), DAVID (R)",
-    cutoutFile: "STAR SHORTS GRID - AUG 9.png",
+    cutoutFile: "swamp-images/STAR SHORTS GRID - AUG 9.png",
     sortOrder: 1,
   },
   {
@@ -69,6 +69,20 @@ const CATALOG: SeedProduct[] = [
     modelCredits: "JOE (BEHIND)",
     cutoutFile: "swamp-images/LURKER GRID - AUG 9.png",
     sortOrder: 3,
+  },
+  // Facts off the founder's LONGSLEEVE mockups (LURKER LONG SLEEVE, M L,
+  // "PLEASE VENMO $30", credits YLVA (L) / Z (R)). The row itself already
+  // exists in the DB, created in the admin and left inactive, so this never
+  // inserts it or touches its price; what it adds is the sizes and the cutout.
+  // Activating it is still the founder's switch in the admin.
+  {
+    slug: "lurker-longsleeve",
+    name: "Lurker Long Sleeve",
+    priceCents: 3000,
+    sizes: ["M", "L"],
+    modelCredits: "YLVA (L), Z (R)",
+    cutoutFile: "swamp-images/Lurker lonsleeve.png",
+    sortOrder: 4,
   },
 ];
 
@@ -206,11 +220,17 @@ async function seedProduct(product: SeedProduct) {
   );
 }
 
-for (const product of CATALOG) {
+// `bun run seed lurker-longsleeve` seeds one product and its lifestyle slot;
+// the full run needs every master in swamp-images/ and is the default.
+const only = process.argv[2];
+
+for (const product of CATALOG.filter((p) => !only || p.slug === only)) {
   await seedProduct(product);
 }
 
-for (const slot of LIFESTYLE_SLOTS) {
+for (const slot of LIFESTYLE_SLOTS.filter(
+  (s) => !only || s.slotKey.endsWith(`:${only}`),
+)) {
   const storagePath = `${slot.slotKey.replace(/[:]/g, "-")}.webp`;
   await uploadWebp("slots", storagePath, slot.file);
   await registerSlot(slot.slotKey, "slots", storagePath, slot.alt);

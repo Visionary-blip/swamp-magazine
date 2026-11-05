@@ -7,10 +7,7 @@ import type Stripe from "stripe";
 // not actually paid, an oversell) are provable in vitest (BD-5).
 
 export type CompletionOutcome =
-  | "applied"
-  | "already-applied"
-  | "oversold"
-  | "order-not-found";
+  "applied" | "already-applied" | "oversold" | "order-not-found";
 
 export type ApplyCompletionInput = {
   eventId: string;

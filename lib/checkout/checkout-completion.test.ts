@@ -95,10 +95,16 @@ function completedEvent(
     payment_status: overrides.paymentStatus ?? "paid",
     payment_intent: "pi_test_123",
     amount_total: 2000,
-    customer_details: { name: "Test Buyer", email: "buyer@example.com", phone: null },
+    customer_details: {
+      name: "Test Buyer",
+      email: "buyer@example.com",
+      phone: null,
+    },
     collected_information: null,
     metadata:
-      overrides.orderId === null ? {} : { order_id: overrides.orderId ?? "order-1" },
+      overrides.orderId === null
+        ? {}
+        : { order_id: overrides.orderId ?? "order-1" },
   };
 
   return {
@@ -148,7 +154,10 @@ describe("handleStripeEvent", () => {
 
     await handleStripeEvent(completedEvent({ id: "evt_a" }), deps);
     const second = await handleStripeEvent(
-      completedEvent({ id: "evt_b", type: "checkout.session.async_payment_succeeded" }),
+      completedEvent({
+        id: "evt_b",
+        type: "checkout.session.async_payment_succeeded",
+      }),
       deps,
     );
 

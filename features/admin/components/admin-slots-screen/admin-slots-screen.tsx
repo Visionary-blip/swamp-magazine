@@ -30,7 +30,8 @@ export async function AdminSlotsScreen() {
           </p>
         </div>
         <p className="font-body text-xs tracking-widest opacity-70">
-          PICK A PICTURE AND HIT REPLACE. IT GOES LIVE STRAIGHT AWAY
+          PICK A PICTURE AND HIT CONFIRM (REPLACE, ON ONE THAT HAS A PICTURE).
+          IT GOES LIVE STRAIGHT AWAY
         </p>
         <p className="font-body text-[10px] tracking-widest opacity-70">
           BIG PHONE PHOTOS ARE FINE -- THEY GET SHRUNK ON THE WAY IN

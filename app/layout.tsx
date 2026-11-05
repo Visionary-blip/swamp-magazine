@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Anton, Archivo } from "next/font/google";
 
 import { dials } from "@/config/dials";
+import { AudioPlayer } from "@/features/audio-player";
+import { CartProvider } from "@/features/cart";
+import { PageVeil } from "@/features/transition";
 
 import "./globals.css";
 
@@ -20,7 +23,7 @@ const archivo = Archivo({
 });
 
 // Description and title are the founder's own words off the coming-soon
-// mockups ("SWAMP MAGAZINE", "THE THIRD ISSUE", "FROM LALO FARRO"), not a
+// mockups ("SWAMP MAGAZINE", "THE NATIONAL ISSUE", "FROM LALO FARRO"), not a
 // marketing gloss. metadataBase makes every relative OG/canonical URL absolute
 // against the real domain, which is what crawlers and Slack/iMessage unfurls
 // need; openGraph carries no explicit `images` so the app/opengraph-image.tsx
@@ -28,7 +31,7 @@ const archivo = Archivo({
 export const metadata: Metadata = {
   metadataBase: new URL(dials.canonicalSiteUrl),
   title: "SWAMP MAGAZINE",
-  description: "SWAMP MAGAZINE. The third issue, from Lalo Farro.",
+  description: "SWAMP MAGAZINE. The national issue, from Lalo Farro.",
   applicationName: "SWAMP MAGAZINE",
   authors: [{ name: "Lalo Farro" }],
   creator: "Lalo Farro",
@@ -36,13 +39,13 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "SWAMP MAGAZINE",
     title: "SWAMP MAGAZINE",
-    description: "SWAMP MAGAZINE. The third issue, from Lalo Farro.",
+    description: "SWAMP MAGAZINE. The national issue, from Lalo Farro.",
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
     title: "SWAMP MAGAZINE",
-    description: "SWAMP MAGAZINE. The third issue, from Lalo Farro.",
+    description: "SWAMP MAGAZINE. The national issue, from Lalo Farro.",
   },
 };
 
@@ -52,7 +55,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${anton.variable} ${archivo.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-cream font-body text-ink">{children}</body>
+      <body className="min-h-full bg-cream font-body text-ink">
+        <CartProvider>{children}</CartProvider>
+        <AudioPlayer />
+        <PageVeil />
+      </body>
     </html>
   );
 }

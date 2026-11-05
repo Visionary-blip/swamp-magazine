@@ -26,8 +26,7 @@ export type AdminCatalogFailure =
   | "server-error";
 
 export type AdminCatalogResult =
-  | { status: "success" }
-  | { status: "error"; reason: AdminCatalogFailure };
+  { status: "success" } | { status: "error"; reason: AdminCatalogFailure };
 
 /**
  * Price arrives as the string the founder typed, not a number. Parsing it

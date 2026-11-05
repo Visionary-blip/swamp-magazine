@@ -7,7 +7,11 @@
   --brand-red: #e0361f;
   --brand-yellow: #f2e438;
   --cream: #f4eddd;
-  --ink: #16110d;
+  /* The site's ground: a very dark brown, not black (230F08). */
+  --ink: #230f08;
+  /* The page transition fades through the same brown as the ground, so a
+     route change never flashes a second, different dark. */
+  --brown: var(--ink);
 }
 
 @theme inline {
@@ -15,8 +19,23 @@
   --color-brand-yellow: var(--brand-yellow);
   --color-cream: var(--cream);
   --color-ink: var(--ink);
+  --color-brown: var(--brown);
   --font-display: var(--font-anton);
   --font-body: var(--font-archivo);
+}
+
+/* The product poster's type: Anton, the footer lockup's face, all caps, set
+   with almost no leading. One size for every piece of text on the poster --
+   the founder asked for it, so the size lives here and nowhere else. The soft
+   shadow is for legibility over a busy photo, not decoration. */
+@utility brat {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 3.6vw, 3rem);
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  line-height: 0.92;
+  text-transform: uppercase;
+  text-shadow: 0 0 14px color-mix(in srgb, var(--ink) 55%, transparent);
 }
 
 /* CSS-only marquee (Thames reference). Motion (the library) arrives with the
@@ -27,6 +46,154 @@
   }
   to {
     transform: translateX(-50%);
+  }
+}
+
+/* The page transition: the dark-brown veil starts opaque on every new route and
+   fades quickly away (see features/transition). */
+@keyframes veil-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.animate-veil-out {
+  animation: veil-out 0.35s ease-out forwards;
+}
+
+.animate-veil-out-slow {
+  animation: veil-out 0.6s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-veil-out,
+  .animate-veil-out-slow {
+    animation: none;
+  }
+}
+
+/* A plain fade-in; `both` keeps the element hidden through its animation-delay,
+   so a stack of them can arrive one after another (the WORLD rows). */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in {
+    animation: none;
+  }
+}
+
+/* Three yellow blinks that point at a control (the film's buttons). The ring and
+   the glyph go brand yellow and come back; `color` drives both, the glyphs being
+   currentColor, and the border is set alongside. */
+@keyframes blink-yellow {
+  0%,
+  100% {
+    color: var(--color-brand-red);
+    border-color: color-mix(in oklab, var(--color-brand-red) 70%, transparent);
+  }
+  50% {
+    color: var(--color-brand-yellow);
+    border-color: var(--color-brand-yellow);
+  }
+}
+
+.animate-blink-yellow {
+  animation: blink-yellow 0.7s ease-in-out 3;
+}
+
+/* Visible while the blinks play (three 0.7s blinks), then gone: the element's own
+   resting opacity is 0, so the last keyframe lands on it with no jump. */
+@keyframes linger {
+  0%,
+  88% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.animate-linger {
+  animation: linger 2.4s ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-linger,
+  .animate-blink-yellow {
+    animation: none;
+  }
+}
+
+/* A short sideways shake that points at the size row when someone presses the
+   order button before picking a size. */
+@keyframes nudge {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-6px);
+  }
+  40%,
+  80% {
+    transform: translateX(6px);
+  }
+}
+
+.animate-nudge {
+  animation: nudge 0.45s ease-in-out;
+}
+
+/* The scroll cue's gentle bob. */
+@keyframes cue-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(5px);
+  }
+}
+
+.animate-cue-bob {
+  animation: cue-bob 1.8s ease-in-out infinite;
+}
+
+/* The same bob sideways, for the back arrow that points left. */
+@keyframes cue-bob-left {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-5px);
+  }
+}
+
+.animate-cue-bob-left {
+  animation: cue-bob-left 1.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-nudge,
+  .animate-cue-bob-left,
+  .animate-cue-bob {
+    animation: none;
   }
 }
 

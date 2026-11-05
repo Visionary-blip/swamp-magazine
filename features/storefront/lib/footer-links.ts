@@ -29,18 +29,11 @@ export type FooterColumn = {
 export const footerColumns: readonly FooterColumn[] = [
   {
     heading: "THE MAGAZINE",
-    links: [
-      { label: "ABOUT", href: "/about" },
-      { label: "CONTACT", href: "/contact" },
-      { label: "STOCKISTS", href: "/stockists" },
-    ],
+    links: [{ label: "ABOUT", href: "/about" }],
   },
   {
     heading: "ORDERS",
-    links: [
-      { label: "SHIPPING & RETURNS", href: "/shipping" },
-      { label: "FAQ", href: "/faq" },
-    ],
+    links: [{ label: "SHIPPING & RETURNS", href: "/shipping" }],
   },
   {
     // Instagram only -- no TikTok (Zach, 2026-09-21). Two accounts, because the

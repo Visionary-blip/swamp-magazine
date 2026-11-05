@@ -13,10 +13,7 @@ import { serverEnv } from "@/lib/env/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export type SendAnnouncementFailure =
-  | "invalid-input"
-  | "no-recipients"
-  | "send-failed"
-  | "server-error";
+  "invalid-input" | "no-recipients" | "send-failed" | "server-error";
 
 export type SendAnnouncementResult =
   | { status: "success"; recipients: number; batches: number }
@@ -77,7 +74,8 @@ export async function sendDropAnnouncement(
 
   try {
     const recipients = await getRecipients();
-    if (recipients.length === 0) return { status: "error", reason: "no-recipients" };
+    if (recipients.length === 0)
+      return { status: "error", reason: "no-recipients" };
 
     const batches = splitIntoBatches(recipients, dials.announcementBatchSize);
     const resend = new Resend(serverEnv.resendApiKey);
@@ -141,7 +139,11 @@ export async function sendDropAnnouncement(
       batches.length,
       "batches",
     );
-    return { status: "success", recipients: delivered, batches: batches.length };
+    return {
+      status: "success",
+      recipients: delivered,
+      batches: batches.length,
+    };
   } catch (error) {
     console.error("[ANNOUNCEMENT]", error);
     return { status: "error", reason: "server-error" };

@@ -1,4 +1,5 @@
 export { LiveLandingScreen } from "./components/live-landing-screen/live-landing-screen";
+export { CapacityScreen } from "./components/capacity-screen/capacity-screen";
 export { ProductScreen } from "./components/product-screen/product-screen";
 export { CatalogIndex } from "./components/catalog-index/catalog-index";
 export { FilmBand } from "./components/film-band/film-band";
@@ -8,6 +9,9 @@ export {
   PlaceholderScreen,
   type PlaceholderScreenProps,
 } from "./components/placeholder-screen/placeholder-screen";
+export { MastheadLink } from "./components/masthead-link/masthead-link";
+export { PolicyScreen } from "./components/policy-screen/policy-screen";
+export { shippingReturnsCopy } from "./lib/shipping-returns-copy";
 export { Reveal } from "./components/reveal/reveal";
 export { StarMark } from "./components/star-mark/star-mark";
 export { storefrontCopy } from "./lib/storefront-copy";
@@ -20,8 +24,10 @@ export {
 export {
   getCatalog,
   getProduct,
+  getAddOns,
   getLandingImagery,
   catalogNumber,
+  type AddOn,
   type CatalogProduct,
   type ProductDetail,
   type ProductVariant,
