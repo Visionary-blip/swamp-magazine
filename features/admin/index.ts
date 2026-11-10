@@ -16,6 +16,7 @@ export {
   type AdminAccess,
   type AdminIdentity,
 } from "./lib/admin-guard";
+export { getStorefrontMode } from "./lib/storefront-mode";
 export {
   denyAdminEmail,
   hasAdminAllowlist,

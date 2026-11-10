@@ -70,7 +70,8 @@ export async function getRegisteredSlots(): Promise<Map<
   }
 }
 
-export type SlotWriteFailure = "not-an-image" | "upload-failed" | "register-failed";
+export type SlotWriteFailure =
+  "not-an-image" | "upload-failed" | "register-failed";
 
 export type SlotWriteResult =
   | { status: "success"; url: string }
@@ -160,8 +161,7 @@ export async function replaceSlotImage(
 export type SlotDeleteFailure = "not-registered" | "clear-failed";
 
 export type SlotDeleteResult =
-  | { status: "success" }
-  | { status: "error"; reason: SlotDeleteFailure };
+  { status: "success" } | { status: "error"; reason: SlotDeleteFailure };
 
 /**
  * Unregister -> delete the object, in that order.
@@ -222,7 +222,10 @@ async function getSlotRow(
       .maybeSingle();
 
     if (error || !data) return null;
-    return { bucket: data.bucket as string, storagePath: data.storage_path as string };
+    return {
+      bucket: data.bucket as string,
+      storagePath: data.storage_path as string,
+    };
   } catch {
     return null;
   }
@@ -241,7 +244,8 @@ async function removeSuperseded(
   if (!previous) return;
   // The seed writes an unversioned path, so a first swap legitimately differs;
   // guard only against deleting what was just uploaded.
-  if (previous.bucket === bucket && previous.storagePath === storagePath) return;
+  if (previous.bucket === bucket && previous.storagePath === storagePath)
+    return;
 
   await removeStorageObject(previous);
 }

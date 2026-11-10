@@ -25,7 +25,8 @@ export const catalogFailureText: Record<AdminCatalogFailure, string> = {
 
 const fieldClasses =
   "w-full border-2 border-current bg-transparent px-3 py-3 font-body text-base outline-none";
-const labelClasses = "flex flex-col gap-1 font-body text-[10px] tracking-widest";
+const labelClasses =
+  "flex flex-col gap-1 font-body text-[10px] tracking-widest";
 const buttonClasses =
   "border-2 border-current px-4 py-3 font-display text-lg tracking-wide transition-opacity hover:opacity-70 disabled:opacity-40";
 
@@ -168,11 +169,7 @@ export function ProductEditor({ product }: { product: AdminProduct }) {
             SAVE
           </button>
 
-          <VariantList
-            product={product}
-            pending={pending}
-            onRun={run}
-          />
+          <VariantList product={product} pending={pending} onRun={run} />
 
           <div className="flex flex-col gap-2 border-t-2 border-current pt-5">
             <button

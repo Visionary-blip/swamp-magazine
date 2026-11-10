@@ -72,10 +72,7 @@ export function allSlotDefinitions(
  * it and nothing happened" the P4 brief warns about. A new path means a new
  * URL, which is the only reliable cache bust available here.
  */
-export function slotStoragePath(
-  slot: SlotDefinition,
-  version: string,
-): string {
+export function slotStoragePath(slot: SlotDefinition, version: string): string {
   // Colons are legal in Supabase object keys but survive badly through URLs
   // and shells; the seed already flattened them and this keeps that shape.
   const base = slot.key.replace(/:/g, "-");

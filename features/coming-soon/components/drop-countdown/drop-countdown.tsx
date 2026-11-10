@@ -3,7 +3,11 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-import { padUnit, splitRemaining, type CountdownParts } from "../../lib/countdown";
+import {
+  padUnit,
+  splitRemaining,
+  type CountdownParts,
+} from "../../lib/countdown";
 
 type DropCountdownProps = {
   /** Server-rendered target so the first paint already shows real digits. */

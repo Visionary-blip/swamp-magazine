@@ -14,6 +14,14 @@
   --brown: var(--ink);
 }
 
+/* The National Issue theme (the landing's switch sets data-theme on <html>): the
+   whole ground goes from brown to a dark navy of about the same depth. Every
+   brown surface and scrim reads --ink, so this one line moves all of them; the
+   page transition follows through --brown. */
+:root[data-theme="national"] {
+  --ink: #00022e;
+}
+
 @theme inline {
   --color-brand-red: var(--brand-red);
   --color-brand-yellow: var(--brand-yellow);

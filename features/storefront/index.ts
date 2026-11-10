@@ -14,6 +14,7 @@ export { PolicyScreen } from "./components/policy-screen/policy-screen";
 export { shippingReturnsCopy } from "./lib/shipping-returns-copy";
 export { Reveal } from "./components/reveal/reveal";
 export { StarMark } from "./components/star-mark/star-mark";
+export { themeBootScript } from "./lib/theme-boot";
 export { storefrontCopy } from "./lib/storefront-copy";
 export {
   footerColumns,

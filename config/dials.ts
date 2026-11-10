@@ -18,6 +18,28 @@ export const dials = {
   lighterPriceCents: 500,
 
   /**
+   * Whether the lighter is offered on the add-ons page. It is switched off while
+   * the founder works on it; its price, picture and server-side pricing are all
+   * kept, so setting this to true brings it back as it was.
+   */
+  lighterVisible: false,
+
+  /**
+   * Whether the site-wide music player (features/audio-player) is mounted. It
+   * is switched off while the founder works on it; everything built for it is
+   * kept, so setting this to true brings it back as it was.
+   */
+  musicPlayerVisible: false,
+
+  /**
+   * The range of the "B" (Botched) size's height picker, in whole feet. The
+   * founder only wants a rough idea of the customer's height, so the wheel runs
+   * from the shortest to the tallest he expects to be asked to fit.
+   */
+  botchedMinFeet: 4,
+  botchedMaxFeet: 7,
+
+  /**
    * Oversell policy: stock is checked at checkout-session creation; if a
    * webhook race oversells anyway, the remedy is refund + apologize (real
    * reservation is overkill at this scale). Implemented in P3.

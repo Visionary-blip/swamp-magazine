@@ -37,7 +37,11 @@ export async function POST(request: Request): Promise<Response> {
 
   let event;
   try {
-    event = await stripe.webhooks.constructEventAsync(payload, signature, secret);
+    event = await stripe.webhooks.constructEventAsync(
+      payload,
+      signature,
+      secret,
+    );
   } catch (error) {
     // An unverified body is untrusted input; log the failure, never the body.
     console.error(
@@ -136,8 +140,7 @@ const OUTCOMES: readonly CompletionOutcome[] = [
 
 function isCompletionOutcome(value: unknown): value is CompletionOutcome {
   return (
-    typeof value === "string" &&
-    (OUTCOMES as readonly string[]).includes(value)
+    typeof value === "string" && (OUTCOMES as readonly string[]).includes(value)
   );
 }
 
@@ -158,7 +161,12 @@ async function sendConfirmation(orderId: string): Promise<void> {
       .select("id");
 
     if (claimError) {
-      console.error("[ORDER_EMAIL]", orderId, claimError.code, claimError.message);
+      console.error(
+        "[ORDER_EMAIL]",
+        orderId,
+        claimError.code,
+        claimError.message,
+      );
       return;
     }
     if (!claimed || claimed.length === 0) {
@@ -239,7 +247,11 @@ async function releaseConfirmationClaim(orderId: string): Promise<void> {
       );
     }
   } catch (error) {
-    console.error("[ORDER_EMAIL] releasing the send claim failed", orderId, error);
+    console.error(
+      "[ORDER_EMAIL] releasing the send claim failed",
+      orderId,
+      error,
+    );
   }
 }
 
@@ -295,6 +307,8 @@ async function refundOversold({
       refund.id,
       error.message,
     );
-    throw new Error(`could not mark order ${orderId} refunded: ${error.message}`);
+    throw new Error(
+      `could not mark order ${orderId} refunded: ${error.message}`,
+    );
   }
 }

@@ -21,7 +21,10 @@ export function splitIntoBatches<T>(items: readonly T[], size: number): T[][] {
 
 // Every send carries one of these (CAN-SPAM). The token is the subscriber id,
 // so the link works with no session and stays valid forever.
-export function buildUnsubscribeUrl(origin: string, subscriberId: string): string {
+export function buildUnsubscribeUrl(
+  origin: string,
+  subscriberId: string,
+): string {
   const url = new URL("/unsubscribe", origin);
   url.searchParams.set("id", subscriberId);
   return url.toString();

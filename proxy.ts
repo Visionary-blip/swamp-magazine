@@ -9,8 +9,15 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Scoped to /admin deliberately. The storefront is anonymous and cached
-  // per-request already -- running the auth cookie dance in front of it would
-  // buy nothing and cost every visitor a Supabase round trip.
-  matcher: ["/admin", "/admin/:path*"],
+  // /admin always. The storefront pages are listed too, but only so a signed-in
+  // admin's session is refreshed there (they preview the closed site); a visitor
+  // with no session cookie is passed straight through without any Supabase call.
+  matcher: [
+    "/admin",
+    "/admin/:path*",
+    "/",
+    "/product/:path*",
+    "/checkout",
+    "/add-ons",
+  ],
 };

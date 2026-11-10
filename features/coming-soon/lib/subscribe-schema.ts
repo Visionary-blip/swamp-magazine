@@ -6,14 +6,11 @@ const PHONE_PATTERN = /^\+?[0-9().\s-]{7,20}$/;
 
 export const subscribeSchema = z.object({
   email: z.string().trim().toLowerCase().pipe(z.email()),
-  phone: z.preprocess(
-    (value) => {
-      if (typeof value !== "string") return undefined;
-      const trimmed = value.trim();
-      return trimmed === "" ? undefined : trimmed;
-    },
-    z.string().regex(PHONE_PATTERN).optional(),
-  ),
+  phone: z.preprocess((value) => {
+    if (typeof value !== "string") return undefined;
+    const trimmed = value.trim();
+    return trimmed === "" ? undefined : trimmed;
+  }, z.string().regex(PHONE_PATTERN).optional()),
 });
 
 export type SubscribeInput = z.output<typeof subscribeSchema>;

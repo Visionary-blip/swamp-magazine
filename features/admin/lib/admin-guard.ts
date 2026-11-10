@@ -10,8 +10,7 @@ import { adminRoutes } from "./admin-routes";
 export type AdminIdentity = { email: string };
 
 export type AdminAccess =
-  | { status: "ok"; email: string }
-  | { status: "denied"; reason: AdminDenial };
+  { status: "ok"; email: string } | { status: "denied"; reason: AdminDenial };
 
 /**
  * The real guard. The proxy only refreshes the session and bounces obvious

@@ -54,7 +54,9 @@ export function OrderCard({ order }: { order: AdminOrder }) {
       {open ? (
         <div className="flex flex-col gap-5 border-t-2 border-current p-4">
           <div className="flex flex-col gap-2">
-            <p className="font-display text-lg leading-none">WHAT THEY BOUGHT</p>
+            <p className="font-display text-lg leading-none">
+              WHAT THEY BOUGHT
+            </p>
             {order.items.length === 0 ? (
               <p className="font-body text-[10px] tracking-widest opacity-70">
                 NO LINES ON THIS ORDER
@@ -69,7 +71,9 @@ export function OrderCard({ order }: { order: AdminOrder }) {
                     <span>
                       {item.quantity} &times; {item.productName} ({item.size})
                     </span>
-                    <span>{formatUsd(item.unitPriceCents * item.quantity)}</span>
+                    <span>
+                      {formatUsd(item.unitPriceCents * item.quantity)}
+                    </span>
                   </li>
                 ))}
               </ul>

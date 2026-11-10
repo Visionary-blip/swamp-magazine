@@ -27,12 +27,23 @@ const MODEL_FIT: Record<string, ModelFit[]> = {
     { name: "ANANYA", height: `5'7"`, size: "L" },
     { name: "JESSICA", height: `5'6"`, size: "M" },
   ],
-  // Z's size in this piece is still to come; the bracket shows until it is given.
   "lurker-longsleeve": [
     { name: "YLVA", height: `5'5"`, size: "L" },
-    { name: "Z", height: `6'2"`, size: "[SIZE]" },
+    { name: "Z", height: `6'2"`, size: "L" },
   ],
 };
+
+// The SIZING button is half as wide as the credits above it, so a short credit
+// makes a narrow button. A product listed here keeps the width its credits had
+// before they were shortened (Joe's was "JOE (BEHIND)", 177px). Literal class
+// names, so Tailwind can see them.
+const CREDITS_MIN_WIDTH: Record<string, string> = {
+  "lurker-tee": "md:min-w-[177px]",
+};
+
+export function getCreditsMinWidth(slug: string): string {
+  return CREDITS_MIN_WIDTH[slug] ?? "";
+}
 
 // A model's fit by the name as written in the credit line ("JESSICA" for
 // "JESSICA (R)"). A model with no entry yet gets the bracketed stand-ins under

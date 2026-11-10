@@ -88,7 +88,9 @@ export async function getSubscriberList(): Promise<SubscriberList> {
  * `null` means the read failed, which the route surfaces as an error rather
  * than handing the founder a plausible-looking empty file.
  */
-export async function getSubscribersForExport(): Promise<SubscriberCsvRow[] | null> {
+export async function getSubscribersForExport(): Promise<
+  SubscriberCsvRow[] | null
+> {
   try {
     const supabase = createAdminClient();
     const { data, error } = await supabase

@@ -10,8 +10,7 @@
 export function formatUsd(cents: number): string {
   const negative = cents < 0;
   const abs = Math.abs(cents);
-  const body =
-    abs % 100 === 0 ? `$${abs / 100}` : `$${(abs / 100).toFixed(2)}`;
+  const body = abs % 100 === 0 ? `$${abs / 100}` : `$${(abs / 100).toFixed(2)}`;
   return negative ? `-${body}` : body;
 }
 

@@ -181,7 +181,10 @@ export function SiteModeControls({
             onClick={() => {
               const iso = toIso(dropAtInput.current?.value ?? "");
               if (!iso) {
-                setFeedback({ tone: "bad", text: "PICK A DATE AND TIME FIRST" });
+                setFeedback({
+                  tone: "bad",
+                  text: "PICK A DATE AND TIME FIRST",
+                });
                 return;
               }
               run(() => setDropAt(iso), "DROP TIME SAVED");

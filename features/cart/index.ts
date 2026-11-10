@@ -1,3 +1,4 @@
+export { BotchedDialog } from "./components/botched-dialog/botched-dialog";
 export { CartCorner } from "./components/cart-corner/cart-corner";
 export {
   CartProvider,

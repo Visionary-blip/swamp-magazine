@@ -1,5 +1,8 @@
 import { adminRoutes } from "../../lib/admin-routes";
-import { getSubscriberList, type SubscriberRecord } from "../../lib/subscribers";
+import {
+  getSubscriberList,
+  type SubscriberRecord,
+} from "../../lib/subscribers";
 
 export async function AdminSubscribersScreen() {
   const list = await getSubscriberList();

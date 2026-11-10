@@ -24,7 +24,9 @@ export function AdminSignInScreen({ denied }: AdminSignInScreenProps) {
   return (
     <main className="flex min-h-dvh flex-col items-center justify-center gap-8 bg-cream px-4 py-16 text-brand-red">
       <header className="flex flex-col items-center gap-1 text-center">
-        <p className="font-body text-[10px] tracking-[0.35em]">SWAMP MAGAZINE</p>
+        <p className="font-body text-[10px] tracking-[0.35em]">
+          SWAMP MAGAZINE
+        </p>
         <h1 className="font-display text-[clamp(2.5rem,12vw,5rem)] leading-[0.95]">
           ADMIN
         </h1>

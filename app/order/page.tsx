@@ -33,7 +33,9 @@ export default async function OrderPage({ searchParams }: OrderPageProps) {
 
   const stripe = getStripe();
   if (!stripe) {
-    console.error("[ORDER] Stripe is not configured -- cannot confirm a session");
+    console.error(
+      "[ORDER] Stripe is not configured -- cannot confirm a session",
+    );
     redirect("/");
   }
 

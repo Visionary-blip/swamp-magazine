@@ -66,7 +66,7 @@ const CATALOG: SeedProduct[] = [
     name: "Lurker Tee",
     priceCents: 2500,
     sizes: ["XS", "S", "M", "L", "XL"],
-    modelCredits: "JOE (BEHIND)",
+    modelCredits: "JOE",
     cutoutFile: "swamp-images/LURKER GRID - AUG 9.png",
     sortOrder: 3,
   },

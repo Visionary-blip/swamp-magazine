@@ -8,7 +8,8 @@ import { catalogFailureText } from "../product-editor/product-editor";
 
 const fieldClasses =
   "w-full border-2 border-current bg-transparent px-3 py-3 font-body text-base outline-none";
-const labelClasses = "flex flex-col gap-1 font-body text-[10px] tracking-widest";
+const labelClasses =
+  "flex flex-col gap-1 font-body text-[10px] tracking-widest";
 
 type Feedback = { tone: "ok" | "bad"; text: string } | null;
 

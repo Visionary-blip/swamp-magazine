@@ -5,6 +5,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+import {
+  BOTCHED_SIZE,
+  botchedSize,
+  parseBotchedSize,
+  sizeMatches,
+} from "@/lib/checkout/botched";
 import { formatUsd } from "@/lib/money";
 import { cn } from "@/lib/utils";
 
@@ -14,6 +20,7 @@ import {
   sortSizes,
   type CartItem,
 } from "../../lib/cart";
+import { BotchedDialog } from "../botched-dialog/botched-dialog";
 import { useCart } from "../cart-provider/cart-provider";
 
 // The cart, drawn as what is in it: a small cutout per garment, in the order
@@ -96,6 +103,9 @@ function CartThumb({ item, fixed }: { item: CartItem; fixed: boolean }) {
   const router = useRouter();
   const { removeItem, changeSize } = useCart();
   const [menuOpen, setMenuOpen] = useState(false);
+  // Switching to B asks for a height and how botched, in the same pop-up the
+  // product page uses.
+  const [botchedOpen, setBotchedOpen] = useState(false);
   // Touch only: a tap opens the controls. On a pointer that can hover they show
   // on hover or focus instead, and a click goes to the cart page.
   const [tapped, setTapped] = useState(false);
@@ -208,7 +218,8 @@ function CartThumb({ item, fixed }: { item: CartItem; fixed: boolean }) {
             aria-label={`Size ${item.size}. ${canChange ? "Change size" : "Only size"}`}
             className="flex size-6 items-center justify-center rounded-full border border-brand-red/70 bg-ink/80 font-display text-xs leading-none text-brand-red uppercase transition-colors duration-200 hover:text-brand-yellow hover:border-brand-yellow focus-visible:text-brand-yellow focus-visible:border-brand-yellow focus-visible:outline-none disabled:cursor-default disabled:hover:text-brand-red disabled:hover:border-brand-red/70 pointer-coarse:size-10 pointer-coarse:text-sm"
           >
-            {item.size}
+            {/* A Botched size carries a height; the bubble only has room for the B. */}
+            {parseBotchedSize(item.size) ? BOTCHED_SIZE : item.size}
           </button>
           {menuOpen ? (
             // The padding is the gap between the button and the row, kept
@@ -219,36 +230,37 @@ function CartThumb({ item, fixed }: { item: CartItem; fixed: boolean }) {
                 aria-label="Choose a size"
                 className="flex flex-row overflow-hidden rounded-2xl border border-brand-red/70 bg-ink/95"
               >
-                {sizes.map((option) => (
-                  <li
-                    key={option.size}
-                    role="option"
-                    aria-selected={option.size === item.size}
-                  >
-                    <button
-                      type="button"
-                      disabled={option.soldOut && option.size !== item.size}
-                      onClick={() => {
-                        changeSize(item.slug, item.size, option.size);
-                        setMenuOpen(false);
-                      }}
-                      className={cn(
-                        "block w-full px-3 py-1 text-center font-display text-xs leading-none uppercase transition-colors duration-200 hover:text-brand-yellow focus-visible:text-brand-yellow focus-visible:outline-none pointer-coarse:min-w-11 pointer-coarse:py-3 pointer-coarse:text-sm",
-                        option.size === item.size
-                          ? "text-brand-yellow"
-                          : "text-brand-red",
-                        option.soldOut &&
-                          option.size !== item.size &&
-                          "cursor-not-allowed line-through opacity-40 hover:text-brand-red",
-                      )}
-                    >
-                      {option.size}
-                      {option.soldOut && option.size !== item.size ? (
-                        <span className="sr-only"> sold out</span>
-                      ) : null}
-                    </button>
-                  </li>
-                ))}
+                {sizes.map((option) => {
+                  const current = sizeMatches(option.size, item.size);
+                  return (
+                    <li key={option.size} role="option" aria-selected={current}>
+                      <button
+                        type="button"
+                        disabled={option.soldOut && !current}
+                        onClick={() => {
+                          setMenuOpen(false);
+                          if (option.size === BOTCHED_SIZE) {
+                            setBotchedOpen(true);
+                            return;
+                          }
+                          changeSize(item.slug, item.size, option.size);
+                        }}
+                        className={cn(
+                          "block w-full px-3 py-1 text-center font-display text-xs leading-none uppercase transition-colors duration-200 hover:text-brand-yellow focus-visible:text-brand-yellow focus-visible:outline-none pointer-coarse:min-w-11 pointer-coarse:py-3 pointer-coarse:text-sm",
+                          current ? "text-brand-yellow" : "text-brand-red",
+                          option.soldOut &&
+                            !current &&
+                            "cursor-not-allowed line-through opacity-40 hover:text-brand-red",
+                        )}
+                      >
+                        {option.size}
+                        {option.soldOut && !current ? (
+                          <span className="sr-only"> sold out</span>
+                        ) : null}
+                      </button>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ) : null}
@@ -275,6 +287,16 @@ function CartThumb({ item, fixed }: { item: CartItem; fixed: boolean }) {
           </svg>
         </button>
       </div>
+      {botchedOpen ? (
+        <BotchedDialog
+          initial={parseBotchedSize(item.size)}
+          onDone={(fit) => {
+            setBotchedOpen(false);
+            changeSize(item.slug, item.size, botchedSize(fit));
+          }}
+          onCancel={() => setBotchedOpen(false)}
+        />
+      ) : null}
     </li>
   );
 }

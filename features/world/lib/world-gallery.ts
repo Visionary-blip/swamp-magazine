@@ -16,7 +16,7 @@ function shots(from: number, to: number): { src: string; alt: string }[] {
 
 export const worldGallery: readonly WorldGallerySection[] = [
   // The pile-of-clothes shoot.
-  { heading: "DREGS", images: shots(1, 10) },
+  { heading: "DREGS S/S 24", images: shots(1, 10) },
   // The pink-and-maroon shirt shoot, then the stoop and couch shoot.
-  { heading: "THE STANDARD ISSUE", images: shots(11, 27) },
+  { heading: "STANDARD ISSUE S/S 25", images: shots(11, 27) },
 ];

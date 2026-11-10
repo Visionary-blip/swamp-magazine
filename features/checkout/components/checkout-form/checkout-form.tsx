@@ -5,8 +5,16 @@ import { useState, useTransition, type FormEvent, type ReactNode } from "react";
 
 import { createCheckoutSession } from "@/actions/create-checkout-session";
 import { dials } from "@/config/dials";
-import { useCart, type CartItem } from "@/features/cart";
+import { BotchedDialog, useCart, type CartItem } from "@/features/cart";
 import { useProductOverlay } from "@/features/transition";
+import {
+  botchedBaseSize,
+  BOTCHED_SIZE,
+  BOTCHED_LEVEL_LABELS,
+  botchedSize,
+  type BotchedFit,
+  parseBotchedSize,
+} from "@/lib/checkout/botched";
 import { cn } from "@/lib/utils";
 
 import type { LedgerLine } from "../order-ledger/order-ledger";
@@ -61,6 +69,10 @@ export function CheckoutForm({
   // follows the customer from product page to product page.
   const { delivery, setDelivery } = cart;
   const [size, setSize] = useState<string | null>(null);
+  // What a Botched garment is cut to (height and how botched); null until the
+  // pop-up has been answered.
+  const [fit, setFit] = useState<BotchedFit | null>(null);
+  const [botchedOpen, setBotchedOpen] = useState(false);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [orderId, setOrderId] = useState<string | null>(null);
   const [errorReason, setErrorReason] = useState<OrderErrorReason | null>(null);
@@ -80,18 +92,31 @@ export function CheckoutForm({
   const [exModelPlaced, setExModelPlaced] = useState(false);
   const exModelUsed = useExModelUsed();
 
-  const sizes = variants.map((variant) => ({
+  const plainSizes = variants.map((variant) => ({
     size: variant.size,
     soldOut: variant.soldOut || refusedSizes.includes(variant.size),
   }));
+  // B (Botched) is the XL with ripped hems (the largest size where there is no
+  // XL), so it is offered on every garment and is sold out when that size is.
+  const baseSizeName = botchedBaseSize(plainSizes.map((option) => option.size));
+  const baseSize = plainSizes.find((option) => option.size === baseSizeName);
+  const sizes = baseSize
+    ? [...plainSizes, { size: BOTCHED_SIZE, soldOut: baseSize.soldOut }]
+    : plainSizes;
+  // The size that goes on the order line: a Botched one carries the fit, and
+  // there is none until the pop-up has been answered.
+  const orderSize =
+    size === BOTCHED_SIZE ? (fit ? botchedSize(fit) : null) : size;
   const deliveryChosen = cart.items.length > 0 || deliveryPicked;
-  const allGone = sizes.length === 0 || sizes.every((option) => option.soldOut);
+  const allGone =
+    plainSizes.length === 0 || plainSizes.every((option) => option.soldOut);
 
   // What would be ordered right now: the cart, plus the size picked here.
-  const selected: CartItem | null = size
+  const selected: CartItem | null = orderSize
     ? {
         slug,
-        size,
+        size: orderSize,
+        // B stays on the list, so the cart can switch to it and back.
         sizes,
         quantity: 1,
         name,
@@ -135,6 +160,7 @@ export function CheckoutForm({
     if (!selected || isPending) return;
     cart.addItem(selected);
     setSize(null);
+    setFit(null);
     // In the landing's overlay "back to the grid" is closing the overlay.
     if (overlay) overlay.close();
     else router.push("/#products");
@@ -164,8 +190,12 @@ export function CheckoutForm({
       if (result.reason === "sold-out") {
         const gone = result.item;
         if (gone && gone.slug === slug) {
-          setRefusedSizes((current) => [...current, gone.size]);
-          if (size === gone.size) setSize(null);
+          // A Botched line is cut from the XL, so it is the XL that ran out.
+          const goneVariant = parseBotchedSize(gone.size)
+            ? (baseSizeName ?? gone.size)
+            : gone.size;
+          setRefusedSizes((current) => [...current, goneVariant]);
+          if (orderSize === gone.size || size === goneVariant) setSize(null);
         }
         // Whatever ran out, it cannot stay in the cart: leaving it would fail
         // the next attempt the same way.
@@ -202,7 +232,7 @@ export function CheckoutForm({
             than as not open yet. */}
         <h1 className="brat text-brand-red">{name}</h1>
         <ul className="brat flex flex-wrap justify-center gap-x-8 text-brand-red">
-          {sizes.map((option) => (
+          {plainSizes.map((option) => (
             <li
               key={option.size}
               className={option.soldOut ? "line-through opacity-40" : ""}
@@ -318,7 +348,11 @@ export function CheckoutForm({
                 value={option.size}
                 checked={size === option.size}
                 disabled={option.soldOut}
-                onChange={() => setSize(option.size)}
+                onChange={() => {
+                  setSize(option.size);
+                  // B opens its pop-up (what it means, and the height wheels).
+                  if (option.size === BOTCHED_SIZE) setBotchedOpen(true);
+                }}
                 // A radio cannot be unchecked by clicking it (no change event
                 // fires), so the size picked is toggled off here instead; Space
                 // does the same from the keyboard.
@@ -345,6 +379,37 @@ export function CheckoutForm({
           ))}
         </div>
       </fieldset>
+
+      {size === BOTCHED_SIZE ? (
+        <>
+          {/* Once the height is in, it stays on show and reopens the pop-up. */}
+          {orderSize && fit ? (
+            <button
+              type="button"
+              onClick={() => setBotchedOpen(true)}
+              disabled={isPending}
+              className="brat cursor-pointer px-1 py-2 text-brand-red transition-colors duration-200 hover:text-brand-yellow focus-visible:underline focus-visible:underline-offset-8 disabled:cursor-not-allowed disabled:opacity-40 max-md:w-full max-md:border-y max-md:border-brand-red/40 max-md:bg-ink/55 max-md:py-4"
+            >
+              {fit.feet} FT {fit.inches} IN ·{" "}
+              {BOTCHED_LEVEL_LABELS[fit.level - 1]}
+            </button>
+          ) : null}
+          {botchedOpen ? (
+            <BotchedDialog
+              initial={fit}
+              onDone={(picked) => {
+                setFit(picked);
+                setBotchedOpen(false);
+              }}
+              onCancel={() => {
+                setBotchedOpen(false);
+                // No height given, so B comes back off.
+                if (!orderSize) setSize(null);
+              }}
+            />
+          ) : null}
+        </>
+      ) : null}
 
       {/* With a cart, delivery is one choice for the whole order and is made on
           the cart page; asking again on every garment's page is a step the

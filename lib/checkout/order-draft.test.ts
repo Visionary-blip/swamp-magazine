@@ -248,3 +248,67 @@ describe("resolveOrderDraft code add-ons", () => {
     expect(result).toMatchObject({ status: "error", reason: "not-found" });
   });
 });
+
+describe("resolveOrderDraft botched sizes", () => {
+  const tee = product({
+    product_variants: [
+      { id: "var-s", size: "S", inventory_count: 5 },
+      { id: "var-xl", size: "XL", inventory_count: 2 },
+    ],
+  });
+
+  it("cuts a Botched line from the XL and keeps the height on the line", () => {
+    const result = resolveOrderDraft(
+      [tee],
+      [line("vamp-tee", `B 5'7" (2/3)`)],
+      "pickup",
+    );
+    expect(result.status).toBe("success");
+    if (result.status !== "success") return;
+    expect(result.draft.lines[0]).toMatchObject({
+      variantId: "var-xl",
+      size: `B 5'7" (2/3)`,
+      unitPriceCents: 2000,
+    });
+  });
+
+  it("counts Botched and plain XL lines against the same stock", () => {
+    const result = resolveOrderDraft(
+      [tee],
+      [
+        line("vamp-tee", `B 5'7" (2/3)`, 1),
+        line("vamp-tee", `B 6'1" (3/3)`, 1),
+        line("vamp-tee", "XL", 1),
+      ],
+      "pickup",
+    );
+    expect(result).toMatchObject({ status: "error", reason: "sold-out" });
+  });
+
+  it("refuses a bare B", () => {
+    expect(
+      resolveOrderDraft([tee], [line("vamp-tee", "B")], "pickup"),
+    ).toMatchObject({ status: "error", reason: "not-found" });
+  });
+
+  it("cuts a Botched line from the largest size when there is no XL", () => {
+    const stockedShorts = product({
+      id: "prod-2",
+      slug: "star-shorts",
+      name: "Star Shorts",
+      product_variants: [
+        { id: "var-sh-s", size: "S", inventory_count: 4 },
+        { id: "var-sh-l", size: "L", inventory_count: 1 },
+        { id: "var-sh-m", size: "M", inventory_count: 4 },
+      ],
+    });
+    const result = resolveOrderDraft(
+      [stockedShorts],
+      [line("star-shorts", `B 5'7" (1/3)`)],
+      "pickup",
+    );
+    expect(result.status).toBe("success");
+    if (result.status !== "success") return;
+    expect(result.draft.lines[0]).toMatchObject({ variantId: "var-sh-l" });
+  });
+});

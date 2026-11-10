@@ -7,11 +7,18 @@ import { useState, useTransition, type FormEvent } from "react";
 import { createCheckoutSession } from "@/actions/create-checkout-session";
 import { dials } from "@/config/dials";
 import {
+  BotchedDialog,
   cartSubtotalCents,
   sortSizes,
   useCart,
   type CartItem,
 } from "@/features/cart";
+import {
+  BOTCHED_SIZE,
+  botchedSize,
+  parseBotchedSize,
+  sizeMatches,
+} from "@/lib/checkout/botched";
 import { cn } from "@/lib/utils";
 
 import {
@@ -40,6 +47,8 @@ export function CartCheckout() {
   const [errorReason, setErrorReason] = useState<OrderErrorReason | null>(null);
   const [goneLine, setGoneLine] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  // The garment being switched to B, while the pop-up asks how.
+  const [botchedFor, setBotchedFor] = useState<CartItem | null>(null);
 
   const subtotalCents = cartSubtotalCents(items);
   const shippingCents =
@@ -143,16 +152,20 @@ export function CartCheckout() {
                   className="brat flex flex-wrap justify-center gap-x-4"
                 >
                   {sortSizes(item.sizes).map((option) => {
-                    const current = option.size === item.size;
+                    const current = sizeMatches(option.size, item.size);
                     return (
                       <button
                         key={option.size}
                         type="button"
                         aria-pressed={current}
                         disabled={isPending || (option.soldOut && !current)}
-                        onClick={() =>
-                          cart.moveOneToSize(item.slug, item.size, option.size)
-                        }
+                        onClick={() => {
+                          if (option.size === BOTCHED_SIZE) {
+                            setBotchedFor(item);
+                            return;
+                          }
+                          cart.moveOneToSize(item.slug, item.size, option.size);
+                        }}
                         className={cn(
                           "px-0.5 py-1 transition-colors duration-200 focus-visible:underline focus-visible:underline-offset-8 focus-visible:outline-none",
                           current
@@ -195,6 +208,21 @@ export function CartCheckout() {
           )),
         )}
       </ul>
+
+      {botchedFor ? (
+        <BotchedDialog
+          initial={parseBotchedSize(botchedFor.size)}
+          onDone={(fit) => {
+            cart.moveOneToSize(
+              botchedFor.slug,
+              botchedFor.size,
+              botchedSize(fit),
+            );
+            setBotchedFor(null);
+          }}
+          onCancel={() => setBotchedFor(null)}
+        />
+      ) : null}
 
       {!stripePromise || errorReason === "stripe-unconfigured" ? (
         <p className="brat text-center text-brand-red">

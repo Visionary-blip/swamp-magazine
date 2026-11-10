@@ -9,10 +9,13 @@ import { storefrontCopy } from "../../lib/storefront-copy";
 import { CatalogIndex } from "../catalog-index/catalog-index";
 import { FeedPager } from "../feed-pager/feed-pager";
 import { GlideLink } from "../glide-link/glide-link";
+import { HeroMascot } from "../hero-mascot/hero-mascot";
+import { HeroWordmark } from "../hero-wordmark/hero-wordmark";
 import { ProductScreen } from "../product-screen/product-screen";
 import { Reveal } from "../reveal/reveal";
 import { ScrollCue } from "../scroll-cue/scroll-cue";
 import { SiteFooter } from "../site-footer/site-footer";
+import { ThemeSwitch } from "../theme-switch/theme-switch";
 
 // Direction A ("Feature Presentation"), picked by Zach 2026-09-08: the store as
 // an A24 film page. The first screen is the photograph edge to edge and the
@@ -52,6 +55,7 @@ export async function LiveLandingScreen() {
     <main className="group/landing bg-ink max-md:fixed max-md:inset-0 max-md:overflow-hidden max-md:data-[view=grid]:overflow-y-auto">
       <FeedPager count={products.length} />
       <CartCorner placement="fixed" />
+      <ThemeSwitch />
       <ProductOverlay panels={panels} />
       {/* The phone's all-products grid sits on a photograph, fixed behind the
           scrolling tiles under a scrim so the red type reads. */}
@@ -101,40 +105,24 @@ export async function LiveLandingScreen() {
               where the star used to, at the top of the frame. The three
               pieces of front-of-house are each a link to the grid and go
               yellow together; a click lands on the products. */}
-            <h1 className="w-full text-center font-display text-[14vw] leading-none whitespace-nowrap">
-              <GlideLink href="#products" className={hoverYellow}>
-                {storefrontCopy.wordmark}
-              </GlideLink>
-            </h1>
+            <HeroWordmark className={hoverYellow} />
             {/* Goblin line-art is a founder upload (landing_mascot, P4). Until
               it exists the slot stays honestly empty -- never faked. It is the
               upload used as a mask over a filled box, so "yellow" is the brand
               token recolouring the drawing rather than a filter guessing at it;
               the image goes through Next's own optimiser URL so the mask loads
               same-origin (a mask from another origin needs CORS headers). */}
-            {imagery.mascot && (
-              <GlideLink
-                href="#products"
-                role="img"
-                aria-label={imagery.mascot.alt || "Shop the products"}
-                className={`block aspect-square w-[34vw] max-w-52 ${hoverYellow}`}
-              >
-                <span
-                  aria-hidden
-                  className="block size-full bg-current"
-                  style={{
-                    maskImage: `url(${optimizedUrl(imagery.mascot.url, 640)})`,
-                    WebkitMaskImage: `url(${optimizedUrl(imagery.mascot.url, 640)})`,
-                    maskSize: "contain",
-                    WebkitMaskSize: "contain",
-                    maskRepeat: "no-repeat",
-                    WebkitMaskRepeat: "no-repeat",
-                    maskPosition: "center",
-                    WebkitMaskPosition: "center",
-                  }}
-                />
-              </GlideLink>
-            )}
+            <HeroMascot
+              fisher={
+                imagery.mascot
+                  ? {
+                      maskUrl: optimizedUrl(imagery.mascot.url, 640),
+                      alt: imagery.mascot.alt,
+                    }
+                  : null
+              }
+              className={hoverYellow}
+            />
             <p className="font-body text-[16.5px] font-semibold tracking-[0.4em] md:text-lg">
               <GlideLink href="#products" className={hoverYellow}>
                 {storefrontCopy.byline}

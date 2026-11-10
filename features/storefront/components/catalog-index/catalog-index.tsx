@@ -5,6 +5,7 @@ import { formatUsd } from "@/lib/money";
 
 import type { CatalogProduct } from "../../lib/catalog";
 import { getProductGallery } from "../../lib/product-gallery";
+import { storefrontCopy } from "../../lib/storefront-copy";
 import { Reveal } from "../reveal/reveal";
 
 // The product grid under the hero (one row of four from md up, two across on a
@@ -21,6 +22,11 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
       id="products"
       className="bg-ink max-md:group-data-[view=grid]/landing:bg-transparent max-md:group-data-[view=grid]/landing:px-2 max-md:group-data-[view=grid]/landing:pt-14 md:px-16 md:py-[88px]"
     >
+      {/* Not on the phone's one-at-a-time feed: a heading there would push the
+          first garment off its screen, so it shows on desktop and in the grid. */}
+      <h2 className="mb-12 hidden text-center font-display text-3xl leading-none tracking-[0.05em] text-brand-red md:block max-md:group-data-[view=grid]/landing:mb-6 max-md:group-data-[view=grid]/landing:block">
+        {storefrontCopy.issueHeading}
+      </h2>
       {/* A phone gets one garment per screen, each a stop in the FeedPager: a
           swipe lands on the next one. From md up it is the four-across grid. */}
       <ul className="grid grid-cols-1 max-md:group-data-[view=grid]/landing:grid-cols-2 max-md:group-data-[view=grid]/landing:gap-y-4 md:grid-cols-4 md:gap-x-8 md:gap-y-16">

@@ -22,49 +22,47 @@ type OgCardProps = {
 // difference nobody sees at thumbnail size.
 export function renderOgCard({ eyebrow, title, footnote }: OgCardProps) {
   return new ImageResponse(
-    (
+    <div
+      style={{
+        alignItems: "center",
+        backgroundColor: CREAM,
+        color: RED,
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        justifyContent: "center",
+        padding: "64px",
+        textAlign: "center",
+        width: "100%",
+      }}
+    >
       <div
         style={{
-          alignItems: "center",
-          backgroundColor: CREAM,
-          color: RED,
+          border: `8px solid ${RED}`,
           display: "flex",
           flexDirection: "column",
+          gap: "24px",
           height: "100%",
           justifyContent: "center",
-          padding: "64px",
-          textAlign: "center",
+          padding: "48px",
           width: "100%",
         }}
       >
+        <div style={{ fontSize: 28, letterSpacing: "0.35em" }}>{eyebrow}</div>
         <div
           style={{
-            border: `8px solid ${RED}`,
-            display: "flex",
-            flexDirection: "column",
-            gap: "24px",
-            height: "100%",
-            justifyContent: "center",
-            padding: "48px",
-            width: "100%",
+            fontSize: title.length > 18 ? 96 : 128,
+            fontWeight: 800,
+            letterSpacing: "-0.02em",
+            lineHeight: 1,
+            textTransform: "uppercase",
           }}
         >
-          <div style={{ fontSize: 28, letterSpacing: "0.35em" }}>{eyebrow}</div>
-          <div
-            style={{
-              fontSize: title.length > 18 ? 96 : 128,
-              fontWeight: 800,
-              letterSpacing: "-0.02em",
-              lineHeight: 1,
-              textTransform: "uppercase",
-            }}
-          >
-            {title}
-          </div>
-          <div style={{ fontSize: 28, letterSpacing: "0.35em" }}>{footnote}</div>
+          {title}
         </div>
+        <div style={{ fontSize: 28, letterSpacing: "0.35em" }}>{footnote}</div>
       </div>
-    ),
+    </div>,
     ogImageSize,
   );
 }

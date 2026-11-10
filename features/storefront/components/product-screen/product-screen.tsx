@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 import type { ProductDetail } from "../../lib/catalog";
 import { parseModelCredits } from "../../lib/model-credits";
-import { getModelFit } from "../../lib/model-fit";
+import { getCreditsMinWidth, getModelFit } from "../../lib/model-fit";
 import { getProductGallery } from "../../lib/product-gallery";
 import { storefrontCopy } from "../../lib/storefront-copy";
 import { ModelFitButton } from "../model-fit/model-fit-button";
@@ -66,7 +66,12 @@ export function ProductScreen({ product }: { product: ProductDetail }) {
             {product.modelCredits ? (
               // `w-fit`, so the ruler bar under the credits is as wide as the
               // longest of them, (L)/(R) included.
-              <div className="flex w-fit flex-col">
+              <div
+                className={cn(
+                  "flex w-fit flex-col",
+                  getCreditsMinWidth(product.slug),
+                )}
+              >
                 <ul className="brat flex flex-col items-end gap-1.5 text-right text-brand-red">
                   {parseModelCredits(product.modelCredits).map((credit) => (
                     <li key={credit.text}>

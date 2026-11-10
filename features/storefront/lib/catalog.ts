@@ -1,3 +1,4 @@
+import { dials } from "@/config/dials";
 import { CODE_ADD_ONS } from "@/lib/checkout/code-add-ons";
 import { createClient } from "@/lib/supabase/server";
 
@@ -100,16 +101,17 @@ export async function getCatalog(): Promise<CatalogProduct[]> {
 export async function getAddOns(): Promise<AddOn[]> {
   const fromDb = await readDatabaseAddOns();
   // The ones that live in code come after, unless a row already covers the slug.
-  const inCode = CODE_ADD_ONS.filter(
-    (addOn) => !fromDb.some((row) => row.slug === addOn.slug),
-  ).map((addOn) => ({
-    slug: addOn.slug,
-    name: addOn.name,
-    priceCents: addOn.priceCents,
-    size: addOn.size,
-    soldOut: false,
-    cutout: addOn.cutout,
-  }));
+  // The lighter is the only one, and it can be switched off (see the dial).
+  const inCode = (dials.lighterVisible ? CODE_ADD_ONS : [])
+    .filter((addOn) => !fromDb.some((row) => row.slug === addOn.slug))
+    .map((addOn) => ({
+      slug: addOn.slug,
+      name: addOn.name,
+      priceCents: addOn.priceCents,
+      size: addOn.size,
+      soldOut: false,
+      cutout: addOn.cutout,
+    }));
   return [...fromDb, ...inCode];
 }
 

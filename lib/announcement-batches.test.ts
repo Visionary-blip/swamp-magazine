@@ -29,9 +29,9 @@ describe("splitIntoBatches", () => {
 
   it("never exceeds the batch size", () => {
     const batches = splitIntoBatches(Array.from({ length: 101 }), 100);
-    expect(Math.max(...batches.map((batch) => batch.length))).toBeLessThanOrEqual(
-      100,
-    );
+    expect(
+      Math.max(...batches.map((batch) => batch.length)),
+    ).toBeLessThanOrEqual(100);
   });
 
   it("refuses a batch size that would mean one unbounded call", () => {

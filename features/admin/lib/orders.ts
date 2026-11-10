@@ -230,7 +230,9 @@ function toShippingAddress(value: unknown): ShippingAddress | null {
     postalCode: str(source.postal_code) ?? str(source.postalCode),
     country: str(source.country),
   };
-  return Object.values(address).some((field) => field !== null) ? address : null;
+  return Object.values(address).some((field) => field !== null)
+    ? address
+    : null;
 }
 
 function str(value: unknown): string | null {

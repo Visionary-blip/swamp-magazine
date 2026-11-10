@@ -4,6 +4,7 @@ import { Anton, Archivo } from "next/font/google";
 import { dials } from "@/config/dials";
 import { AudioPlayer } from "@/features/audio-player";
 import { CartProvider } from "@/features/cart";
+import { themeBootScript } from "@/features/storefront";
 import { PageVeil } from "@/features/transition";
 
 import "./globals.css";
@@ -54,10 +55,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       className={`${anton.variable} ${archivo.variable} h-full antialiased`}
+      // The boot script below may set data-theme before React sees the markup.
+      suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
+      </head>
       <body className="min-h-full bg-cream font-body text-ink">
         <CartProvider>{children}</CartProvider>
-        <AudioPlayer />
+        {dials.musicPlayerVisible ? <AudioPlayer /> : null}
         <PageVeil />
       </body>
     </html>

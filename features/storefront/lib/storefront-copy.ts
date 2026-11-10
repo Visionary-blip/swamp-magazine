@@ -8,8 +8,12 @@
 export const storefrontCopy = {
   /** LIFTED -- the masthead, verbatim off every mockup. */
   wordmark: "SWAMP MAGAZINE",
+  /** The wordmark under the National Issue theme. */
+  nationalWordmark: "NATIONAL ISSUE",
   /** LIFTED -- the byline under it, verbatim. */
   byline: "FROM LALO FARRO",
+  /** The founder's: the line above the product grid (the issue on sale). */
+  issueHeading: "FIRST ISSUE F/W 25",
   /** LIFTED -- his own name for the drop; already shipped on coming-soon. */
   issue: "THE NATIONAL ISSUE",
   /**

@@ -4,6 +4,7 @@ import type {
 } from "@/actions/create-checkout-session";
 import { dials } from "@/config/dials";
 
+import { botchedBaseSize, parseBotchedSize } from "./botched";
 import { findCodeAddOn } from "./code-add-ons";
 
 // The pure half of createCheckoutSession: given rows already read from the DB,
@@ -98,6 +99,10 @@ export function resolveOrderDraft(
   }
 
   const lines: OrderDraftLine[] = [];
+  // Stock already spoken for by earlier lines, per variant: a Botched line is
+  // cut from the XL stock, so it and a plain XL line (or two Botched lines at
+  // different heights) share one count.
+  const claimed = new Map<string, number>();
   let hasGarment = false;
   for (const line of merged.values()) {
     const product = products.find((row) => row.slug === line.slug);
@@ -128,14 +133,20 @@ export function resolveOrderDraft(
       return { status: "error", reason: "not-found" };
     }
 
+    // A Botched size is not a variant of its own: it is cut from the XL (or the
+    // garment's largest size when it has no XL).
+    const wantedSize = parseBotchedSize(line.size)
+      ? botchedBaseSize(product.product_variants.map((row) => row.size))
+      : line.size;
     const variant = product.product_variants.find(
-      (row) => row.size === line.size,
+      (row) => row.size === wantedSize,
     );
     if (!variant) {
       return { status: "error", reason: "not-found" };
     }
 
-    if (variant.inventory_count < line.quantity) {
+    const taken = claimed.get(variant.id) ?? 0;
+    if (variant.inventory_count - taken < line.quantity) {
       return {
         status: "error",
         reason: "sold-out",
@@ -143,13 +154,15 @@ export function resolveOrderDraft(
       };
     }
 
+    claimed.set(variant.id, taken + line.quantity);
     if (!product.is_add_on) hasGarment = true;
 
     lines.push({
       productId: product.id,
       variantId: variant.id,
       productName: product.name,
-      size: variant.size,
+      // The line keeps what was asked for, so a Botched order carries its height.
+      size: line.size,
       unitPriceCents: product.price_cents,
       quantity: line.quantity,
     });

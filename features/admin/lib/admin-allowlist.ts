@@ -11,7 +11,9 @@ export type AdminDenial = "signed-out" | "no-allowlist" | "not-allowed";
  * admitting everyone, and an address that is merely authenticated is still
  * nobody. Returns `null` when the caller is allowed.
  */
-export function denyAdminEmail(email: string | null | undefined): AdminDenial | null {
+export function denyAdminEmail(
+  email: string | null | undefined,
+): AdminDenial | null {
   const allowlist = serverEnv.adminEmails;
 
   if (!hasAdminAllowlist()) return "no-allowlist";

@@ -1,8 +1,15 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-import { adminRoutes, isPublicAdminPath } from "@/features/admin/lib/admin-routes";
+import {
+  adminRoutes,
+  isPublicAdminPath,
+} from "@/features/admin/lib/admin-routes";
 import { clientEnv } from "@/lib/env/client";
+
+function isSupabaseCookie({ name }: { name: string }) {
+  return name.startsWith("sb-");
+}
 
 // Session refresh for the /admin tree. Supabase access tokens expire in an
 // hour; without this the founder gets silently logged out mid-task because a
@@ -12,6 +19,16 @@ import { clientEnv } from "@/lib/env/client";
 // lives server-side in the guarded layout -- a proxy that also authorized
 // would be the single point of failure the PLAN warns about.
 export async function updateAdminSession(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const inAdmin = pathname === "/admin" || pathname.startsWith("/admin/");
+
+  // Off /admin the only point is keeping a signed-in admin's session fresh while
+  // they preview the closed storefront; a visitor with no Supabase session
+  // cookie has nothing to refresh and costs no round trip.
+  if (!inAdmin && !request.cookies.getAll().some(isSupabaseCookie)) {
+    return NextResponse.next({ request });
+  }
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -48,7 +65,7 @@ export async function updateAdminSession(request: NextRequest) {
   }
 
   const signedIn = Boolean(data?.claims);
-  if (!signedIn && !isPublicAdminPath(request.nextUrl.pathname)) {
+  if (inAdmin && !signedIn && !isPublicAdminPath(pathname)) {
     const target = request.nextUrl.clone();
     target.pathname = adminRoutes.signIn;
     target.search = "";

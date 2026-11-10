@@ -10,7 +10,12 @@ import { adminRoutes } from "../../lib/admin-routes";
 // `false` here and shows as SOON rather than 404-ing an unlabelled link.
 const NAV_ITEMS = [
   { href: adminRoutes.dashboard, label: "SITE", ready: true, exact: true },
-  { href: adminRoutes.subscribers, label: "SUBSCRIBERS", ready: true, exact: false },
+  {
+    href: adminRoutes.subscribers,
+    label: "SUBSCRIBERS",
+    ready: true,
+    exact: false,
+  },
   { href: adminRoutes.products, label: "PRODUCTS", ready: true, exact: false },
   { href: adminRoutes.slots, label: "IMAGES", ready: true, exact: false },
   { href: adminRoutes.orders, label: "ORDERS", ready: true, exact: false },

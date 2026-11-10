@@ -9,9 +9,9 @@ const DAY = 24 * HOUR;
 
 describe("splitRemaining", () => {
   it("splits a span into whole days, hours, minutes and seconds", () => {
-    expect(splitRemaining(2 * DAY + 3 * HOUR + 4 * MINUTE + 5 * SECOND)).toEqual(
-      { days: 2, hours: 3, minutes: 4, seconds: 5, done: false },
-    );
+    expect(
+      splitRemaining(2 * DAY + 3 * HOUR + 4 * MINUTE + 5 * SECOND),
+    ).toEqual({ days: 2, hours: 3, minutes: 4, seconds: 5, done: false });
   });
 
   it("drops sub-second remainder instead of rounding up", () => {

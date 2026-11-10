@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
+import { getStorefrontMode } from "@/features/admin";
 import { AddOnsScreen } from "@/features/checkout";
 import { getAddOns } from "@/features/storefront";
 import { isAtOrderCapacity } from "@/lib/order-capacity.server";
-import { getSiteMode } from "@/lib/site-mode.server";
 
 // Same gate as the cart page: an unreleased drop must not be reachable.
 export const dynamic = "force-dynamic";
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AddOnsPage() {
-  const mode = await getSiteMode();
+  const mode = await getStorefrontMode();
   if (mode !== "live" || (await isAtOrderCapacity())) redirect("/");
   const addOns = await getAddOns();
   // Nothing to offer means the step does not exist: straight on to the cart.
