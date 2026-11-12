@@ -15,7 +15,6 @@ import { ProductScreen } from "../product-screen/product-screen";
 import { Reveal } from "../reveal/reveal";
 import { ScrollCue } from "../scroll-cue/scroll-cue";
 import { SiteFooter } from "../site-footer/site-footer";
-import { ThemeSwitch } from "../theme-switch/theme-switch";
 
 // Direction A ("Feature Presentation"), picked by Zach 2026-09-08: the store as
 // an A24 film page. The first screen is the photograph edge to edge and the
@@ -55,7 +54,6 @@ export async function LiveLandingScreen() {
     <main className="group/landing bg-ink max-md:fixed max-md:inset-0 max-md:overflow-hidden max-md:data-[view=grid]:overflow-y-auto">
       <FeedPager count={products.length} />
       <CartCorner placement="fixed" />
-      <ThemeSwitch />
       <ProductOverlay panels={panels} />
       {/* The phone's all-products grid sits on a photograph, fixed behind the
           scrolling tiles under a scrim so the red type reads. */}

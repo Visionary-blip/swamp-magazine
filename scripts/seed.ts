@@ -84,6 +84,20 @@ const CATALOG: SeedProduct[] = [
     cutoutFile: "swamp-images/Lurker lonsleeve.png",
     sortOrder: 4,
   },
+  // The National Issue's FC shirt, added 2026-11-11 from the founder's photo. The
+  // sizes are the lurker tee's; "MODEL 1" / "MODEL 2" are his stand-ins for the
+  // credits, and the $25 price and the stock are PLACEHOLDERS -- his to set in the
+  // admin. The storefront shows it in its own row above the first issue (see
+  // features/storefront/lib/issues.ts).
+  {
+    slug: "fc-shirt",
+    name: "FC Shirt",
+    priceCents: 2500,
+    sizes: ["XS", "S", "M", "L", "XL"],
+    modelCredits: "MODEL 1, MODEL 2",
+    cutoutFile: "swamp-images/FC SHIRT GRID.webp",
+    sortOrder: 5,
+  },
 ];
 
 // Product backgrounds. star-shorts is deliberately absent: its slot is already

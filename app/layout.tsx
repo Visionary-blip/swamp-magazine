@@ -4,7 +4,7 @@ import { Anton, Archivo } from "next/font/google";
 import { dials } from "@/config/dials";
 import { AudioPlayer } from "@/features/audio-player";
 import { CartProvider } from "@/features/cart";
-import { themeBootScript } from "@/features/storefront";
+import { ThemeSwitch, themeBootScript } from "@/features/storefront";
 import { PageVeil } from "@/features/transition";
 
 import "./globals.css";
@@ -64,6 +64,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full bg-cream font-body text-ink">
         <CartProvider>{children}</CartProvider>
         {dials.musicPlayerVisible ? <AudioPlayer /> : null}
+        <ThemeSwitch />
         <PageVeil />
       </body>
     </html>
