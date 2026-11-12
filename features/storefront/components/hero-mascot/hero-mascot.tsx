@@ -13,7 +13,7 @@ const FLAG_BEARER_URL = "/world/flag-bearer.webp";
 const THREE_CROCS_URL = "/world/three-crocs.webp";
 const NATIONAL_MASCOTS = [FLAG_BEARER_URL, THREE_CROCS_URL];
 // How long each National Issue mascot stays up before the next one takes over.
-const MASCOT_SWAP_MS = 5000;
+const MASCOT_SWAP_MS = 3000;
 
 // The landing's mascot: the fisher (the founder's upload, passed in as a mask
 // URL) or, under the National Issue theme, the flag bearer. The same square box,
