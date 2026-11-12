@@ -26,7 +26,7 @@ const NATIONAL_MASCOTS = [
   { url: SHIELD_URL, scale: 1.24 },
 ];
 // How long each National Issue mascot stays up before the next one takes over.
-const MASCOT_SWAP_MS = 3000;
+const MASCOT_SWAP_MS = 2000;
 
 // The landing's mascot: the fisher (the founder's upload, passed in as a mask
 // URL) or, under the National Issue theme, the flag bearer. The same square box,
