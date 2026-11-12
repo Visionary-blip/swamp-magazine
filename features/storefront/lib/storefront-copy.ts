@@ -10,6 +10,8 @@ export const storefrontCopy = {
   wordmark: "SWAMP MAGAZINE",
   /** The wordmark under the National Issue theme. */
   nationalWordmark: "NATIONAL ISSUE",
+  // Stands where the wordmark does beside the theme switch once it is on.
+  nationalSwitchMark: "V",
   /** LIFTED -- the byline under it, verbatim. */
   byline: "FROM LALO FARRO",
   /** The founder's: the line above the product grid (the issue on sale). */
