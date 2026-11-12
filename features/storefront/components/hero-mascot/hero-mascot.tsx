@@ -11,7 +11,15 @@ import { GlideLink } from "../glide-link/glide-link";
 const FLAG_BEARER_URL = "/world/flag-bearer.webp";
 // The three crocs, the National Issue's second mascot, made as a mask the same way.
 const THREE_CROCS_URL = "/world/three-crocs.webp";
-const NATIONAL_MASCOTS = [FLAG_BEARER_URL, THREE_CROCS_URL];
+// The dog and the shield, likewise masks of the founder's drawings.
+const DOG_URL = "/world/dog.webp";
+const SHIELD_URL = "/world/shield.webp";
+const NATIONAL_MASCOTS = [
+  FLAG_BEARER_URL,
+  THREE_CROCS_URL,
+  DOG_URL,
+  SHIELD_URL,
+];
 // How long each National Issue mascot stays up before the next one takes over.
 const MASCOT_SWAP_MS = 3000;
 
