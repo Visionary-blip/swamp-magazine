@@ -22,11 +22,13 @@ const SHIELD_URL = "/world/shield.webp";
 const NATIONAL_MASCOTS = [
   { url: FLAG_BEARER_URL, scale: 1.2 },
   { url: THREE_CROCS_URL, scale: 1.15 },
-  { url: DOG_URL, scale: 1.08 },
+  // Centred on its eye, not its bounds: the eye sits a little above the
+  // middle of the drawing, so `shift` (percent of the box) pulls it to the centre.
+  { url: DOG_URL, scale: 1.08, shift: { x: 2, y: 5 } },
   { url: SHIELD_URL, scale: 1.24 },
 ];
 // How long each National Issue mascot stays up before the next one takes over.
-const MASCOT_SWAP_MS = 2000;
+const MASCOT_SWAP_MS = 1500;
 
 // The landing's mascot: the fisher (the founder's upload, passed in as a mask
 // URL) or, under the National Issue theme, the flag bearer. The same square box,
@@ -72,7 +74,9 @@ export function HeroMascot({
         aria-hidden
         className="block size-full bg-current"
         style={{
-          transform: mascot ? `scale(${mascot.scale})` : undefined,
+          transform: mascot
+            ? `translate(${mascot.shift?.x ?? 0}%, ${mascot.shift?.y ?? 0}%) scale(${mascot.scale})`
+            : undefined,
           maskImage: `url(${maskUrl})`,
           WebkitMaskImage: `url(${maskUrl})`,
           maskSize: "contain",
