@@ -14,11 +14,16 @@ const THREE_CROCS_URL = "/world/three-crocs.webp";
 // The dog and the shield, likewise masks of the founder's drawings.
 const DOG_URL = "/world/dog.webp";
 const SHIELD_URL = "/world/shield.webp";
+
+// Each drawing is tall and narrow beside the fisher, which fills its square, so at
+// the same box they read smaller. `scale` grows each until its drawn area (box
+// width x height) matches the fisher's; measured from the alpha bounds of the
+// masks, not by eye.
 const NATIONAL_MASCOTS = [
-  FLAG_BEARER_URL,
-  THREE_CROCS_URL,
-  DOG_URL,
-  SHIELD_URL,
+  { url: FLAG_BEARER_URL, scale: 1.2 },
+  { url: THREE_CROCS_URL, scale: 1.15 },
+  { url: DOG_URL, scale: 1.08 },
+  { url: SHIELD_URL, scale: 1.24 },
 ];
 // How long each National Issue mascot stays up before the next one takes over.
 const MASCOT_SWAP_MS = 3000;
@@ -48,9 +53,10 @@ export function HeroMascot({
   }, [national]);
 
   if (!national && !fisher) return null;
-  const maskUrl = national
+  const mascot = national
     ? NATIONAL_MASCOTS[turn % NATIONAL_MASCOTS.length]
-    : (fisher?.maskUrl ?? "");
+    : null;
+  const maskUrl = mascot ? mascot.url : (fisher?.maskUrl ?? "");
   const label = national
     ? "Shop the products"
     : fisher?.alt || "Shop the products";
@@ -66,6 +72,7 @@ export function HeroMascot({
         aria-hidden
         className="block size-full bg-current"
         style={{
+          transform: mascot ? `scale(${mascot.scale})` : undefined,
           maskImage: `url(${maskUrl})`,
           WebkitMaskImage: `url(${maskUrl})`,
           maskSize: "contain",
