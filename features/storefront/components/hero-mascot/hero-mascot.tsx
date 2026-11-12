@@ -24,7 +24,7 @@ const NATIONAL_MASCOTS = [
   { url: THREE_CROCS_URL, scale: 1.15 },
   // Centred on its eye, not its bounds: the eye sits a little above the
   // middle of the drawing, so `shift` (percent of the box) pulls it to the centre.
-  { url: DOG_URL, scale: 1.08, shift: { x: 2, y: 5 } },
+  { url: DOG_URL, scale: 1.08, shift: { x: 2, y: 0 } },
   { url: SHIELD_URL, scale: 1.24 },
 ];
 // How long each National Issue mascot stays up before the next one takes over.
