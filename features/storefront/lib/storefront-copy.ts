@@ -14,6 +14,8 @@ export const storefrontCopy = {
   byline: "FROM LALO FARRO",
   /** The founder's: the line above the product grid (the issue on sale). */
   issueHeading: "FIRST ISSUE F/W 25",
+  /** The founder's: the line above the National Issue's row of the grid. */
+  nationalIssueHeading: "NATIONAL ISSUE F/W 26",
   /** LIFTED -- his own name for the drop; already shipped on coming-soon. */
   issue: "THE NATIONAL ISSUE",
   /**
