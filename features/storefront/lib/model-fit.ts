@@ -27,10 +27,9 @@ const MODEL_FIT: Record<string, ModelFit[]> = {
     { name: "ANANYA", height: `5'7"`, size: "L" },
     { name: "JESSICA", height: `5'6"`, size: "M" },
   ],
-  // Heights are still to come from the founder, so they show as stand-ins.
   "fc-hoodie": [
-    { name: "CALDER", height: "[HEIGHT]", size: "L" },
-    { name: "NIKITA", height: "[HEIGHT]", size: "XL" },
+    { name: "CALDER", height: `5'5"`, size: "L" },
+    { name: "NIKITA", height: `6'0"`, size: "XL" },
   ],
   "lurker-longsleeve": [
     { name: "YLVA", height: `5'5"`, size: "L" },
