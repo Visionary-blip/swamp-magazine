@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import type { ProductDetail } from "../../lib/catalog";
 import { parseModelCredits } from "../../lib/model-credits";
 import { getCreditsMinWidth, getModelFit } from "../../lib/model-fit";
+import { getScrim } from "../../lib/background-scrim";
 import { getProductGallery } from "../../lib/product-gallery";
 import { storefrontCopy } from "../../lib/storefront-copy";
 import { ModelFitButton } from "../model-fit/model-fit-button";
@@ -46,10 +47,20 @@ export function ProductScreen({ product }: { product: ProductDetail }) {
               sizes="100vw"
               className="-z-20 object-cover"
             />
-            <div className="absolute inset-0 -z-10 bg-ink/40" />
+            <div
+              className={cn(
+                "absolute inset-0 -z-10",
+                getScrim(product.slug, product.background.url).wash,
+              )}
+            />
             {/* A deeper wash behind the order controls at the foot, where the
                 red type sits over whatever the photograph has there. */}
-            <div className="absolute inset-x-0 bottom-0 -z-10 h-1/2 bg-linear-to-t from-ink/70 to-transparent" />
+            <div
+              className={cn(
+                "absolute inset-x-0 bottom-0 -z-10 h-1/2 bg-linear-to-t to-transparent",
+                getScrim(product.slug, product.background.url).foot,
+              )}
+            />
           </>
         ) : null}
 
