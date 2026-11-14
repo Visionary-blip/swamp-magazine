@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   BOTCHED_SIZE,
   botchedSize,
+  offeredSizes,
   parseBotchedSize,
   sizeMatches,
 } from "@/lib/checkout/botched";
@@ -133,7 +134,7 @@ function CartThumb({ item, fixed }: { item: CartItem; fixed: boolean }) {
     };
   }, [open]);
 
-  const sizes = sortSizes(item.sizes);
+  const sizes = sortSizes(offeredSizes(item.slug, item.sizes));
   // A garment saved with no size list (or only the one size) has nothing to
   // change to, so its size is shown but is not a button.
   const canChange = sizes.length > 1;

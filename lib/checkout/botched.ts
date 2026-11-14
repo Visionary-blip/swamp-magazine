@@ -9,6 +9,33 @@ import { dials } from "@/config/dials";
 
 export const BOTCHED_SIZE = "B";
 
+// Botched is a tee-shirt thing: ripped hems only make sense on a tee. Not the
+// shorts, the hoodie, the longsleeve or a crop top (the founder, 2026-11-14). It
+// is a storefront decision keyed by slug, like the issues, so a new tee has to be
+// added here to get the B.
+const BOTCHED_SLUGS: readonly string[] = [
+  "vamp-tee",
+  "college-arch",
+  "lurker-tee",
+  "fc-shirt",
+];
+
+/** Whether a garment may be had Botched. */
+export function botchedOffered(slug: string): boolean {
+  return BOTCHED_SLUGS.includes(slug);
+}
+
+/** A garment's sizes as the buttons should show them: the B only where it is
+ * offered, so a cart saved before the rule changed cannot still show it. */
+export function offeredSizes<T extends { size: string }>(
+  slug: string,
+  sizes: T[],
+): T[] {
+  return botchedOffered(slug)
+    ? sizes
+    : sizes.filter((option) => option.size !== BOTCHED_SIZE);
+}
+
 /** The variant a Botched order is cut from and counted against. */
 const BOTCHED_BASE_SIZE = "XL";
 

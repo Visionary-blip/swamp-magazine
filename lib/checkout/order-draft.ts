@@ -4,7 +4,7 @@ import type {
 } from "@/actions/create-checkout-session";
 import { dials } from "@/config/dials";
 
-import { botchedBaseSize, parseBotchedSize } from "./botched";
+import { botchedBaseSize, botchedOffered, parseBotchedSize } from "./botched";
 import { findCodeAddOn } from "./code-add-ons";
 
 // The pure half of createCheckoutSession: given rows already read from the DB,
@@ -131,6 +131,12 @@ export function resolveOrderDraft(
     // confirm it exists.
     if (!product || !product.active) {
       return { status: "error", reason: "not-found" };
+    }
+
+    // Botched is for the tees only; anything else asking for it is a stale cart
+    // or a hand-made request.
+    if (parseBotchedSize(line.size) && !botchedOffered(line.slug)) {
+      return { status: "error", reason: "invalid-input" };
     }
 
     // A Botched size is not a variant of its own: it is cut from the XL (or the

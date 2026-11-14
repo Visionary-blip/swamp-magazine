@@ -9,6 +9,7 @@ import { BotchedDialog, useCart, type CartItem } from "@/features/cart";
 import { useProductOverlay } from "@/features/transition";
 import {
   botchedBaseSize,
+  botchedOffered,
   BOTCHED_SIZE,
   BOTCHED_LEVEL_LABELS,
   botchedSize,
@@ -97,8 +98,10 @@ export function CheckoutForm({
     soldOut: variant.soldOut || refusedSizes.includes(variant.size),
   }));
   // B (Botched) is the XL with ripped hems (the largest size where there is no
-  // XL), so it is offered on every garment and is sold out when that size is.
-  const baseSizeName = botchedBaseSize(plainSizes.map((option) => option.size));
+  // XL), offered on the tees only, and sold out when that size is.
+  const baseSizeName = botchedOffered(slug)
+    ? botchedBaseSize(plainSizes.map((option) => option.size))
+    : null;
   const baseSize = plainSizes.find((option) => option.size === baseSizeName);
   const sizes = baseSize
     ? [...plainSizes, { size: BOTCHED_SIZE, soldOut: baseSize.soldOut }]

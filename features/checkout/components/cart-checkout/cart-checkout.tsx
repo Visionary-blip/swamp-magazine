@@ -16,6 +16,7 @@ import {
 import {
   BOTCHED_SIZE,
   botchedSize,
+  offeredSizes,
   parseBotchedSize,
   sizeMatches,
 } from "@/lib/checkout/botched";
@@ -151,38 +152,44 @@ export function CartCheckout() {
                   aria-label={`Size for ${item.name}`}
                   className="brat flex flex-wrap justify-center gap-x-4"
                 >
-                  {sortSizes(item.sizes).map((option) => {
-                    const current = sizeMatches(option.size, item.size);
-                    return (
-                      <button
-                        key={option.size}
-                        type="button"
-                        aria-pressed={current}
-                        disabled={isPending || (option.soldOut && !current)}
-                        onClick={() => {
-                          if (option.size === BOTCHED_SIZE) {
-                            setBotchedFor(item);
-                            return;
-                          }
-                          cart.moveOneToSize(item.slug, item.size, option.size);
-                        }}
-                        className={cn(
-                          "px-0.5 py-1 transition-colors duration-200 focus-visible:underline focus-visible:underline-offset-8 focus-visible:outline-none",
-                          current
-                            ? "text-brand-yellow"
-                            : "text-brand-red hover:text-brand-yellow",
-                          option.soldOut &&
-                            !current &&
-                            "cursor-not-allowed line-through opacity-40 hover:text-brand-red",
-                        )}
-                      >
-                        {option.size}
-                        {option.soldOut && !current ? (
-                          <span className="sr-only"> sold out</span>
-                        ) : null}
-                      </button>
-                    );
-                  })}
+                  {sortSizes(offeredSizes(item.slug, item.sizes)).map(
+                    (option) => {
+                      const current = sizeMatches(option.size, item.size);
+                      return (
+                        <button
+                          key={option.size}
+                          type="button"
+                          aria-pressed={current}
+                          disabled={isPending || (option.soldOut && !current)}
+                          onClick={() => {
+                            if (option.size === BOTCHED_SIZE) {
+                              setBotchedFor(item);
+                              return;
+                            }
+                            cart.moveOneToSize(
+                              item.slug,
+                              item.size,
+                              option.size,
+                            );
+                          }}
+                          className={cn(
+                            "px-0.5 py-1 transition-colors duration-200 focus-visible:underline focus-visible:underline-offset-8 focus-visible:outline-none",
+                            current
+                              ? "text-brand-yellow"
+                              : "text-brand-red hover:text-brand-yellow",
+                            option.soldOut &&
+                              !current &&
+                              "cursor-not-allowed line-through opacity-40 hover:text-brand-red",
+                          )}
+                        >
+                          {option.size}
+                          {option.soldOut && !current ? (
+                            <span className="sr-only"> sold out</span>
+                          ) : null}
+                        </button>
+                      );
+                    },
+                  )}
                 </div>
               ) : (
                 <span className="brat text-brand-red">{item.size}</span>

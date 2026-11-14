@@ -292,23 +292,39 @@ describe("resolveOrderDraft botched sizes", () => {
   });
 
   it("cuts a Botched line from the largest size when there is no XL", () => {
-    const stockedShorts = product({
+    const noXlTee = product({
       id: "prod-2",
-      slug: "star-shorts",
-      name: "Star Shorts",
+      slug: "lurker-tee",
+      name: "Lurker Tee",
       product_variants: [
-        { id: "var-sh-s", size: "S", inventory_count: 4 },
-        { id: "var-sh-l", size: "L", inventory_count: 1 },
-        { id: "var-sh-m", size: "M", inventory_count: 4 },
+        { id: "var-t-s", size: "S", inventory_count: 4 },
+        { id: "var-t-l", size: "L", inventory_count: 1 },
+        { id: "var-t-m", size: "M", inventory_count: 4 },
       ],
     });
     const result = resolveOrderDraft(
-      [stockedShorts],
-      [line("star-shorts", `B 5'7" (1/3)`)],
+      [noXlTee],
+      [line("lurker-tee", `B 5'7" (1/3)`)],
       "pickup",
     );
     expect(result.status).toBe("success");
     if (result.status !== "success") return;
-    expect(result.draft.lines[0]).toMatchObject({ variantId: "var-sh-l" });
+    expect(result.draft.lines[0]).toMatchObject({ variantId: "var-t-l" });
+  });
+
+  it("refuses Botched on anything that is not a tee", () => {
+    const hoodie = product({
+      id: "prod-3",
+      slug: "fc-hoodie",
+      name: "FC Hoodie",
+      product_variants: [{ id: "var-h-xl", size: "XL", inventory_count: 4 }],
+    });
+    expect(
+      resolveOrderDraft(
+        [hoodie],
+        [line("fc-hoodie", `B 5'7" (2/3)`)],
+        "pickup",
+      ),
+    ).toMatchObject({ status: "error", reason: "invalid-input" });
   });
 });
