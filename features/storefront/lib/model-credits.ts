@@ -15,6 +15,7 @@ const INSTAGRAM_HANDLES: Record<string, string> = {
   MIA: "ch3ekychu",
   CALDER: "calderburkhart",
   NIKITA: "Nikibort",
+  FABI: "fabimaicorso",
 };
 
 export type ModelCredit = { text: string; href: string | null };
