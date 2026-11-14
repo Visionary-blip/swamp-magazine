@@ -17,6 +17,7 @@ function shots(slug: string, count: number, alt: string): GalleryImage[] {
 
 const GALLERIES: Record<string, GalleryImage[]> = {
   "college-arch": shots("college-arch", 6, "College Arch lifestyle shot"),
+  "fc-hoodie": shots("fc-hoodie", 5, "FC Hoodie lifestyle shot"),
   "lurker-tee": shots("lurker-tee", 4, "Lurker Tee lifestyle shot"),
   "lurker-longsleeve": shots(
     "lurker-longsleeve",

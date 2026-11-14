@@ -5,7 +5,7 @@ import { storefrontCopy } from "./storefront-copy";
 // of their own above the first issue's. Which issue a product belongs to is a
 // storefront decision rather than a database column (no migration), so it is
 // listed here by slug; anything not listed is the first issue's.
-const NATIONAL_ISSUE_SLUGS: readonly string[] = ["fc-shirt"];
+const NATIONAL_ISSUE_SLUGS: readonly string[] = ["fc-shirt", "fc-hoodie"];
 
 export type IssueGroup = { heading: string; products: CatalogProduct[] };
 

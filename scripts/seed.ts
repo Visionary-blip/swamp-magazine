@@ -98,6 +98,18 @@ const CATALOG: SeedProduct[] = [
     cutoutFile: "swamp-images/FC SHIRT GRID.webp",
     sortOrder: 5,
   },
+  // The FC hoodie, added 2026-11-13 with a purple stand-in for the cutout until the
+  // real product shot exists (swap it in the admin). The $60 price and the stock
+  // are placeholders; the founder sets both.
+  {
+    slug: "fc-hoodie",
+    name: "FC Hoodie",
+    priceCents: 6000,
+    sizes: ["L", "XL"],
+    modelCredits: "CALDER, NIKITA",
+    cutoutFile: "swamp-images/FC HOODIE GRID.webp",
+    sortOrder: 6,
+  },
 ];
 
 // Product backgrounds. star-shorts is deliberately absent: its slot is already
@@ -133,6 +145,11 @@ const LIFESTYLE_SLOTS = [
     slotKey: "product_bg:lurker-longsleeve",
     file: "swamp-images/LURKER LONGSLEEVE BG - ZACH.png",
     alt: "Lurker Longsleeve lifestyle shot",
+  },
+  {
+    slotKey: "product_bg:fc-hoodie",
+    file: "swamp-images/FC HOODIE BG.jpg",
+    alt: "FC Hoodie lifestyle shot",
   },
 ];
 
