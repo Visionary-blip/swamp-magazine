@@ -31,8 +31,11 @@ const MODEL_FIT: Record<string, ModelFit[]> = {
     { name: "CALDER", height: `5'5"`, size: "L" },
     { name: "NIKITA", height: `6'0"`, size: "XL" },
   ],
-  // Fabi's height is still to come from the founder.
-  "croc-crop": [{ name: "FABI", height: "[HEIGHT]", size: "XS" }],
+  // Fabi's and Adeline's heights are still to come from the founder.
+  "croc-crop": [
+    { name: "FABI", height: "[HEIGHT]", size: "XS" },
+    { name: "ADELINE", height: "[HEIGHT]", size: "S" },
+  ],
   "lurker-longsleeve": [
     { name: "YLVA", height: `5'5"`, size: "L" },
     { name: "Z", height: `6'2"`, size: "L" },

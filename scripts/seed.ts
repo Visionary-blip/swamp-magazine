@@ -111,14 +111,14 @@ const CATALOG: SeedProduct[] = [
     sortOrder: 6,
   },
   // The Croc Crop, added 2026-11-14 with a red stand-in for the cutout until the
-  // real product shot exists (swap it in the admin). The $25 price, the stock and
-  // the other model are placeholders; the founder sets them.
+  // real product shot exists (swap it in the admin). The $25 price and the stock
+  // are placeholders; the founder sets them.
   {
     slug: "croc-crop",
     name: "Croc Crop",
     priceCents: 2500,
     sizes: ["XS", "S", "M", "L"],
-    modelCredits: "FABI",
+    modelCredits: "FABI, ADELINE",
     cutoutFile: "swamp-images/CROC CROP GRID.webp",
     sortOrder: 7,
   },
