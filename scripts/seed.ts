@@ -99,12 +99,12 @@ const CATALOG: SeedProduct[] = [
     sortOrder: 5,
   },
   // The FC hoodie, added 2026-11-13 with a purple stand-in for the cutout until the
-  // real product shot exists (swap it in the admin). The $60 price and the stock
+  // real product shot exists (swap it in the admin). The $50 price and the stock
   // are placeholders; the founder sets both.
   {
     slug: "fc-hoodie",
     name: "FC Hoodie",
-    priceCents: 6000,
+    priceCents: 5000,
     sizes: ["L", "XL"],
     modelCredits: "NIKITA (R), CALDER (L)",
     cutoutFile: "swamp-images/FC HOODIE GRID.webp",
