@@ -91,7 +91,7 @@ const CATALOG: SeedProduct[] = [
   // features/storefront/lib/issues.ts).
   {
     slug: "fc-shirt",
-    name: "FC Shirt",
+    name: "FC Tee",
     priceCents: 2500,
     sizes: ["XS", "S", "M", "L", "XL"],
     modelCredits: "MODEL 1, MODEL 2",
