@@ -122,6 +122,19 @@ const CATALOG: SeedProduct[] = [
     cutoutFile: "swamp-images/CROC CROP GRID.webp",
     sortOrder: 7,
   },
+  // The Dog Tee, added 2026-11-14 with a light blue stand-in for the cutout until
+  // the real product shot exists (swap it in the admin). Treated like the lurker
+  // tee: the same sizes, in the first issue's row, with Botched on offer. The $25
+  // price is the founder's; the stock and "MODEL 1" are placeholders.
+  {
+    slug: "dog-tee",
+    name: "Dog Tee",
+    priceCents: 2500,
+    sizes: ["XS", "S", "M", "L", "XL"],
+    modelCredits: "MODEL 1",
+    cutoutFile: "swamp-images/DOG TEE GRID.webp",
+    sortOrder: 8,
+  },
 ];
 
 // Product backgrounds. star-shorts is deliberately absent: its slot is already
