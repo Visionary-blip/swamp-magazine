@@ -85,8 +85,8 @@ const CATALOG: SeedProduct[] = [
     sortOrder: 4,
   },
   // The National Issue's FC shirt, added 2026-11-11 from the founder's photo. The
-  // sizes are the lurker tee's; "MODEL 1" / "MODEL 2" are his stand-ins for the
-  // credits, and the $25 price and the stock are PLACEHOLDERS -- his to set in the
+  // sizes are the lurker tee's; "MODEL 2" is his stand-in for the
+  // second credit, and the $25 price and the stock are PLACEHOLDERS -- his to set in the
   // admin. The storefront shows it in its own row above the first issue (see
   // features/storefront/lib/issues.ts).
   {
@@ -94,7 +94,7 @@ const CATALOG: SeedProduct[] = [
     name: "FC Tee",
     priceCents: 2500,
     sizes: ["XS", "S", "M", "L", "XL"],
-    modelCredits: "MODEL 1, MODEL 2",
+    modelCredits: "GARRETT, MODEL 2",
     cutoutFile: "swamp-images/FC SHIRT GRID.webp",
     sortOrder: 5,
   },
