@@ -30,9 +30,9 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
         const start = groups
           .slice(0, groupIndex)
           .reduce((count, earlier) => count + earlier.products.length, 0);
-        // Fewer than four (the National Issue's single piece) stand centred in
-        // their row rather than in the first column.
-        const centered = group.products.length < 4;
+        // The National Issue stands centred in its rows (a last row of one or two
+        // sits under the middle), and so does any issue of fewer than four.
+        const centered = group.centered || group.products.length < 4;
         return (
           <div
             key={group.heading}

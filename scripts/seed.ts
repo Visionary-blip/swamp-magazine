@@ -135,6 +135,20 @@ const CATALOG: SeedProduct[] = [
     cutoutFile: "swamp-images/DOG TEE GRID.webp",
     sortOrder: 8,
   },
+  // The Triple Croc Tee, added 2026-11-14 with a dark bluish-grey stand-in for the
+  // cutout until the real product shot exists (swap it in the admin). Treated like
+  // any other tee: the lurker tee's sizes, the first issue's row, Botched on
+  // offer. The $35 price is the founder's; the stock and "MODEL 1" are
+  // placeholders.
+  {
+    slug: "triple-croc-tee",
+    name: "Triple Croc Tee",
+    priceCents: 3500,
+    sizes: ["XS", "S", "M", "L", "XL"],
+    modelCredits: "MODEL 1",
+    cutoutFile: "swamp-images/TRIPLE CROC TEE GRID.webp",
+    sortOrder: 9,
+  },
 ];
 
 // Product backgrounds. star-shorts is deliberately absent: its slot is already

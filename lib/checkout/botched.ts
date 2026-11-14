@@ -19,6 +19,7 @@ const BOTCHED_SLUGS: readonly string[] = [
   "lurker-tee",
   "fc-shirt",
   "dog-tee",
+  "triple-croc-tee",
 ];
 
 /** Whether a garment may be had Botched. */
