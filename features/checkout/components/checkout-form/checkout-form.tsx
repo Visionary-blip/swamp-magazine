@@ -459,7 +459,7 @@ export function CheckoutForm({
       <p
         aria-hidden={!whyNot}
         className={cn(
-          "pointer-events-none fixed inset-x-0 top-1/2 z-50 -translate-y-1/2 text-center font-display text-[26vw] leading-none whitespace-nowrap text-brand-yellow uppercase transition-opacity duration-300",
+          "pointer-events-none fixed inset-x-0 top-1/2 z-50 -translate-y-1/2 text-center font-display text-[26vw] leading-none whitespace-nowrap text-brand-yellow uppercase transition-opacity duration-500 ease-in-out",
           whyNot ? "opacity-75" : "opacity-0",
         )}
       >
