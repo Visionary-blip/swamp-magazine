@@ -56,17 +56,20 @@ export async function LiveLandingScreen() {
       <CartCorner placement="fixed" />
       <ProductOverlay panels={panels} />
       {/* The phone's all-products grid sits on a photograph, fixed behind the
-          scrolling tiles under a scrim so the red type reads. */}
+          scrolling tiles under a scrim so the red type reads. It is sized to the
+          LARGE viewport (lvh) and drawn a size up, so it neither shifts nor
+          resizes as the browser's toolbar slides away while the visitor scrolls
+          (`inset-0` follows the visible viewport and does both). */}
       <div
         aria-hidden
-        className="fixed inset-0 -z-10 hidden max-md:group-data-[view=grid]/landing:block"
+        className="fixed top-0 left-0 -z-10 hidden h-lvh w-full overflow-hidden max-md:group-data-[view=grid]/landing:block"
       >
         <Image
           src="/world/grid-background.webp"
           alt=""
           fill
           sizes="100vw"
-          className="object-cover"
+          className="scale-125 object-cover"
         />
         <div className="absolute inset-0 bg-ink/65" />
       </div>

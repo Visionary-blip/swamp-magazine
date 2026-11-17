@@ -6,6 +6,7 @@ import { formatUsd } from "@/lib/money";
 import { cn } from "@/lib/utils";
 
 import type { CatalogProduct } from "../../lib/catalog";
+import { getGridScaleClass } from "../../lib/cutout-treatment";
 import { groupByIssue } from "../../lib/issues";
 import { getScatter } from "../../lib/scatter";
 import { getProductGallery } from "../../lib/product-gallery";
@@ -138,7 +139,10 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
                               alt={product.cutout.alt || product.name}
                               fill
                               sizes="(min-width: 768px) 22vw, 90vw"
-                              className="object-contain transition-transform duration-300 group-hover:scale-105"
+                              className={cn(
+                                "object-contain transition-transform duration-300",
+                                getGridScaleClass(product.slug),
+                              )}
                             />
                           ) : null}
                         </div>

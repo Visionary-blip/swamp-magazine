@@ -85,22 +85,22 @@ const CATALOG: SeedProduct[] = [
     sortOrder: 4,
   },
   // The National Issue's FC shirt, added 2026-11-11 from the founder's photo. The
-  // sizes are the lurker tee's; "MODEL 2" is his stand-in for the
-  // second credit, and the $25 price and the stock are PLACEHOLDERS -- his to set in the
-  // admin. The storefront shows it in its own row above the first issue (see
+  // sizes are the lurker tee's, and the $25 price and the stock are PLACEHOLDERS --
+  // his to set in the admin. The storefront shows it in its own row above the first issue (see
   // features/storefront/lib/issues.ts).
   {
     slug: "fc-shirt",
     name: "FC Tee",
     priceCents: 2500,
     sizes: ["XS", "S", "M", "L", "XL"],
-    modelCredits: "GARRETT, MODEL 2",
+    modelCredits: "GARRETT, ADELINE",
     cutoutFile: "swamp-images/FC SHIRT GRID.webp",
     sortOrder: 5,
   },
-  // The FC hoodie, added 2026-11-13 with a purple stand-in for the cutout until the
-  // real product shot exists (swap it in the admin). The $50 price and the stock
-  // are placeholders; the founder sets both.
+  // The FC hoodie, added 2026-11-13. Its cutout is the founder's newer photo of
+  // it (17 Nov); the first, near-black one and a purple stand-in are kept in
+  // swamp-images/ as FC HOODIE PHOTO.webp and FC HOODIE GRID PURPLE.webp. The $50
+  // price and the stock are placeholders; the founder sets both.
   {
     slug: "fc-hoodie",
     name: "FC Hoodie",

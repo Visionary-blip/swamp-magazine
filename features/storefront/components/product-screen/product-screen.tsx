@@ -9,6 +9,7 @@ import type { ProductDetail } from "../../lib/catalog";
 import { parseModelCredits } from "../../lib/model-credits";
 import { getCreditsMinWidth, getModelFit } from "../../lib/model-fit";
 import { getScrim } from "../../lib/background-scrim";
+import { getPageExposureClass } from "../../lib/cutout-treatment";
 import { getProductGallery } from "../../lib/product-gallery";
 import { storefrontCopy } from "../../lib/storefront-copy";
 import { ModelFitButton } from "../model-fit/model-fit-button";
@@ -142,7 +143,10 @@ export function ProductScreen({ product }: { product: ProductDetail }) {
               fill
               priority
               sizes="(min-width: 768px) 34vw, 72vw"
-              className="object-contain drop-shadow-2xl"
+              className={cn(
+                "object-contain drop-shadow-2xl",
+                getPageExposureClass(product.slug),
+              )}
             />
           </HandoffTarget>
         ) : null}
