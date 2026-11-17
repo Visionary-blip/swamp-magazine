@@ -5,7 +5,10 @@ import {
   useEffect,
   useRef,
   useState,
-  useTransition, type FormEvent, type ReactNode } from "react";
+  useTransition,
+  type FormEvent,
+  type ReactNode,
+} from "react";
 
 import { createCheckoutSession } from "@/actions/create-checkout-session";
 import { dials } from "@/config/dials";
@@ -23,6 +26,7 @@ import {
 import {
   designQuantity,
   designsFor,
+  pairDesign,
   withDesign,
 } from "@/lib/checkout/designs";
 import { lineTotalCents } from "@/lib/checkout/packs";
@@ -40,6 +44,7 @@ import {
 import { deliveryOptions } from "../../lib/delivery-options";
 import { ExModelDialog } from "../ex-model-dialog/ex-model-dialog";
 import { markExModelUsed, useExModelUsed } from "../../lib/ex-model-used";
+import { useSetPairView } from "../pair-view/pair-view";
 import { scrollIntoViewOnMount } from "../../lib/scroll";
 import { stripePromise } from "../../lib/stripe-client";
 
@@ -85,15 +90,29 @@ export function CheckoutForm({
   const [fit, setFit] = useState<BotchedFit | null>(null);
   // Which design, on a garment that has them (EX-MODEL, SWEET DREAMS, BOTH).
   const designs = designsFor(slug);
-  const [design, setDesign] = useState<string | null>(null);
+  // One design, or BOTH: two shirts shown, each with a design of its own.
+  const [mode, setMode] = useState<string | null>(null);
+  const [pairPicks, setPairPicks] = useState<[string | null, string | null]>([
+    null,
+    null,
+  ]);
+  const setPairView = useSetPairView();
+  const design =
+    mode === "BOTH"
+      ? pairPicks[0] && pairPicks[1]
+        ? pairDesign(pairPicks[0], pairPicks[1])
+        : null
+      : mode;
   // "WHY NOT?" fades in and out when BOTH is picked.
   const [whyNot, setWhyNot] = useState(false);
   const whyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(
     () => () => {
       if (whyTimer.current) clearTimeout(whyTimer.current);
+      // Leaving the page puts the one big picture back.
+      setPairView(false);
     },
-    [],
+    [setPairView],
   );
   const [botchedOpen, setBotchedOpen] = useState(false);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
@@ -195,7 +214,9 @@ export function CheckoutForm({
     cart.addItem(selected);
     setSize(null);
     setFit(null);
-    setDesign(null);
+    setMode(null);
+    setPairView(false);
+    setPairPicks([null, null]);
     // In the landing's overlay "back to the grid" is closing the overlay.
     if (overlay) overlay.close();
     else router.push("/#products");
@@ -362,100 +383,165 @@ export function CheckoutForm({
       <h1 className="brat text-brand-red max-md:mb-4">{name}</h1>
       {scrollCue}
 
-      <fieldset disabled={isPending} className="max-md:w-full">
-        <legend className="sr-only">{orderCopy.size}</legend>
-        <div className="brat flex flex-wrap justify-center gap-x-6 max-md:flex-nowrap max-md:gap-x-0 max-md:divide-x max-md:divide-brand-red/40 max-md:border-y max-md:border-brand-red/40 max-md:bg-ink/55">
-          {sizes.map((option) => (
-            <label
-              key={option.size}
-              className={cn(
-                "cursor-pointer px-1 py-2 transition-colors duration-200 max-md:flex max-md:min-h-16 max-md:flex-1 max-md:items-center max-md:justify-center",
-                option.soldOut
-                  ? "cursor-not-allowed text-brand-red line-through opacity-40"
-                  : size === option.size
-                    ? "text-brand-yellow"
-                    : "text-brand-red hover:text-brand-yellow",
-              )}
-            >
-              <input
-                type="radio"
-                name="size"
-                value={option.size}
-                checked={size === option.size}
-                disabled={option.soldOut}
-                onChange={() => {
-                  setSize(option.size);
-                  // B opens its pop-up (what it means, and the height wheels).
-                  if (option.size === BOTCHED_SIZE) setBotchedOpen(true);
-                }}
-                // A radio cannot be unchecked by clicking it (no change event
-                // fires), so the size picked is toggled off here instead; Space
-                // does the same from the keyboard.
-                onClick={() => {
-                  if (size === option.size) setSize(null);
-                }}
-                onKeyDown={(event) => {
-                  if (event.key === " " && size === option.size) {
-                    event.preventDefault();
-                    setSize(null);
-                  }
-                }}
-                className="peer sr-only"
-              />
-              <span className="peer-focus-visible:underline peer-focus-visible:underline-offset-8">
-                {option.size}
-                {/* The strike-through is the sighted cue; disabled alone does
-                    not say why, so screen readers get the reason. */}
-                {option.soldOut ? (
-                  <span className="sr-only"> sold out</span>
-                ) : null}
-              </span>
-            </label>
-          ))}
-        </div>
-      </fieldset>
-
       {/* Which design: one of the two, or BOTH (a pair, at the two-pack price). */}
       {designs.length > 0 ? (
         <fieldset disabled={isPending} className="max-md:w-full">
           <legend className="sr-only">DESIGN</legend>
           <div className="brat flex flex-wrap justify-center gap-x-6 max-md:flex-nowrap max-md:gap-x-0 max-md:divide-x max-md:divide-brand-red/40 max-md:border-y max-md:border-brand-red/40 max-md:bg-ink/55">
-            {designs.map((option) => (
+            {(mode === "BOTH" ? ["BOTH"] : [...designs, "BOTH"]).map(
+              (option) => (
+                <label
+                  key={option}
+                  className={cn(
+                    "cursor-pointer px-1 py-2 transition-colors duration-200 max-md:flex max-md:min-h-16 max-md:flex-1 max-md:items-center max-md:justify-center",
+                    mode === option
+                      ? "text-brand-yellow"
+                      : "text-brand-red hover:text-brand-yellow",
+                  )}
+                >
+                  <input
+                    type="radio"
+                    name="design"
+                    value={option}
+                    checked={mode === option}
+                    onChange={() => {
+                      setMode(option);
+                      setPairView(option === "BOTH");
+                      if (option === "BOTH") {
+                        setWhyNot(true);
+                        if (whyTimer.current) clearTimeout(whyTimer.current);
+                        whyTimer.current = setTimeout(
+                          () => setWhyNot(false),
+                          500,
+                        );
+                      }
+                    }}
+                    className="peer sr-only"
+                  />
+                  <span className="peer-focus-visible:underline peer-focus-visible:underline-offset-8">
+                    {option}
+                  </span>
+                </label>
+              ),
+            )}
+            {/* With BOTH picked the row is just BOTH and the way back to one. */}
+            {mode === "BOTH" ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setMode(null);
+                  setPairView(false);
+                  setPairPicks([null, null]);
+                }}
+                className="cursor-pointer px-1 py-2 text-brand-red transition-colors duration-200 hover:text-brand-yellow focus-visible:underline focus-visible:underline-offset-8 max-md:flex max-md:min-h-16 max-md:flex-1 max-md:items-center max-md:justify-center"
+              >
+                JUST ONE
+              </button>
+            ) : null}
+          </div>
+        </fieldset>
+      ) : null}
+
+      {/* BOTH: two shirts side by side, each with its design to pick, stacked. */}
+      {mode === "BOTH" ? (
+        <div className="flex justify-center gap-10 max-md:gap-6">
+          {[0, 1].map((index) => (
+            <fieldset
+              key={index}
+              disabled={isPending}
+              className="flex flex-col items-center gap-1"
+            >
+              <legend className="sr-only">SHIRT {index + 1} DESIGN</legend>
+              {designs.map((option) => (
+                <label
+                  key={option}
+                  className={cn(
+                    "brat cursor-pointer px-1 py-1 transition-colors duration-200",
+                    pairPicks[index] === option
+                      ? "text-brand-yellow"
+                      : "text-brand-red hover:text-brand-yellow",
+                  )}
+                >
+                  <input
+                    type="radio"
+                    name={`pair-${index}`}
+                    value={option}
+                    checked={pairPicks[index] === option}
+                    onChange={() =>
+                      setPairPicks((current) =>
+                        index === 0
+                          ? [option, current[1]]
+                          : [current[0], option],
+                      )
+                    }
+                    className="peer sr-only"
+                  />
+                  <span className="peer-focus-visible:underline peer-focus-visible:underline-offset-8">
+                    {option}
+                  </span>
+                </label>
+              ))}
+            </fieldset>
+          ))}
+        </div>
+      ) : null}
+      {/* On a garment with designs, the design comes first and the sizes only
+          show once it is chosen. */}
+      {designs.length === 0 || design ? (
+        <fieldset disabled={isPending} className="max-md:w-full">
+          <legend className="sr-only">{orderCopy.size}</legend>
+          <div className="brat flex flex-wrap justify-center gap-x-6 max-md:flex-nowrap max-md:gap-x-0 max-md:divide-x max-md:divide-brand-red/40 max-md:border-y max-md:border-brand-red/40 max-md:bg-ink/55">
+            {sizes.map((option) => (
               <label
-                key={option}
+                key={option.size}
                 className={cn(
                   "cursor-pointer px-1 py-2 transition-colors duration-200 max-md:flex max-md:min-h-16 max-md:flex-1 max-md:items-center max-md:justify-center",
-                  design === option
-                    ? "text-brand-yellow"
-                    : "text-brand-red hover:text-brand-yellow",
+                  option.soldOut
+                    ? "cursor-not-allowed text-brand-red line-through opacity-40"
+                    : size === option.size
+                      ? "text-brand-yellow"
+                      : "text-brand-red hover:text-brand-yellow",
                 )}
               >
                 <input
                   type="radio"
-                  name="design"
-                  value={option}
-                  checked={design === option}
+                  name="size"
+                  value={option.size}
+                  checked={size === option.size}
+                  disabled={option.soldOut}
                   onChange={() => {
-                    setDesign(option);
-                    if (option === "BOTH") {
-                      setWhyNot(true);
-                      if (whyTimer.current) clearTimeout(whyTimer.current);
-                      whyTimer.current = setTimeout(
-                        () => setWhyNot(false),
-                        500,
-                      );
+                    setSize(option.size);
+                    // B opens its pop-up (what it means, and the height wheels).
+                    if (option.size === BOTCHED_SIZE) setBotchedOpen(true);
+                  }}
+                  // A radio cannot be unchecked by clicking it (no change event
+                  // fires), so the size picked is toggled off here instead; Space
+                  // does the same from the keyboard.
+                  onClick={() => {
+                    if (size === option.size) setSize(null);
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === " " && size === option.size) {
+                      event.preventDefault();
+                      setSize(null);
                     }
                   }}
                   className="peer sr-only"
                 />
                 <span className="peer-focus-visible:underline peer-focus-visible:underline-offset-8">
-                  {option}
+                  {option.size}
+                  {/* The strike-through is the sighted cue; disabled alone does
+                    not say why, so screen readers get the reason. */}
+                  {option.soldOut ? (
+                    <span className="sr-only"> sold out</span>
+                  ) : null}
                 </span>
               </label>
             ))}
           </div>
         </fieldset>
       ) : null}
+
       <p
         aria-hidden={!whyNot}
         className={cn(

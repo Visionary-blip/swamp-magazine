@@ -340,7 +340,7 @@ describe("resolveOrderDraft two-pack", () => {
   const total = (quantity: number) => {
     const result = resolveOrderDraft(
       [sleep],
-      [line("sleep-shirt", "M / BOTH", quantity)],
+      [line("sleep-shirt", "M / EX-MODEL", quantity)],
       "pickup",
     );
     if (result.status !== "success") throw new Error("expected success");
@@ -367,7 +367,7 @@ describe("resolveOrderDraft two-pack", () => {
 
   it("still checks stock against the whole quantity", () => {
     expect(
-      resolveOrderDraft([sleep], [line("sleep-shirt", "M / BOTH", 6)], "pickup"),
+      resolveOrderDraft([sleep], [line("sleep-shirt", "M / EX-MODEL", 6)], "pickup"),
     ).toMatchObject({ status: "error", reason: "sold-out" });
   });
 
@@ -375,5 +375,27 @@ describe("resolveOrderDraft two-pack", () => {
     expect(
       resolveOrderDraft([sleep], [line("sleep-shirt", "M")], "pickup"),
     ).toMatchObject({ status: "error", reason: "invalid-input" });
+  });
+
+  it("refuses a pair of designs bought one shirt at a time", () => {
+    expect(
+      resolveOrderDraft(
+        [sleep],
+        [line("sleep-shirt", "M / EX-MODEL + SWEET DREAMS", 1)],
+        "pickup",
+      ),
+    ).toMatchObject({ status: "error", reason: "invalid-input" });
+  });
+
+  it("prices a pair of designs at the two-pack price", () => {
+    const result = resolveOrderDraft(
+      [sleep],
+      [line("sleep-shirt", "M / EX-MODEL + SWEET DREAMS", 2)],
+      "pickup",
+    );
+    expect(result).toMatchObject({
+      status: "success",
+      draft: { totalCents: dials.sleepShirtTwoPackCents },
+    });
   });
 });

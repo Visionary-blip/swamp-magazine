@@ -6,7 +6,7 @@ import { dials } from "@/config/dials";
 
 import { botchedBaseSize, botchedOffered, parseBotchedSize } from "./botched";
 import { findCodeAddOn } from "./code-add-ons";
-import { splitDesign } from "./designs";
+import { designQuantity, splitDesign } from "./designs";
 import { priceLines } from "./packs";
 
 // The pure half of createCheckoutSession: given rows already read from the DB,
@@ -144,7 +144,12 @@ export function resolveOrderDraft(
     // A design (EX-MODEL, SWEET DREAMS, BOTH) is not a variant either: strip it
     // to find the stock, and refuse a line that names none.
     const designed = splitDesign(line.slug, line.size);
-    if (!designed) {
+    // A pair of designs is two shirts, so its line comes in twos: one shirt
+    // named as a pair would be two at the single price.
+    if (
+      !designed ||
+      (designed.design && line.quantity % designQuantity(designed.design) !== 0)
+    ) {
       return { status: "error", reason: "invalid-input" };
     }
 

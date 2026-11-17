@@ -13,6 +13,7 @@ const NATIONAL_ISSUE_SLUGS: readonly string[] = [
   "croc-crop",
   "dog-tee",
   "triple-croc-tee",
+  "sleep-shirt",
 ];
 
 export type IssueGroup = {
