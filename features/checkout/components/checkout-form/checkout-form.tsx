@@ -459,8 +459,8 @@ export function CheckoutForm({
       <p
         aria-hidden={!whyNot}
         className={cn(
-          "brat pointer-events-none fixed inset-x-0 top-1/2 z-50 -translate-y-1/2 text-center text-brand-yellow transition-opacity duration-500",
-          whyNot ? "opacity-100" : "opacity-0",
+          "pointer-events-none fixed inset-x-0 top-1/2 z-50 -translate-y-1/2 text-center font-display text-[26vw] leading-none whitespace-nowrap text-brand-yellow uppercase transition-opacity duration-500",
+          whyNot ? "opacity-75" : "opacity-0",
         )}
       >
         WHY NOT?
