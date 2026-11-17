@@ -442,7 +442,7 @@ export function CheckoutForm({
                       if (whyTimer.current) clearTimeout(whyTimer.current);
                       whyTimer.current = setTimeout(
                         () => setWhyNot(false),
-                        1400,
+                        500,
                       );
                     }
                   }}
@@ -459,7 +459,7 @@ export function CheckoutForm({
       <p
         aria-hidden={!whyNot}
         className={cn(
-          "pointer-events-none fixed inset-x-0 top-1/2 z-50 -translate-y-1/2 text-center font-display text-[26vw] leading-none whitespace-nowrap text-brand-yellow uppercase transition-opacity duration-500",
+          "pointer-events-none fixed inset-x-0 top-1/2 z-50 -translate-y-1/2 text-center font-display text-[26vw] leading-none whitespace-nowrap text-brand-yellow uppercase transition-opacity duration-300",
           whyNot ? "opacity-75" : "opacity-0",
         )}
       >
