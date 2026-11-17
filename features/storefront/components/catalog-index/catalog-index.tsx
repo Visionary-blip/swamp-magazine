@@ -1,12 +1,15 @@
 import Image from "next/image";
 
+import { dials } from "@/config/dials";
 import { HandoffLink } from "@/features/transition";
 import { formatUsd } from "@/lib/money";
 import { cn } from "@/lib/utils";
 
 import type { CatalogProduct } from "../../lib/catalog";
 import { groupByIssue } from "../../lib/issues";
+import { getScatter } from "../../lib/scatter";
 import { getProductGallery } from "../../lib/product-gallery";
+import { IssueGrid } from "../issue-grid/issue-grid";
 import { Reveal } from "../reveal/reveal";
 
 // The product grid under the hero (one row of four from md up, two across on a
@@ -44,15 +47,20 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
             {/* Not on the phone's one-at-a-time feed: a heading there would
                 push the first garment off its screen, so it shows on desktop
                 and in the grid. */}
-            <h2 className="mb-12 hidden text-center font-display text-3xl leading-none tracking-[0.05em] text-brand-red md:block max-md:group-data-[view=grid]/landing:mb-6 max-md:group-data-[view=grid]/landing:block">
-              {group.heading}
-            </h2>
+            {group.heading ? (
+              <h2 className="mb-16 hidden text-center font-display text-3xl leading-none tracking-[0.05em] text-brand-red md:block max-md:group-data-[view=grid]/landing:mb-6 max-md:group-data-[view=grid]/landing:block">
+                {group.heading}
+              </h2>
+            ) : null}
             {/* A phone gets one garment per screen, each a stop in the
                 FeedPager: a swipe lands on the next one. From md up it is the
                 four-across grid. */}
-            <ul
+            <IssueGrid
               className={cn(
-                "grid grid-cols-1 max-md:group-data-[view=grid]/landing:grid-cols-2 max-md:group-data-[view=grid]/landing:gap-y-4 md:gap-x-8 md:gap-y-16",
+                "group/issue md:[&>li]:transition-transform md:[&>li]:duration-700 md:[&>li]:ease-out",
+                "grid grid-cols-1 max-md:group-data-[view=grid]/landing:grid-cols-2 max-md:group-data-[view=grid]/landing:gap-y-4 md:gap-x-8",
+                // A scattered grid needs the room its tiles drift into.
+                dials.scatterProducts ? "md:gap-y-40" : "md:gap-y-16",
                 centered
                   ? "md:flex md:flex-wrap md:justify-center"
                   : "md:grid-cols-4",
@@ -66,15 +74,29 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
                 const backdrop =
                   getProductGallery(product.slug)[0]?.src ??
                   product.background?.url;
+                const scatter = dials.scatterProducts
+                  ? getScatter(product.slug)
+                  : null;
                 return (
                   <li
                     key={product.slug}
+                    style={
+                      scatter
+                        ? ({
+                            "--sx": `${scatter.x}%`,
+                            "--sy": `${scatter.y}%`,
+                            "--ss": scatter.scale,
+                          } as React.CSSProperties)
+                        : undefined
+                    }
                     // A stop for the phone's FeedPager: one swipe, one product.
                     data-feed-stop
                     data-feed-product
                     className={cn(
                       "relative isolate flex min-h-dvh items-center justify-center overflow-hidden px-5 max-md:group-data-[view=grid]/landing:min-h-0 max-md:group-data-[view=grid]/landing:items-start max-md:group-data-[view=grid]/landing:px-0 md:min-h-0 md:items-start md:overflow-visible md:px-0",
                       centered && "md:w-[calc(25%-1.5rem)]",
+                      scatter &&
+                        "md:[transform:translate(var(--sx),var(--sy))_scale(var(--ss))]",
                     )}
                   >
                     {/* Phone only: the product page's own shoot as a full-screen
@@ -120,10 +142,10 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
                             />
                           ) : null}
                         </div>
-                        <span className="font-display text-2xl leading-none tracking-[0.02em] text-brand-red uppercase transition-colors duration-200 group-hover:text-brand-yellow max-md:group-data-[view=grid]/landing:text-lg md:text-2xl lg:text-[30px]">
+                        <span className="font-display text-2xl leading-none tracking-[0.02em] text-brand-red uppercase transition-[color,opacity] duration-300 md:group-data-[piled=true]/issue:opacity-0 group-hover:text-brand-yellow max-md:group-data-[view=grid]/landing:text-lg md:text-2xl lg:text-[30px]">
                           {product.name}
                         </span>
-                        <span className="font-display text-lg text-cream/70 md:text-xl">
+                        <span className="font-display text-lg text-cream/70 transition-opacity duration-300 md:text-xl md:group-data-[piled=true]/issue:opacity-0">
                           {formatUsd(product.priceCents)}
                         </span>
                       </HandoffLink>
@@ -131,7 +153,7 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
                   </li>
                 );
               })}
-            </ul>
+            </IssueGrid>
           </div>
         );
       })}

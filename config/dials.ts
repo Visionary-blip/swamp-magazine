@@ -25,6 +25,14 @@ export const dials = {
   lighterVisible: false,
 
   /**
+   * Whether the landing's product grid is scattered, each tile nudged off its cell
+   * by its own fixed offset (features/storefront/lib/scatter.ts), after the
+   * floating grid on skylrk.com. Desktop only; a phone keeps its one-at-a-time
+   * feed. Set to false for the plain, even grid as it was.
+   */
+  scatterProducts: false,
+
+  /**
    * Whether the site-wide music player (features/audio-player) is mounted. It
    * is switched off while the founder works on it; everything built for it is
    * kept, so setting this to true brings it back as it was.

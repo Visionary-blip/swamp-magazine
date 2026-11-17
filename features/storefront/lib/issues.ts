@@ -1,3 +1,5 @@
+import { dials } from "@/config/dials";
+
 import type { CatalogProduct } from "./catalog";
 import { storefrontCopy } from "./storefront-copy";
 
@@ -24,6 +26,20 @@ export type IssueGroup = {
 /** The catalog split into its issues, each with the line that heads its row.
  * An issue with nothing in it is left out. */
 export function groupByIssue(products: CatalogProduct[]): IssueGroup[] {
+  // A scattered grid is one field with no headings (and none to centre under):
+  // the newest issue's pieces first, then the rest.
+  if (dials.scatterProducts) {
+    const ordered = [
+      ...products.filter((product) =>
+        NATIONAL_ISSUE_SLUGS.includes(product.slug),
+      ),
+      ...products.filter(
+        (product) => !NATIONAL_ISSUE_SLUGS.includes(product.slug),
+      ),
+    ];
+    return [{ heading: "", products: ordered, centered: false }];
+  }
+
   const national = products.filter((product) =>
     NATIONAL_ISSUE_SLUGS.includes(product.slug),
   );
