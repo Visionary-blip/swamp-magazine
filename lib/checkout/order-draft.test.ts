@@ -328,3 +328,52 @@ describe("resolveOrderDraft botched sizes", () => {
     ).toMatchObject({ status: "error", reason: "invalid-input" });
   });
 });
+
+describe("resolveOrderDraft two-pack", () => {
+  const sleep = product({
+    id: "prod-sleep",
+    slug: "sleep-shirt",
+    name: "Sleep Shirt",
+    price_cents: 1500,
+    product_variants: [{ id: "var-sl-m", size: "M", inventory_count: 5 }],
+  });
+  const total = (quantity: number) => {
+    const result = resolveOrderDraft(
+      [sleep],
+      [line("sleep-shirt", "M / BOTH", quantity)],
+      "pickup",
+    );
+    if (result.status !== "success") throw new Error("expected success");
+    return result.draft;
+  };
+
+  it("charges one at the single price, two at the pack price", () => {
+    expect(total(1).totalCents).toBe(1500);
+    expect(total(2).totalCents).toBe(dials.sleepShirtTwoPackCents);
+  });
+
+  it("charges a pair plus an odd one out", () => {
+    expect(total(3).totalCents).toBe(dials.sleepShirtTwoPackCents + 1500);
+    expect(total(4).totalCents).toBe(dials.sleepShirtTwoPackCents * 2);
+  });
+
+  it("keeps whole-cent units and the full quantity on the variant", () => {
+    const draft = total(3);
+    expect(draft.lines.every((l) => Number.isInteger(l.unitPriceCents))).toBe(
+      true,
+    );
+    expect(draft.lines.reduce((sum, l) => sum + l.quantity, 0)).toBe(3);
+  });
+
+  it("still checks stock against the whole quantity", () => {
+    expect(
+      resolveOrderDraft([sleep], [line("sleep-shirt", "M / BOTH", 6)], "pickup"),
+    ).toMatchObject({ status: "error", reason: "sold-out" });
+  });
+
+  it("refuses a Sleep Shirt line that names no design", () => {
+    expect(
+      resolveOrderDraft([sleep], [line("sleep-shirt", "M")], "pickup"),
+    ).toMatchObject({ status: "error", reason: "invalid-input" });
+  });
+});

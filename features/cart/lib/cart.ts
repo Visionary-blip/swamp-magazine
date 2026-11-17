@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { lineTotalCents } from "@/lib/checkout/packs";
+
 // The cart is the customer's own scratchpad, kept in the browser: there is no
 // cart page and no cart table. Everything here is display data -- name, price
 // and picture so the corner can draw itself without a round trip. None of it is
@@ -113,7 +115,10 @@ export function cartCount(items: CartItem[]): number {
 }
 
 export function cartSubtotalCents(items: CartItem[]): number {
-  return items.reduce((sum, item) => sum + item.priceCents * item.quantity, 0);
+  return items.reduce(
+    (sum, item) => sum + lineTotalCents(item.slug, item.priceCents, item.quantity),
+    0,
+  );
 }
 
 const SIZE_ORDER = ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"];

@@ -20,6 +20,7 @@ import {
   parseBotchedSize,
   sizeMatches,
 } from "@/lib/checkout/botched";
+import { lineTotalCents } from "@/lib/checkout/packs";
 import { cn } from "@/lib/utils";
 
 import {
@@ -61,7 +62,7 @@ export function CartCheckout() {
     delivery === "shipping" ? orderCopy.shipping : orderCopy.pickup;
   const ledgerLines: LedgerLine[] = items.map((item) => ({
     label: `${item.name.toUpperCase()}${item.addOn ? "" : ` ${item.size}`}${item.quantity > 1 ? ` ×${item.quantity}` : ""}`,
-    amountCents: item.priceCents * item.quantity,
+    amountCents: lineTotalCents(item.slug, item.priceCents, item.quantity),
   }));
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {

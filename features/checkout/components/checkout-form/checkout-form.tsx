@@ -1,7 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition, type FormEvent, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  useTransition, type FormEvent, type ReactNode } from "react";
 
 import { createCheckoutSession } from "@/actions/create-checkout-session";
 import { dials } from "@/config/dials";
@@ -16,6 +20,12 @@ import {
   type BotchedFit,
   parseBotchedSize,
 } from "@/lib/checkout/botched";
+import {
+  designQuantity,
+  designsFor,
+  withDesign,
+} from "@/lib/checkout/designs";
+import { lineTotalCents } from "@/lib/checkout/packs";
 import { cn } from "@/lib/utils";
 
 import type { LedgerLine } from "../order-ledger/order-ledger";
@@ -73,6 +83,18 @@ export function CheckoutForm({
   // What a Botched garment is cut to (height and how botched); null until the
   // pop-up has been answered.
   const [fit, setFit] = useState<BotchedFit | null>(null);
+  // Which design, on a garment that has them (EX-MODEL, SWEET DREAMS, BOTH).
+  const designs = designsFor(slug);
+  const [design, setDesign] = useState<string | null>(null);
+  // "WHY NOT?" fades in and out when BOTH is picked.
+  const [whyNot, setWhyNot] = useState(false);
+  const whyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (whyTimer.current) clearTimeout(whyTimer.current);
+    },
+    [],
+  );
   const [botchedOpen, setBotchedOpen] = useState(false);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [orderId, setOrderId] = useState<string | null>(null);
@@ -108,8 +130,15 @@ export function CheckoutForm({
     : plainSizes;
   // The size that goes on the order line: a Botched one carries the fit, and
   // there is none until the pop-up has been answered.
-  const orderSize =
+  const pickedSize =
     size === BOTCHED_SIZE ? (fit ? botchedSize(fit) : null) : size;
+  // A garment with designs needs one chosen before it can be ordered.
+  const orderSize =
+    pickedSize && designs.length > 0
+      ? design
+        ? withDesign(pickedSize, design)
+        : null
+      : pickedSize;
   const deliveryChosen = cart.items.length > 0 || deliveryPicked;
   const allGone =
     plainSizes.length === 0 || plainSizes.every((option) => option.soldOut);
@@ -119,9 +148,10 @@ export function CheckoutForm({
     ? {
         slug,
         size: orderSize,
-        // B stays on the list, so the cart can switch to it and back.
-        sizes,
-        quantity: 1,
+        // B stays on the list, so the cart can switch to it and back. A design
+        // is part of the size text, so those lines are changed by re-adding.
+        sizes: designs.length > 0 ? [] : sizes,
+        quantity: design ? designQuantity(design) : 1,
         name,
         priceCents,
         cutoutUrl: cutout?.url ?? null,
@@ -133,7 +163,8 @@ export function CheckoutForm({
   );
 
   const subtotalCents = orderItems.reduce(
-    (sum, item) => sum + item.priceCents * item.quantity,
+    (sum, item) =>
+      sum + lineTotalCents(item.slug, item.priceCents, item.quantity),
     0,
   );
   const shippingCents =
@@ -145,7 +176,7 @@ export function CheckoutForm({
     delivery === "shipping" ? orderCopy.shipping : orderCopy.pickup;
   const ledgerLines: LedgerLine[] = orderItems.map((item) => ({
     label: `${item.name.toUpperCase()}${item.addOn ? "" : ` ${item.size}`}${item.quantity > 1 ? ` ×${item.quantity}` : ""}`,
-    amountCents: item.priceCents * item.quantity,
+    amountCents: lineTotalCents(item.slug, item.priceCents, item.quantity),
   }));
 
   // The button states the whole charge as one number: the order plus shipping
@@ -164,6 +195,7 @@ export function CheckoutForm({
     cart.addItem(selected);
     setSize(null);
     setFit(null);
+    setDesign(null);
     // In the landing's overlay "back to the grid" is closing the overlay.
     if (overlay) overlay.close();
     else router.push("/#products");
@@ -382,6 +414,57 @@ export function CheckoutForm({
           ))}
         </div>
       </fieldset>
+
+      {/* Which design: one of the two, or BOTH (a pair, at the two-pack price). */}
+      {designs.length > 0 ? (
+        <fieldset disabled={isPending} className="max-md:w-full">
+          <legend className="sr-only">DESIGN</legend>
+          <div className="brat flex flex-wrap justify-center gap-x-6 max-md:flex-nowrap max-md:gap-x-0 max-md:divide-x max-md:divide-brand-red/40 max-md:border-y max-md:border-brand-red/40 max-md:bg-ink/55">
+            {designs.map((option) => (
+              <label
+                key={option}
+                className={cn(
+                  "cursor-pointer px-1 py-2 transition-colors duration-200 max-md:flex max-md:min-h-16 max-md:flex-1 max-md:items-center max-md:justify-center",
+                  design === option
+                    ? "text-brand-yellow"
+                    : "text-brand-red hover:text-brand-yellow",
+                )}
+              >
+                <input
+                  type="radio"
+                  name="design"
+                  value={option}
+                  checked={design === option}
+                  onChange={() => {
+                    setDesign(option);
+                    if (option === "BOTH") {
+                      setWhyNot(true);
+                      if (whyTimer.current) clearTimeout(whyTimer.current);
+                      whyTimer.current = setTimeout(
+                        () => setWhyNot(false),
+                        1400,
+                      );
+                    }
+                  }}
+                  className="peer sr-only"
+                />
+                <span className="peer-focus-visible:underline peer-focus-visible:underline-offset-8">
+                  {option}
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      ) : null}
+      <p
+        aria-hidden={!whyNot}
+        className={cn(
+          "brat pointer-events-none fixed inset-x-0 top-1/2 z-50 -translate-y-1/2 text-center text-brand-yellow transition-opacity duration-500",
+          whyNot ? "opacity-100" : "opacity-0",
+        )}
+      >
+        WHY NOT?
+      </p>
 
       {size === BOTCHED_SIZE ? (
         <>

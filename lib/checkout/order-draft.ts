@@ -6,6 +6,8 @@ import { dials } from "@/config/dials";
 
 import { botchedBaseSize, botchedOffered, parseBotchedSize } from "./botched";
 import { findCodeAddOn } from "./code-add-ons";
+import { splitDesign } from "./designs";
+import { priceLines } from "./packs";
 
 // The pure half of createCheckoutSession: given rows already read from the DB,
 // decide whether this is a sellable order and what it costs. Pulled out of the
@@ -139,11 +141,18 @@ export function resolveOrderDraft(
       return { status: "error", reason: "invalid-input" };
     }
 
+    // A design (EX-MODEL, SWEET DREAMS, BOTH) is not a variant either: strip it
+    // to find the stock, and refuse a line that names none.
+    const designed = splitDesign(line.slug, line.size);
+    if (!designed) {
+      return { status: "error", reason: "invalid-input" };
+    }
+
     // A Botched size is not a variant of its own: it is cut from the XL (or the
     // garment's largest size when it has no XL).
     const wantedSize = parseBotchedSize(line.size)
       ? botchedBaseSize(product.product_variants.map((row) => row.size))
-      : line.size;
+      : designed.size;
     const variant = product.product_variants.find(
       (row) => row.size === wantedSize,
     );
@@ -163,15 +172,23 @@ export function resolveOrderDraft(
     claimed.set(variant.id, taken + line.quantity);
     if (!product.is_add_on) hasGarment = true;
 
-    lines.push({
-      productId: product.id,
-      variantId: variant.id,
-      productName: product.name,
-      // The line keeps what was asked for, so a Botched order carries its height.
-      size: line.size,
-      unitPriceCents: product.price_cents,
-      quantity: line.quantity,
-    });
+    // A two-pack is more than one line of the same garment, so each pair's price
+    // is a whole number of cents per unit.
+    for (const priced of priceLines(
+      line.slug,
+      product.price_cents,
+      line.quantity,
+    )) {
+      lines.push({
+        productId: product.id,
+        variantId: variant.id,
+        productName: product.name,
+        // The line keeps what was asked for, so a Botched order carries its height.
+        size: line.size,
+        unitPriceCents: priced.unitPriceCents,
+        quantity: priced.quantity,
+      });
+    }
   }
 
   // An add-on is the gum at the register: it rides along with a real purchase.

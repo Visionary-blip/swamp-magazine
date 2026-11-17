@@ -149,6 +149,19 @@ const CATALOG: SeedProduct[] = [
     cutoutFile: "swamp-images/TRIPLE CROC TEE GRID.webp",
     sortOrder: 9,
   },
+  // The Sleep Shirt, added 2026-11-17 with a sage green stand-in for the cutout
+  // until the real product shot exists (swap it in the admin). $15 alone, $25 for
+  // two (the two-pack is a dial, config/dials.ts). The sizes, the stock and
+  // Connor's missing handle are placeholders the founder fills in.
+  {
+    slug: "sleep-shirt",
+    name: "Sleep Shirt",
+    priceCents: 1500,
+    sizes: ["XS", "S", "M", "L", "XL"],
+    modelCredits: "BRIANNA, CONNOR",
+    cutoutFile: "swamp-images/SLEEP SHIRT GRID.webp",
+    sortOrder: 10,
+  },
 ];
 
 // Product backgrounds. star-shorts is deliberately absent: its slot is already

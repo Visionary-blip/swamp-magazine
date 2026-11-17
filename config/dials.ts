@@ -18,6 +18,13 @@ export const dials = {
   lighterPriceCents: 500,
 
   /**
+   * The Sleep Shirt's two-pack: the price in cents of two of the same shirt
+   * bought together (a single one is its product price, $15). Every pair in an
+   * order gets it; an odd one out pays the single price. Founder's call, 2026-11-17.
+   */
+  sleepShirtTwoPackCents: 2500,
+
+  /**
    * Whether the lighter is offered on the add-ons page. It is switched off while
    * the founder works on it; its price, picture and server-side pricing are all
    * kept, so setting this to true brings it back as it was.
