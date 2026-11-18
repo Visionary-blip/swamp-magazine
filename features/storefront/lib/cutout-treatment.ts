@@ -20,3 +20,14 @@ const PAGE_EXPOSURE: Record<string, string> = {};
 export function getPageExposureClass(slug: string): string {
   return PAGE_EXPOSURE[slug] ?? "";
 }
+
+// The same, for a cutout that reads small on its own page: drawn a size up inside
+// the box the other products fill. The box itself stays put, so the hand-off from
+// the grid lands where it always does.
+const PAGE_SCALE: Record<string, string> = {
+  "fc-hoodie": "scale-[1.15]",
+};
+
+export function getPageScaleClass(slug: string): string {
+  return PAGE_SCALE[slug] ?? "";
+}
