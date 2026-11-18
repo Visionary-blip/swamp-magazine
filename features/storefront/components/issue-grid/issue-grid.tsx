@@ -19,6 +19,11 @@ function pileJitter(index: number): { x: number; y: number; turn: number } {
 // grid's centre, and when it scrolls into the middle they spread out to their
 // cells. The pile is only transforms on the tiles, so the layout, the links and
 // what a phone gets (no pile at all) are the plain grid underneath.
+//
+// The pile only ever runs one way: a grid spreads out as the visitor scrolls down
+// to it, and is never re-piled by scrolling back up, when it leaves through the
+// bottom of the screen -- motion nobody is watching for. It piles only when it
+// is left above (scrolling down past it), and starts piled until first reached.
 export function IssueGrid({
   className,
   children,
@@ -45,8 +50,20 @@ export function IssueGrid({
   useEffect(() => {
     const list = listRef.current;
     if (!list || !enabled) return;
+    let seen = false;
     const observer = new IntersectionObserver(
-      ([entry]) => setPiled(!entry.isIntersecting),
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          seen = true;
+          setPiled(false);
+          return;
+        }
+        const leftBelow =
+          entry.rootBounds !== null &&
+          entry.boundingClientRect.top >= entry.rootBounds.bottom;
+        if (seen && leftBelow) return;
+        setPiled(true);
+      },
       { rootMargin: "-20% 0px -20% 0px", threshold: 0 },
     );
     observer.observe(list);
