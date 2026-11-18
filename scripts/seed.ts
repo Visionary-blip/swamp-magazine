@@ -95,7 +95,7 @@ const CATALOG: SeedProduct[] = [
     sizes: ["XS", "S", "M", "L", "XL"],
     modelCredits: "GARRETT, ADELINE",
     cutoutFile: "swamp-images/FC SHIRT GRID.webp",
-    sortOrder: 5,
+    sortOrder: 6,
   },
   // The FC hoodie, added 2026-11-13. Its cutout is the founder's newer photo of
   // it (17 Nov); the first, near-black one and a purple stand-in are kept in
@@ -108,7 +108,7 @@ const CATALOG: SeedProduct[] = [
     sizes: ["L", "XL"],
     modelCredits: "NIKITA (R), CALDER (L)",
     cutoutFile: "swamp-images/FC HOODIE GRID.webp",
-    sortOrder: 6,
+    sortOrder: 5,
   },
   // The Croc Crop, added 2026-11-14 with a red stand-in for the cutout until the
   // real product shot exists (swap it in the admin). The $25 price and the stock
@@ -159,7 +159,7 @@ const CATALOG: SeedProduct[] = [
     priceCents: 1500,
     sizes: ["XS", "S", "M", "L", "XL"],
     modelCredits: "BRIANNA, CONNOR",
-    cutoutFile: "swamp-images/SLEEP SHIRT GRID.webp",
+    cutoutFile: "swamp-images/SLEEP SHIRT EX-MODEL.webp",
     sortOrder: 10,
   },
 ];

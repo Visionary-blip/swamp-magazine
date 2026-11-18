@@ -13,7 +13,11 @@ import type { ProductDetail } from "../../lib/catalog";
 import { parseModelCredits } from "../../lib/model-credits";
 import { getCreditsMinWidth, getModelFit } from "../../lib/model-fit";
 import { getScrim } from "../../lib/background-scrim";
-import { getPageExposureClass } from "../../lib/cutout-treatment";
+import {
+  getPageExposureClass,
+  getPageScaleClass,
+} from "../../lib/cutout-treatment";
+import { getDesignImages } from "../../lib/design-images";
 import { getProductGallery } from "../../lib/product-gallery";
 import { storefrontCopy } from "../../lib/storefront-copy";
 import { ModelFitButton } from "../model-fit/model-fit-button";
@@ -143,12 +147,14 @@ export function ProductScreen({ product }: { product: ProductDetail }) {
           {product.cutout ? (
             <HandoffTarget className="relative mx-auto my-auto aspect-square w-[72vw] max-w-[420px] md:w-[min(34vw,36dvh)] md:max-w-none">
               <PairCutout
+                designImages={getDesignImages(product.slug)}
                 url={product.cutout.url}
                 alt={product.cutout.alt}
                 sizes="(min-width: 768px) 34vw, 72vw"
                 className={cn(
                   "object-contain drop-shadow-2xl",
                   getPageExposureClass(product.slug),
+                  getPageScaleClass(product.slug),
                 )}
               />
             </HandoffTarget>

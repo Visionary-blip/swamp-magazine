@@ -44,7 +44,7 @@ import {
 import { deliveryOptions } from "../../lib/delivery-options";
 import { ExModelDialog } from "../ex-model-dialog/ex-model-dialog";
 import { markExModelUsed, useExModelUsed } from "../../lib/ex-model-used";
-import { useSetPairView } from "../pair-view/pair-view";
+import { useSetDesignView } from "../pair-view/pair-view";
 import { scrollIntoViewOnMount } from "../../lib/scroll";
 import { stripePromise } from "../../lib/stripe-client";
 
@@ -96,7 +96,7 @@ export function CheckoutForm({
     null,
     null,
   ]);
-  const setPairView = useSetPairView();
+  const setDesignView = useSetDesignView();
   const design =
     mode === "BOTH"
       ? pairPicks[0] && pairPicks[1]
@@ -109,10 +109,17 @@ export function CheckoutForm({
   useEffect(
     () => () => {
       if (whyTimer.current) clearTimeout(whyTimer.current);
-      // Leaving the page puts the one big picture back.
-      setPairView(false);
     },
-    [setPairView],
+    [],
+  );
+  // The page's picture follows the picks; leaving the page puts the one big
+  // picture back.
+  useEffect(() => {
+    setDesignView({ mode, picks: pairPicks });
+  }, [mode, pairPicks, setDesignView]);
+  useEffect(
+    () => () => setDesignView({ mode: null, picks: [null, null] }),
+    [setDesignView],
   );
   const [botchedOpen, setBotchedOpen] = useState(false);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
@@ -215,7 +222,6 @@ export function CheckoutForm({
     setSize(null);
     setFit(null);
     setMode(null);
-    setPairView(false);
     setPairPicks([null, null]);
     // In the landing's overlay "back to the grid" is closing the overlay.
     if (overlay) overlay.close();
@@ -406,7 +412,6 @@ export function CheckoutForm({
                     checked={mode === option}
                     onChange={() => {
                       setMode(option);
-                      setPairView(option === "BOTH");
                       if (option === "BOTH") {
                         setWhyNot(true);
                         if (whyTimer.current) clearTimeout(whyTimer.current);
@@ -430,7 +435,6 @@ export function CheckoutForm({
                 type="button"
                 onClick={() => {
                   setMode(null);
-                  setPairView(false);
                   setPairPicks([null, null]);
                 }}
                 className="cursor-pointer px-1 py-2 text-brand-red transition-colors duration-200 hover:text-brand-yellow focus-visible:underline focus-visible:underline-offset-8 max-md:flex max-md:min-h-16 max-md:flex-1 max-md:items-center max-md:justify-center"
