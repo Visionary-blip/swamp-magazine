@@ -68,7 +68,8 @@ export function PairCutout({
   }
   return (
     // Each shirt is the size the single picture is, one either side of centre.
-    // A phone has no room for two at full width, so there they overlap.
+    // A phone has no room for two side by side, so there they are staggered down
+    // the page, overlapping and tilted a little, like a +2 card in Uno.
     // A shirt with no design picked yet shows the design its place would take in
     // the pair.
     <>
@@ -79,8 +80,8 @@ export function PairCutout({
             key={index}
             className={
               index === 0
-                ? "absolute inset-0 -translate-x-1/2 max-md:-translate-x-[36%]"
-                : "absolute inset-0 translate-x-1/2 max-md:translate-x-[36%]"
+                ? "absolute inset-0 -translate-x-1/2 max-md:-translate-x-[14%] max-md:-translate-y-[22%] max-md:-rotate-6 max-md:scale-[0.8]"
+                : "absolute inset-0 translate-x-1/2 max-md:translate-x-[14%] max-md:translate-y-[22%] max-md:rotate-6 max-md:scale-[0.8]"
             }
           >
             <Image
