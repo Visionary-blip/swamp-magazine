@@ -4,44 +4,60 @@ import Image from "next/image";
 import { createContext, useContext, useState, type ReactNode } from "react";
 
 // The product page's big picture and the order form are siblings in a server
-// component, so "BOTH was picked" needs somewhere to live that both can reach.
-const PairViewContext = createContext<((both: boolean) => void) | null>(null);
-const PairActiveContext = createContext(false);
+// component, so what the form has picked needs somewhere to live that both can
+// reach: `mode` is a single design or BOTH, `picks` is each of the two shirts'
+// designs under BOTH.
+export type DesignView = {
+  mode: string | null;
+  picks: [string | null, string | null];
+};
+
+const NO_VIEW: DesignView = { mode: null, picks: [null, null] };
+
+const DesignViewContext = createContext<((view: DesignView) => void) | null>(
+  null,
+);
+const DesignActiveContext = createContext<DesignView>(NO_VIEW);
 
 export function PairViewProvider({ children }: { children: ReactNode }) {
-  const [both, setBoth] = useState(false);
+  const [view, setView] = useState<DesignView>(NO_VIEW);
   return (
-    <PairViewContext.Provider value={setBoth}>
-      <PairActiveContext.Provider value={both}>
+    <DesignViewContext.Provider value={setView}>
+      <DesignActiveContext.Provider value={view}>
         {children}
-      </PairActiveContext.Provider>
-    </PairViewContext.Provider>
+      </DesignActiveContext.Provider>
+    </DesignViewContext.Provider>
   );
 }
 
-/** Lets the order form say whether BOTH is picked; a no-op off the product page. */
-export function useSetPairView(): (both: boolean) => void {
-  return useContext(PairViewContext) ?? (() => {});
+/** Lets the order form say what is picked; a no-op off the product page. */
+export function useSetDesignView(): (view: DesignView) => void {
+  return useContext(DesignViewContext) ?? (() => {});
 }
 
-/** The garment's picture: the one big cutout, until BOTH is picked, and then the
- * same cutout twice, side by side, in the same place. */
+/** The garment's picture: its one cutout, or the picked design's own; and under
+ * BOTH, the two shirts side by side in the same place, each in its design. */
 export function PairCutout({
   url,
   alt,
   sizes,
   className,
+  designImages,
 }: {
   url: string;
   alt: string;
   sizes: string;
   className?: string;
+  /** Picture per design, for a garment that has them. */
+  designImages: Record<string, string>;
 }) {
-  const both = useContext(PairActiveContext);
-  if (!both) {
+  const { mode, picks } = useContext(DesignActiveContext);
+  const designs = Object.keys(designImages);
+
+  if (mode !== "BOTH") {
     return (
       <Image
-        src={url}
+        src={(mode && designImages[mode]) || url}
         alt={alt}
         fill
         priority
@@ -51,20 +67,32 @@ export function PairCutout({
     );
   }
   return (
-    // Wider than the single picture's box, centred on it, so each shirt keeps a
-    // good size; narrow enough to stay on a phone's screen.
-    <div className="absolute top-1/2 left-1/2 flex w-[130%] -translate-x-1/2 -translate-y-1/2">
-      {[0, 1].map((index) => (
-        <div key={index} className="relative aspect-square w-1/2">
-          <Image
-            src={url}
-            alt={index === 0 ? alt : ""}
-            fill
-            sizes={sizes}
-            className={className}
-          />
-        </div>
-      ))}
-    </div>
+    // Each shirt is the size the single picture is, one either side of centre.
+    // A phone has no room for two at full width, so there they overlap.
+    // A shirt with no design picked yet shows the design its place would take in
+    // the pair.
+    <>
+      {[0, 1].map((index) => {
+        const design = picks[index] ?? designs[index];
+        return (
+          <div
+            key={index}
+            className={
+              index === 0
+                ? "absolute inset-0 -translate-x-1/2 max-md:-translate-x-[36%]"
+                : "absolute inset-0 translate-x-1/2 max-md:translate-x-[36%]"
+            }
+          >
+            <Image
+              src={(design && designImages[design]) || url}
+              alt={index === 0 ? alt : ""}
+              fill
+              sizes={sizes}
+              className={className}
+            />
+          </div>
+        );
+      })}
+    </>
   );
 }
