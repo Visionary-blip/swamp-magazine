@@ -23,7 +23,9 @@ function pileJitter(index: number): { x: number; y: number; turn: number } {
 // `holdWhenLeftBelow`: leaving through the bottom of the screen means the visitor
 // scrolled up, away from the grid. The grid that has this keeps its spread then
 // (the National issue, under the hero, on the way back up to the landing page);
-// the others pile back up. Every grid starts piled and spreads on arrival.
+// the others pile back up. Every grid starts piled and spreads on arrival. A held
+// grid does pile once it is wholly below the screen (the visitor is back at the
+// landing page, nobody sees it), so the next trip down shows it spreading out.
 export function IssueGrid({
   className,
   children,
@@ -69,7 +71,18 @@ export function IssueGrid({
       { rootMargin: "-20% 0px -20% 0px", threshold: 0 },
     );
     observer.observe(list);
+    const pileWhenOffScreenBelow = () => {
+      if (list.getBoundingClientRect().top >= window.innerHeight) {
+        setPiled(true);
+      }
+    };
+    if (holdWhenLeftBelow) {
+      window.addEventListener("scroll", pileWhenOffScreenBelow, {
+        passive: true,
+      });
+    }
     return () => {
+      window.removeEventListener("scroll", pileWhenOffScreenBelow);
       observer.disconnect();
       setPiled(false);
     };

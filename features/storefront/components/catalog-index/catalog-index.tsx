@@ -13,6 +13,17 @@ import { getProductGallery } from "../../lib/product-gallery";
 import { IssueGrid } from "../issue-grid/issue-grid";
 import { Reveal } from "../reveal/reveal";
 
+// A tile's width in a centred row of n: the row less its n-1 gaps (md:gap-x-8,
+// 2rem), shared out. Fewer than four keep the width of four, as before.
+const ROW_TILE_WIDTH: Record<number, string> = {
+  1: "md:w-[calc(25%-1.5rem)]",
+  2: "md:w-[calc(25%-1.5rem)]",
+  3: "md:w-[calc(25%-1.5rem)]",
+  4: "md:w-[calc(25%-1.5rem)]",
+  5: "md:w-[calc((100%-8rem)/5)]",
+  6: "md:w-[calc((100%-10rem)/6)]",
+};
+
 // The product grid under the hero (one row of four from md up, two across on a
 // phone): each garment's cutout on ink, name and price
 // beneath, the whole tile the link. It replaces the film-credits index list at
@@ -97,7 +108,11 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
                     data-feed-product
                     className={cn(
                       "relative isolate flex min-h-dvh items-center justify-center overflow-hidden px-5 max-md:group-data-[view=grid]/landing:min-h-0 max-md:group-data-[view=grid]/landing:items-start max-md:group-data-[view=grid]/landing:px-0 md:min-h-0 md:items-start md:overflow-visible md:px-0",
-                      centered && "md:w-[calc(25%-1.5rem)]",
+                      // A centred issue stays in one row up to six tiles, so the
+                      // whole National Issue is on screen at once; more than that
+                      // wraps at six. Literal classes, so Tailwind can see them.
+                      centered &&
+                        ROW_TILE_WIDTH[Math.min(group.products.length, 6)],
                       scatter &&
                         "md:[transform:translate(var(--sx),var(--sy))_scale(var(--ss))]",
                     )}
