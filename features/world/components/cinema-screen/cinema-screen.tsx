@@ -2,8 +2,19 @@ import { MastheadLink, SiteFooter } from "@/features/storefront";
 
 import { CinemaPlayer } from "./cinema-player";
 
-// The founder's cut, 1080p H.264 with its own sound (compressed from the 226 MB
-// master; the master stays with the founder). See CinemaPlayer for the controls.
+// The founder's films, 1080p H.264 with their own sound (the final cut compressed
+// from the 226 MB master, which stays with the founder), side by side behind left
+// and right arrows. See CinemaPlayer for the controls.
+const FILMS = [
+  {
+    src: "/world/cinema-final-cut.mp4",
+    poster: "/world/cinema-final-cut-poster.webp",
+    title: "final cut",
+  },
+  // 4:5 portrait, 16 s; the founder's file, copied as it was (a .mov, H.264/AAC).
+  { src: "/world/cinema-tv-vignette.mp4", title: "TV vignette" },
+] as const;
+
 export function CinemaScreen() {
   return (
     <main className="flex min-h-dvh flex-col bg-ink">
@@ -16,8 +27,7 @@ export function CinemaScreen() {
           CINEMA
         </h1>
         <CinemaPlayer
-          src="/world/cinema-final-cut.mp4"
-          poster="/world/cinema-final-cut-poster.webp"
+          films={FILMS}
           // Edge to edge on a phone, 16:9 kept by the player.
           className="w-full md:w-4/5"
         />

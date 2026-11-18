@@ -10,17 +10,23 @@ import { cn } from "@/lib/utils";
 const roundButton =
   "animate-blink-yellow flex size-8 items-center justify-center rounded-full border border-brand-red/70 bg-ink/80 text-brand-red transition-colors duration-200 hover:text-brand-yellow hover:border-brand-yellow focus-visible:text-brand-yellow focus-visible:border-brand-yellow focus-visible:outline-none pointer-coarse:size-11";
 
+export type Film = {
+  src: string;
+  /** Optional: a film with none shows its own first frame. */
+  poster?: string;
+  /** What the arrows announce, for a screen reader. */
+  title: string;
+};
+
 // The film with only what the founder asked for: play/pause and a volume
 // button laid out exactly as the music player's (four snap positions, the far
 // left being silence). The browser's own bar -- full screen, the three-dot menu,
 // the clock -- is off. It starts by itself (see the effect below).
 export function CinemaPlayer({
-  src,
-  poster,
+  films,
   className,
 }: {
-  src: string;
-  poster: string;
+  films: readonly Film[];
   className?: string;
 }) {
   const video = useRef<HTMLVideoElement>(null);
@@ -29,16 +35,19 @@ export function CinemaPlayer({
   const [level, setLevel] = useState(volumeLevels.length - 1); // full
   const muted = level === 0;
   const [menuOpen, setMenuOpen] = useState(false);
+  const [index, setIndex] = useState(0);
+  const { src, poster } = films[index];
 
+  // A new film is a new <video> (keyed on its src), so it takes the volume too.
   useEffect(() => {
     if (video.current) video.current.volume = volumeLevels[level];
-  }, [level]);
+  }, [level, index]);
 
   // Starts on arrival. Browsers only allow sound once the visitor has interacted
   // with the site, which arriving through the WORLD page's links normally
   // counts as; when it is refused (a direct load, a strict browser) the film
   // starts silent instead and the volume button shows it as muted, so a press
-  // there brings the sound up.
+  // there brings the sound up. The arrows start the next film the same way.
   useEffect(() => {
     const element = video.current;
     if (!element) return;
@@ -47,7 +56,7 @@ export function CinemaPlayer({
       element.muted = true;
       element.play().catch(() => setPlaying(false));
     });
-  }, []);
+  }, [index]);
 
   // A press anywhere else, or Escape, closes the menu (same as the music player).
   useEffect(() => {
@@ -66,6 +75,12 @@ export function CinemaPlayer({
     };
   }, [menuOpen]);
 
+  // Left and right step through the films, round the ends, so both arrows always
+  // work.
+  function step(direction: 1 | -1) {
+    setIndex((current) => (current + direction + films.length) % films.length);
+  }
+
   function togglePlay() {
     const element = video.current;
     if (!element) return;
@@ -77,6 +92,7 @@ export function CinemaPlayer({
   return (
     <div ref={root} className={cn("group/film relative", className)}>
       <video
+        key={src}
         ref={video}
         playsInline
         preload="metadata"
@@ -84,10 +100,56 @@ export function CinemaPlayer({
         muted={muted}
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
-        className="aspect-video w-full bg-ink"
+        // A portrait film sits inside the same 16:9 frame, ink either side.
+        className="aspect-video w-full bg-ink object-contain"
       >
         <source src={src} type="video/mp4" />
       </video>
+
+      {films.length > 1
+        ? (["previous", "next"] as const).map((which) => (
+            <div
+              key={which}
+              className={cn(
+                "absolute inset-y-0 flex items-center",
+                which === "previous"
+                  ? "left-2 md:left-4"
+                  : "right-2 md:right-4",
+              )}
+            >
+              <button
+                type="button"
+                onClick={() => step(which === "previous" ? -1 : 1)}
+                aria-label={`${which === "previous" ? "Previous" : "Next"} film: ${
+                  films[
+                    (index + (which === "previous" ? -1 : 1) + films.length) %
+                      films.length
+                  ].title
+                }`}
+                className={roundButton}
+              >
+                <svg
+                  aria-hidden
+                  viewBox="0 0 12 12"
+                  className="size-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path
+                    d={
+                      which === "previous"
+                        ? "M7.5 2L3.5 6l4 4"
+                        : "M4.5 2l4 4-4 4"
+                    }
+                  />
+                </svg>
+              </button>
+            </div>
+          ))
+        : null}
 
       <div
         role="group"
