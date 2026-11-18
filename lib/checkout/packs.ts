@@ -22,9 +22,7 @@ export function lineTotalCents(
 ): number {
   const pair = twoPackCents(slug);
   if (pair === null) return unitPriceCents * quantity;
-  return (
-    Math.floor(quantity / 2) * pair + (quantity % 2) * unitPriceCents
-  );
+  return Math.floor(quantity / 2) * pair + (quantity % 2) * unitPriceCents;
 }
 
 /** The order lines a quantity is charged as. Stripe takes whole-cent unit

@@ -335,12 +335,15 @@ describe("resolveOrderDraft two-pack", () => {
     slug: "sleep-shirt",
     name: "Sleep Shirt",
     price_cents: 1500,
-    product_variants: [{ id: "var-sl-m", size: "M", inventory_count: 5 }],
+    product_variants: [
+      { id: "var-sl-l", size: "L", inventory_count: 5 },
+      { id: "var-sl-xl", size: "XL", inventory_count: 1 },
+    ],
   });
   const total = (quantity: number) => {
     const result = resolveOrderDraft(
       [sleep],
-      [line("sleep-shirt", "M / EX-MODEL", quantity)],
+      [line("sleep-shirt", "L / EX-MODEL", quantity)],
       "pickup",
     );
     if (result.status !== "success") throw new Error("expected success");
@@ -367,13 +370,17 @@ describe("resolveOrderDraft two-pack", () => {
 
   it("still checks stock against the whole quantity", () => {
     expect(
-      resolveOrderDraft([sleep], [line("sleep-shirt", "M / EX-MODEL", 6)], "pickup"),
+      resolveOrderDraft(
+        [sleep],
+        [line("sleep-shirt", "L / EX-MODEL", 6)],
+        "pickup",
+      ),
     ).toMatchObject({ status: "error", reason: "sold-out" });
   });
 
   it("refuses a Sleep Shirt line that names no design", () => {
     expect(
-      resolveOrderDraft([sleep], [line("sleep-shirt", "M")], "pickup"),
+      resolveOrderDraft([sleep], [line("sleep-shirt", "L")], "pickup"),
     ).toMatchObject({ status: "error", reason: "invalid-input" });
   });
 
@@ -381,7 +388,7 @@ describe("resolveOrderDraft two-pack", () => {
     expect(
       resolveOrderDraft(
         [sleep],
-        [line("sleep-shirt", "M / EX-MODEL + SWEET DREAMS", 1)],
+        [line("sleep-shirt", "L / EX-MODEL + XL / SWEET DREAMS", 1)],
         "pickup",
       ),
     ).toMatchObject({ status: "error", reason: "invalid-input" });
@@ -390,12 +397,62 @@ describe("resolveOrderDraft two-pack", () => {
   it("prices a pair of designs at the two-pack price", () => {
     const result = resolveOrderDraft(
       [sleep],
-      [line("sleep-shirt", "M / EX-MODEL + SWEET DREAMS", 2)],
+      [line("sleep-shirt", "L / EX-MODEL + XL / SWEET DREAMS", 2)],
       "pickup",
     );
     expect(result).toMatchObject({
       status: "success",
       draft: { totalCents: dials.sleepShirtTwoPackCents },
     });
+  });
+
+  it("gives each shirt of a pair its own size and stock", () => {
+    const result = resolveOrderDraft(
+      [sleep],
+      [line("sleep-shirt", "L / EX-MODEL + XL / SWEET DREAMS", 2)],
+      "pickup",
+    );
+    if (result.status !== "success") throw new Error("expected success");
+    expect(result.draft.lines.map((l) => [l.variantId, l.size])).toEqual([
+      ["var-sl-l", "L / EX-MODEL"],
+      ["var-sl-xl", "XL / SWEET DREAMS"],
+    ]);
+    expect(result.draft.totalCents).toBe(dials.sleepShirtTwoPackCents);
+  });
+
+  it("refuses a pair when either size is out of stock", () => {
+    expect(
+      resolveOrderDraft(
+        [sleep],
+        [line("sleep-shirt", "XL / EX-MODEL + XL / SWEET DREAMS", 2)],
+        "pickup",
+      ),
+    ).toMatchObject({ status: "error", reason: "sold-out" });
+  });
+
+  it("still reads a pair written with one size", () => {
+    expect(
+      resolveOrderDraft(
+        [sleep],
+        [line("sleep-shirt", "L / EX-MODEL + SWEET DREAMS", 2)],
+        "pickup",
+      ),
+    ).toMatchObject({ status: "success" });
+  });
+
+  it("only sells the Sleep Shirt in L and XL", () => {
+    const small = product({
+      id: "prod-sleep",
+      slug: "sleep-shirt",
+      price_cents: 1500,
+      product_variants: [{ id: "var-sl-m", size: "M", inventory_count: 5 }],
+    });
+    expect(
+      resolveOrderDraft(
+        [small],
+        [line("sleep-shirt", "M / EX-MODEL")],
+        "pickup",
+      ),
+    ).toMatchObject({ status: "error", reason: "invalid-input" });
   });
 });

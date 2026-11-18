@@ -6,8 +6,8 @@ import { dials } from "@/config/dials";
 
 import { botchedBaseSize, botchedOffered, parseBotchedSize } from "./botched";
 import { findCodeAddOn } from "./code-add-ons";
-import { designQuantity, splitDesign } from "./designs";
-import { priceLines } from "./packs";
+import { splitDesign, withDesign } from "./designs";
+import { priceLines, twoPackCents } from "./packs";
 
 // The pure half of createCheckoutSession: given rows already read from the DB,
 // decide whether this is a sellable order and what it costs. Pulled out of the
@@ -141,59 +141,76 @@ export function resolveOrderDraft(
       return { status: "error", reason: "invalid-input" };
     }
 
-    // A design (EX-MODEL, SWEET DREAMS, BOTH) is not a variant either: strip it
-    // to find the stock, and refuse a line that names none.
+    // A design (EX-MODEL, SWEET DREAMS) is not a variant either: read the shirts
+    // off the line, and refuse a line that names none.
     const designed = splitDesign(line.slug, line.size);
-    // A pair of designs is two shirts, so its line comes in twos: one shirt
-    // named as a pair would be two at the single price.
+    // A pair is two shirts, so its line comes in twos (one shirt named as a pair
+    // would be two at the single price) and only where there is a two-pack.
     if (
       !designed ||
-      (designed.design && line.quantity % designQuantity(designed.design) !== 0)
+      (designed.shirts.length === 2 &&
+        (line.quantity % 2 !== 0 || twoPackCents(line.slug) === null))
     ) {
       return { status: "error", reason: "invalid-input" };
     }
 
     // A Botched size is not a variant of its own: it is cut from the XL (or the
     // garment's largest size when it has no XL).
-    const wantedSize = parseBotchedSize(line.size)
-      ? botchedBaseSize(product.product_variants.map((row) => row.size))
-      : designed.size;
-    const variant = product.product_variants.find(
-      (row) => row.size === wantedSize,
+    const wantedSizes = parseBotchedSize(line.size)
+      ? [botchedBaseSize(product.product_variants.map((row) => row.size))]
+      : designed.shirts.map((shirt) => shirt.size);
+    const variants = wantedSizes.map((wanted) =>
+      product.product_variants.find((row) => row.size === wanted),
     );
-    if (!variant) {
+    if (variants.some((variant) => !variant)) {
       return { status: "error", reason: "not-found" };
     }
+    const found = variants as NonNullable<(typeof variants)[number]>[];
 
-    const taken = claimed.get(variant.id) ?? 0;
-    if (variant.inventory_count - taken < line.quantity) {
-      return {
-        status: "error",
-        reason: "sold-out",
-        item: { slug: line.slug, size: line.size },
-      };
+    // Each shirt of a pair is half the line; both may be the same variant.
+    const each = line.quantity / found.length;
+    const needed = new Map<string, number>();
+    for (const variant of found) {
+      needed.set(variant.id, (needed.get(variant.id) ?? 0) + each);
     }
-
-    claimed.set(variant.id, taken + line.quantity);
+    for (const variant of found) {
+      if (
+        variant.inventory_count - (claimed.get(variant.id) ?? 0) <
+        (needed.get(variant.id) ?? 0)
+      ) {
+        return {
+          status: "error",
+          reason: "sold-out",
+          item: { slug: line.slug, size: line.size },
+        };
+      }
+    }
+    for (const [id, count] of needed) {
+      claimed.set(id, (claimed.get(id) ?? 0) + count);
+    }
     if (!product.is_add_on) hasGarment = true;
 
     // A two-pack is more than one line of the same garment, so each pair's price
-    // is a whole number of cents per unit.
-    for (const priced of priceLines(
-      line.slug,
-      product.price_cents,
-      line.quantity,
-    )) {
-      lines.push({
-        productId: product.id,
-        variantId: variant.id,
-        productName: product.name,
-        // The line keeps what was asked for, so a Botched order carries its height.
-        size: line.size,
-        unitPriceCents: priced.unitPriceCents,
-        quantity: priced.quantity,
-      });
-    }
+    // is a whole number of cents per unit. A pair's two lines are its two shirts,
+    // each with its own size and stock.
+    priceLines(line.slug, product.price_cents, line.quantity).forEach(
+      (priced, at) => {
+        const shirt = designed.shirts[at] ?? designed.shirts[0];
+        lines.push({
+          productId: product.id,
+          variantId: found[at]?.id ?? found[0].id,
+          productName: product.name,
+          // The line keeps what was asked for, so a Botched order carries its
+          // height; a pair's shirts each carry their own size and design.
+          size:
+            designed.shirts.length === 2 && shirt.design
+              ? withDesign(shirt.size, shirt.design)
+              : line.size,
+          unitPriceCents: priced.unitPriceCents,
+          quantity: priced.quantity,
+        });
+      },
+    );
   }
 
   // An add-on is the gum at the register: it rides along with a real purchase.
