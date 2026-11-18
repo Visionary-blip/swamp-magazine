@@ -26,7 +26,8 @@ import {
 import {
   designQuantity,
   designsFor,
-  pairDesign,
+  offeredSizes,
+  pairSize,
   withDesign,
 } from "@/lib/checkout/designs";
 import { lineTotalCents } from "@/lib/checkout/packs";
@@ -88,22 +89,23 @@ export function CheckoutForm({
   // What a Botched garment is cut to (height and how botched); null until the
   // pop-up has been answered.
   const [fit, setFit] = useState<BotchedFit | null>(null);
-  // Which design, on a garment that has them (EX-MODEL, SWEET DREAMS, BOTH).
+  // Which design, on a garment that has them (EX-MODEL, SWEET DREAMS), and one
+  // shirt or two.
   const designs = designsFor(slug);
-  // One design, or BOTH: two shirts shown, each with a design of its own.
+  // One design, or BOTH (the page's word for two): two shirts shown, each with a
+  // design and a size of its own.
   const [mode, setMode] = useState<string | null>(null);
   const [pairPicks, setPairPicks] = useState<[string | null, string | null]>([
     null,
     null,
   ]);
+  const [pairSizes, setPairSizes] = useState<[string | null, string | null]>([
+    null,
+    null,
+  ]);
   const setDesignView = useSetDesignView();
-  const design =
-    mode === "BOTH"
-      ? pairPicks[0] && pairPicks[1]
-        ? pairDesign(pairPicks[0], pairPicks[1])
-        : null
-      : mode;
-  // "WHY NOT?" fades in and out when BOTH is picked.
+  const design = mode === "BOTH" ? null : mode;
+  // "WHY NOT?" fades in and out when two is picked.
   const [whyNot, setWhyNot] = useState(false);
   const whyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(
@@ -141,10 +143,15 @@ export function CheckoutForm({
   const [exModelPlaced, setExModelPlaced] = useState(false);
   const exModelUsed = useExModelUsed();
 
-  const plainSizes = variants.map((variant) => ({
-    size: variant.size,
-    soldOut: variant.soldOut || refusedSizes.includes(variant.size),
-  }));
+  // Some garments are cut in fewer sizes than the database holds (the Sleep
+  // Shirt: L and XL); the server holds the order to the same list.
+  const offered = offeredSizes(slug);
+  const plainSizes = variants
+    .filter((variant) => !offered || offered.includes(variant.size))
+    .map((variant) => ({
+      size: variant.size,
+      soldOut: variant.soldOut || refusedSizes.includes(variant.size),
+    }));
   // B (Botched) is the XL with ripped hems (the largest size where there is no
   // XL), offered on the tees only, and sold out when that size is.
   const baseSizeName = botchedOffered(slug)
@@ -160,11 +167,18 @@ export function CheckoutForm({
     size === BOTCHED_SIZE ? (fit ? botchedSize(fit) : null) : size;
   // A garment with designs needs one chosen before it can be ordered.
   const orderSize =
-    pickedSize && designs.length > 0
-      ? design
-        ? withDesign(pickedSize, design)
-        : null
-      : pickedSize;
+    designs.length === 0
+      ? pickedSize
+      : mode === "BOTH"
+        ? pairPicks[0] && pairPicks[1] && pairSizes[0] && pairSizes[1]
+          ? pairSize(
+              { size: pairSizes[0], design: pairPicks[0] },
+              { size: pairSizes[1], design: pairPicks[1] },
+            )
+          : null
+        : pickedSize && design
+          ? withDesign(pickedSize, design)
+          : null;
   const deliveryChosen = cart.items.length > 0 || deliveryPicked;
   const allGone =
     plainSizes.length === 0 || plainSizes.every((option) => option.soldOut);
@@ -177,7 +191,8 @@ export function CheckoutForm({
         // B stays on the list, so the cart can switch to it and back. A design
         // is part of the size text, so those lines are changed by re-adding.
         sizes: designs.length > 0 ? [] : sizes,
-        quantity: design ? designQuantity(design) : 1,
+        quantity:
+          designs.length > 0 && orderSize ? designQuantity(orderSize) : 1,
         name,
         priceCents,
         cutoutUrl: cutout?.url ?? null,
@@ -223,6 +238,7 @@ export function CheckoutForm({
     setFit(null);
     setMode(null);
     setPairPicks([null, null]);
+    setPairSizes([null, null]);
     // In the landing's overlay "back to the grid" is closing the overlay.
     if (overlay) overlay.close();
     else router.push("/#products");
@@ -389,37 +405,42 @@ export function CheckoutForm({
       <h1 className="brat text-brand-red max-md:mb-4">{name}</h1>
       {scrollCue}
 
-      {/* Which design: one of the two, or BOTH (a pair, at the two-pack price). */}
+      {/* How many: one shirt, or two (the two-pack price). */}
       {designs.length > 0 ? (
         <fieldset disabled={isPending} className="max-md:w-full">
-          <legend className="sr-only">DESIGN</legend>
+          <legend className="sr-only">HOW MANY</legend>
           <div className="brat flex flex-wrap justify-center gap-x-6 max-md:flex-nowrap max-md:gap-x-0 max-md:divide-x max-md:divide-brand-red/40 max-md:border-y max-md:border-brand-red/40 max-md:bg-ink/55">
-            {(mode === "BOTH" ? ["BOTH"] : [...designs, "BOTH"]).map(
-              (option) => (
+            {(["1", "2"] as const).map((option) => {
+              const chosen = (option === "2") === (mode === "BOTH");
+              return (
                 <label
                   key={option}
                   className={cn(
                     "cursor-pointer px-1 py-2 transition-colors duration-200 max-md:flex max-md:min-h-16 max-md:flex-1 max-md:items-center max-md:justify-center",
-                    mode === option
+                    chosen
                       ? "text-brand-yellow"
                       : "text-brand-red hover:text-brand-yellow",
                   )}
                 >
                   <input
                     type="radio"
-                    name="design"
+                    name="how-many"
                     value={option}
-                    checked={mode === option}
+                    checked={chosen}
                     onChange={() => {
-                      setMode(option);
-                      if (option === "BOTH") {
-                        setWhyNot(true);
-                        if (whyTimer.current) clearTimeout(whyTimer.current);
-                        whyTimer.current = setTimeout(
-                          () => setWhyNot(false),
-                          500,
-                        );
+                      if (option === "1") {
+                        setMode(null);
+                        setPairPicks([null, null]);
+                        setPairSizes([null, null]);
+                        return;
                       }
+                      setMode("BOTH");
+                      setWhyNot(true);
+                      if (whyTimer.current) clearTimeout(whyTimer.current);
+                      whyTimer.current = setTimeout(
+                        () => setWhyNot(false),
+                        500,
+                      );
                     }}
                     className="peer sr-only"
                   />
@@ -427,71 +448,133 @@ export function CheckoutForm({
                     {option}
                   </span>
                 </label>
-              ),
-            )}
-            {/* With BOTH picked the row is just BOTH and the way back to one. */}
-            {mode === "BOTH" ? (
-              <button
-                type="button"
-                onClick={() => {
-                  setMode(null);
-                  setPairPicks([null, null]);
-                }}
-                className="cursor-pointer px-1 py-2 text-brand-red transition-colors duration-200 hover:text-brand-yellow focus-visible:underline focus-visible:underline-offset-8 max-md:flex max-md:min-h-16 max-md:flex-1 max-md:items-center max-md:justify-center"
-              >
-                JUST ONE
-              </button>
-            ) : null}
+              );
+            })}
           </div>
         </fieldset>
       ) : null}
 
-      {/* BOTH: two shirts side by side, each with its design to pick, stacked. */}
+      {/* One shirt: which design. */}
+      {designs.length > 0 && mode !== "BOTH" ? (
+        <fieldset disabled={isPending} className="max-md:w-full">
+          <legend className="sr-only">DESIGN</legend>
+          <div className="brat flex flex-wrap justify-center gap-x-6 max-md:flex-nowrap max-md:gap-x-0 max-md:divide-x max-md:divide-brand-red/40 max-md:border-y max-md:border-brand-red/40 max-md:bg-ink/55">
+            {designs.map((option) => (
+              <label
+                key={option}
+                className={cn(
+                  "cursor-pointer px-1 py-2 transition-colors duration-200 max-md:flex max-md:min-h-16 max-md:flex-1 max-md:items-center max-md:justify-center",
+                  mode === option
+                    ? "text-brand-yellow"
+                    : "text-brand-red hover:text-brand-yellow",
+                )}
+              >
+                <input
+                  type="radio"
+                  name="design"
+                  value={option}
+                  checked={mode === option}
+                  onChange={() => setMode(option)}
+                  className="peer sr-only"
+                />
+                <span className="peer-focus-visible:underline peer-focus-visible:underline-offset-8">
+                  {option}
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      ) : null}
+
+      {/* Two shirts side by side: each with its design to pick, and its size
+          below, so the two can differ. Half the usual type, to fit both. */}
       {mode === "BOTH" ? (
         <div className="flex justify-center gap-10 max-md:gap-6">
           {[0, 1].map((index) => (
-            <fieldset
-              key={index}
-              disabled={isPending}
-              className="flex flex-col items-center gap-1"
-            >
-              <legend className="sr-only">SHIRT {index + 1} DESIGN</legend>
-              {designs.map((option) => (
-                <label
-                  key={option}
-                  className={cn(
-                    "brat cursor-pointer px-1 py-1 transition-colors duration-200",
-                    pairPicks[index] === option
-                      ? "text-brand-yellow"
-                      : "text-brand-red hover:text-brand-yellow",
-                  )}
-                >
-                  <input
-                    type="radio"
-                    name={`pair-${index}`}
-                    value={option}
-                    checked={pairPicks[index] === option}
-                    onChange={() =>
-                      setPairPicks((current) =>
-                        index === 0
-                          ? [option, current[1]]
-                          : [current[0], option],
-                      )
-                    }
-                    className="peer sr-only"
-                  />
-                  <span className="peer-focus-visible:underline peer-focus-visible:underline-offset-8">
-                    {option}
-                  </span>
-                </label>
-              ))}
-            </fieldset>
+            <div key={index} className="flex flex-col items-center gap-3">
+              <fieldset
+                disabled={isPending}
+                className="flex flex-col items-center gap-1"
+              >
+                <legend className="sr-only">SHIRT {index + 1} DESIGN</legend>
+                {designs.map((option) => (
+                  <label
+                    key={option}
+                    className={cn(
+                      "cursor-pointer px-1 py-1 font-display text-[clamp(1.3125rem,2.7vw,2.25rem)] leading-[0.92] tracking-[0.03em] uppercase transition-colors duration-200",
+                      pairPicks[index] === option
+                        ? "text-brand-yellow"
+                        : "text-brand-red hover:text-brand-yellow",
+                    )}
+                  >
+                    <input
+                      type="radio"
+                      name={`pair-${index}`}
+                      value={option}
+                      checked={pairPicks[index] === option}
+                      onChange={() =>
+                        setPairPicks((current) =>
+                          index === 0
+                            ? [option, current[1]]
+                            : [current[0], option],
+                        )
+                      }
+                      className="peer sr-only"
+                    />
+                    <span className="peer-focus-visible:underline peer-focus-visible:underline-offset-8">
+                      {option}
+                    </span>
+                  </label>
+                ))}
+              </fieldset>
+              <fieldset
+                disabled={isPending}
+                className="flex justify-center gap-4"
+              >
+                <legend className="sr-only">SHIRT {index + 1} SIZE</legend>
+                {plainSizes.map((option) => (
+                  <label
+                    key={option.size}
+                    className={cn(
+                      "px-1 py-1 font-display text-[clamp(1.3125rem,2.7vw,2.25rem)] leading-[0.92] tracking-[0.03em] uppercase transition-colors duration-200",
+                      option.soldOut
+                        ? "cursor-not-allowed text-brand-red line-through opacity-40"
+                        : pairSizes[index] === option.size
+                          ? "cursor-pointer text-brand-yellow"
+                          : "cursor-pointer text-brand-red hover:text-brand-yellow",
+                    )}
+                  >
+                    <input
+                      type="radio"
+                      name={`pair-size-${index}`}
+                      value={option.size}
+                      checked={pairSizes[index] === option.size}
+                      disabled={option.soldOut}
+                      onChange={() =>
+                        setPairSizes((current) =>
+                          index === 0
+                            ? [option.size, current[1]]
+                            : [current[0], option.size],
+                        )
+                      }
+                      className="peer sr-only"
+                    />
+                    <span className="peer-focus-visible:underline peer-focus-visible:underline-offset-8">
+                      {option.size}
+                      {option.soldOut ? (
+                        <span className="sr-only"> sold out</span>
+                      ) : null}
+                    </span>
+                  </label>
+                ))}
+              </fieldset>
+            </div>
           ))}
         </div>
       ) : null}
       {/* On a garment with designs, the design comes first and the sizes only
           show once it is chosen. */}
-      {designs.length === 0 || design ? (
+      {mode !== "BOTH" && (designs.length === 0 || design) ? (
         <fieldset disabled={isPending} className="max-md:w-full">
           <legend className="sr-only">{orderCopy.size}</legend>
           <div className="brat flex flex-wrap justify-center gap-x-6 max-md:flex-nowrap max-md:gap-x-0 max-md:divide-x max-md:divide-brand-red/40 max-md:border-y max-md:border-brand-red/40 max-md:bg-ink/55">
