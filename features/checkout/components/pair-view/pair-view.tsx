@@ -67,7 +67,8 @@ export function PairCutout({
     );
   }
   return (
-    // Each shirt is the size the single picture is, one either side of centre.
+    // Each shirt is 90% of the single picture, one either side of centre with a gap
+    // between.
     // A phone has no room for two side by side, so there they are staggered down
     // the page, overlapping and tilted a little, like a +2 card in Uno.
     // A shirt with no design picked yet shows the design its place would take in
@@ -80,8 +81,8 @@ export function PairCutout({
             key={index}
             className={
               index === 0
-                ? "absolute inset-0 -translate-x-1/2 max-md:-translate-x-[14%] max-md:-translate-y-[22%] max-md:-rotate-6 max-md:scale-[0.8]"
-                : "absolute inset-0 translate-x-1/2 max-md:translate-x-[14%] max-md:translate-y-[22%] max-md:rotate-6 max-md:scale-[0.8]"
+                ? "absolute inset-0 -translate-x-[55%] md:scale-90 max-md:-translate-x-[14%] max-md:-translate-y-[22%] max-md:-rotate-6 max-md:scale-[0.8]"
+                : "absolute inset-0 translate-x-[55%] md:scale-90 max-md:translate-x-[14%] max-md:translate-y-[22%] max-md:rotate-6 max-md:scale-[0.8]"
             }
           >
             <Image

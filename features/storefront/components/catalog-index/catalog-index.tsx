@@ -13,20 +13,11 @@ import { getProductGallery } from "../../lib/product-gallery";
 import { IssueGrid } from "../issue-grid/issue-grid";
 import { Reveal } from "../reveal/reveal";
 
-// A tile's width in a centred issue of n pieces: the row less its gaps
-// (md:gap-x-8, 2rem), shared out. Fewer than four keep the width of four; six
-// stand three across in two rows at the First issue's tile size (the grid is
-// three of its four columns wide, 75% less a gap's worth, then split in three).
-const ROW_TILE_WIDTH: Record<number, string> = {
-  1: "md:w-[calc(25%-1.5rem)]",
-  2: "md:w-[calc(25%-1.5rem)]",
-  3: "md:w-[calc(25%-1.5rem)]",
-  4: "md:w-[calc(25%-1.5rem)]",
-  5: "md:w-[calc((100%-8rem)/5)]",
-  6: "md:w-[calc((100%-4rem)/3)]",
-};
+// Every tile on the page is one size: a sixth of the row less its five gaps
+// (md:gap-x-8, 2rem). An issue of fewer than six stands centred in its row.
+const TILE_WIDTH = "md:w-[calc((100%-10rem)/6)]";
 
-// The product grid under the hero (one row of four from md up, two across on a
+// The product grid under the hero (six across from md up, two across on a
 // phone): each garment's cutout on ink, name and price
 // beneath, the whole tile the link. It replaces the film-credits index list at
 // the founder's request -- the visitor scrolls past the photograph and meets the
@@ -68,7 +59,7 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
             ) : null}
             {/* A phone gets one garment per screen, each a stop in the
                 FeedPager: a swipe lands on the next one. From md up it is the
-                four-across grid. */}
+                six-across grid. */}
             <IssueGrid
               // The centred row is the National issue, the one under the hero.
               holdWhenLeftBelow={centered}
@@ -77,14 +68,9 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
                 "grid grid-cols-1 max-md:group-data-[view=grid]/landing:grid-cols-2 max-md:group-data-[view=grid]/landing:gap-y-4 md:gap-x-8",
                 // A scattered grid needs the room its tiles drift into.
                 dials.scatterProducts ? "md:gap-y-40" : "md:gap-y-16",
-                // Six pieces stand three across in two rows, the grid as wide as
-                // three of the First issue's four columns (so tiles match).
-                centered &&
-                  group.products.length === 6 &&
-                  "md:mx-auto md:max-w-[calc(75%-0.5rem)]",
-                centered
-                  ? "md:flex md:flex-wrap md:justify-center"
-                  : "md:grid-cols-4",
+                dials.scatterProducts
+                  ? "md:grid-cols-6"
+                  : "md:flex md:flex-wrap md:justify-center",
               )}
             >
               {group.products.map((product, position) => {
@@ -115,10 +101,7 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
                     data-feed-product
                     className={cn(
                       "relative isolate flex min-h-dvh items-center justify-center overflow-hidden px-5 max-md:group-data-[view=grid]/landing:min-h-0 max-md:group-data-[view=grid]/landing:items-start max-md:group-data-[view=grid]/landing:px-0 md:min-h-0 md:items-start md:overflow-visible md:px-0",
-                      // Sized by how many the centred issue holds (see
-                      // ROW_TILE_WIDTH), so all of it fits the screen at once.
-                      centered &&
-                        ROW_TILE_WIDTH[Math.min(group.products.length, 6)],
+                      !scatter && TILE_WIDTH,
                       scatter &&
                         "md:[transform:translate(var(--sx),var(--sy))_scale(var(--ss))]",
                     )}
