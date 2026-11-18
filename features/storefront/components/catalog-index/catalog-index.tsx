@@ -57,6 +57,8 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
                 FeedPager: a swipe lands on the next one. From md up it is the
                 four-across grid. */}
             <IssueGrid
+              // The centred row is the National issue, the one under the hero.
+              holdWhenLeftBelow={centered}
               className={cn(
                 "group/issue md:[&>li]:transition-transform md:[&>li]:duration-700 md:[&>li]:ease-out",
                 "grid grid-cols-1 max-md:group-data-[view=grid]/landing:grid-cols-2 max-md:group-data-[view=grid]/landing:gap-y-4 md:gap-x-8",

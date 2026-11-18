@@ -20,16 +20,18 @@ function pileJitter(index: number): { x: number; y: number; turn: number } {
 // cells. The pile is only transforms on the tiles, so the layout, the links and
 // what a phone gets (no pile at all) are the plain grid underneath.
 //
-// The pile only ever runs one way: a grid spreads out as the visitor scrolls down
-// to it, and is never re-piled by scrolling back up, when it leaves through the
-// bottom of the screen -- motion nobody is watching for. It piles only when it
-// is left above (scrolling down past it), and starts piled until first reached.
+// `holdWhenLeftBelow`: leaving through the bottom of the screen means the visitor
+// scrolled up, away from the grid. The grid that has this keeps its spread then
+// (the National issue, under the hero, on the way back up to the landing page);
+// the others pile back up. Every grid starts piled and spreads on arrival.
 export function IssueGrid({
   className,
   children,
+  holdWhenLeftBelow = false,
 }: {
   className: string;
   children: ReactNode;
+  holdWhenLeftBelow?: boolean;
 }) {
   const listRef = useRef<HTMLUListElement>(null);
   const [piled, setPiled] = useState(false);
@@ -61,7 +63,7 @@ export function IssueGrid({
         const leftBelow =
           entry.rootBounds !== null &&
           entry.boundingClientRect.top >= entry.rootBounds.bottom;
-        if (seen && leftBelow) return;
+        if (holdWhenLeftBelow && seen && leftBelow) return;
         setPiled(true);
       },
       { rootMargin: "-20% 0px -20% 0px", threshold: 0 },
@@ -71,7 +73,7 @@ export function IssueGrid({
       observer.disconnect();
       setPiled(false);
     };
-  }, [enabled]);
+  }, [enabled, holdWhenLeftBelow]);
 
   // Lay the tiles on the pile, or put them back. Measured from the untransformed
   // layout (offsets), so it is right whichever state the tiles are in.
