@@ -13,15 +13,17 @@ import { getProductGallery } from "../../lib/product-gallery";
 import { IssueGrid } from "../issue-grid/issue-grid";
 import { Reveal } from "../reveal/reveal";
 
-// A tile's width in a centred row of n: the row less its n-1 gaps (md:gap-x-8,
-// 2rem), shared out. Fewer than four keep the width of four, as before.
+// A tile's width in a centred issue of n pieces: the row less its gaps
+// (md:gap-x-8, 2rem), shared out. Fewer than four keep the width of four; six
+// stand three across in two rows at the First issue's tile size (the grid is
+// three of its four columns wide, 75% less a gap's worth, then split in three).
 const ROW_TILE_WIDTH: Record<number, string> = {
   1: "md:w-[calc(25%-1.5rem)]",
   2: "md:w-[calc(25%-1.5rem)]",
   3: "md:w-[calc(25%-1.5rem)]",
   4: "md:w-[calc(25%-1.5rem)]",
   5: "md:w-[calc((100%-8rem)/5)]",
-  6: "md:w-[calc((100%-10rem)/6)]",
+  6: "md:w-[calc((100%-4rem)/3)]",
 };
 
 // The product grid under the hero (one row of four from md up, two across on a
@@ -75,6 +77,11 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
                 "grid grid-cols-1 max-md:group-data-[view=grid]/landing:grid-cols-2 max-md:group-data-[view=grid]/landing:gap-y-4 md:gap-x-8",
                 // A scattered grid needs the room its tiles drift into.
                 dials.scatterProducts ? "md:gap-y-40" : "md:gap-y-16",
+                // Six pieces stand three across in two rows, the grid as wide as
+                // three of the First issue's four columns (so tiles match).
+                centered &&
+                  group.products.length === 6 &&
+                  "md:mx-auto md:max-w-[calc(75%-0.5rem)]",
                 centered
                   ? "md:flex md:flex-wrap md:justify-center"
                   : "md:grid-cols-4",
@@ -108,9 +115,8 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
                     data-feed-product
                     className={cn(
                       "relative isolate flex min-h-dvh items-center justify-center overflow-hidden px-5 max-md:group-data-[view=grid]/landing:min-h-0 max-md:group-data-[view=grid]/landing:items-start max-md:group-data-[view=grid]/landing:px-0 md:min-h-0 md:items-start md:overflow-visible md:px-0",
-                      // A centred issue stays in one row up to six tiles, so the
-                      // whole National Issue is on screen at once; more than that
-                      // wraps at six. Literal classes, so Tailwind can see them.
+                      // Sized by how many the centred issue holds (see
+                      // ROW_TILE_WIDTH), so all of it fits the screen at once.
                       centered &&
                         ROW_TILE_WIDTH[Math.min(group.products.length, 6)],
                       scatter &&
