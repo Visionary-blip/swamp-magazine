@@ -42,14 +42,46 @@ function sleepShirtShots(): GalleryImage[] {
   }));
 }
 
+// `shots` for a gallery where some photographs are kept whole (2:3, graded from
+// the camera files) in their 4:5 frames: `positions` gives, by the file's number,
+// how far down the photograph the frame sits (0 = top edge, 100 = bottom edge).
+// A photograph with no entry is already 4:5 and needs none.
+function shotsFramed(
+  slug: string,
+  count: number,
+  alt: string,
+  positions: Record<number, number>,
+): GalleryImage[] {
+  return shots(slug, count, alt).map((image, index) => {
+    const y = positions[index + 1];
+    return y === undefined ? image : { ...image, position: `50% ${y}%` };
+  });
+}
+
 const GALLERIES: Record<string, GalleryImage[]> = {
-  "college-arch": shots("college-arch", 6, "College Arch lifestyle shot"),
+  "college-arch": shotsFramed(
+    "college-arch",
+    6,
+    "College Arch lifestyle shot",
+    {
+      1: 100,
+      2: 96,
+      5: 49,
+      6: 36,
+    },
+  ),
   "fc-hoodie": shots("fc-hoodie", 7, "FC Hoodie lifestyle shot"),
-  "lurker-tee": shots("lurker-tee", 4, "Lurker Tee lifestyle shot"),
-  "lurker-longsleeve": shots(
+  "lurker-tee": shotsFramed("lurker-tee", 4, "Lurker Tee lifestyle shot", {
+    1: 66,
+    2: 78,
+    3: 89,
+    4: 26,
+  }),
+  "lurker-longsleeve": shotsFramed(
     "lurker-longsleeve",
     5,
     "Lurker Long Sleeve lifestyle shot",
+    { 4: 50 },
   ),
   "star-shorts": shots("star-shorts", 4, "Star Shorts lifestyle shot"),
   // The Sleep Shirt photographs are kept whole (2:3), so each frame shows the
