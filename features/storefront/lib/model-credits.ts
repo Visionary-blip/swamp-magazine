@@ -19,6 +19,7 @@ const INSTAGRAM_HANDLES: Record<string, string> = {
   ADELINE: "adelinesajko",
   GARRETT: "garrettrobertsonn",
   BRIANNA: "briannaimartin",
+  CONNOR: "conner.bensn",
 };
 
 export type ModelCredit = { text: string; href: string | null };

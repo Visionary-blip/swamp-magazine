@@ -151,11 +151,11 @@ const CATALOG: SeedProduct[] = [
   },
   // The Sleep Shirt, added 2026-11-17 (the cutout is the EX-MODEL photo; the
   // SWEET DREAMS photo is bundled, see features/storefront/lib/design-images.ts).
-  // $15 alone, $25 for two (the two-pack is a dial, config/dials.ts). Stock and
-  // Connor's missing handle are placeholders the founder fills in.
+  // $15 alone, $25 for two (the two-pack is a dial, config/dials.ts). Stock is a
+  // placeholder the founder fills in.
   {
     slug: "sleep-shirt",
-    name: "Sleep Shirt",
+    name: "Sleep Shirts",
     priceCents: 1500,
     sizes: ["XS", "S", "M", "L", "XL"],
     modelCredits: "BRIANNA, CONNOR",
