@@ -34,10 +34,11 @@ const MODEL_FIT: Record<string, ModelFit[]> = {
   // Garrett's height, and Adeline's height and size, are still to come from the
   // founder (a name with no entry shows the bracketed stand-ins).
   "fc-shirt": [{ name: "GARRETT", height: "[HEIGHT]", size: "L" }],
-  // Fabi's and Adeline's heights are still to come from the founder.
+  // Fabi's height is still to come from the founder; MODEL 2 stands in for the
+  // second model until the founder names them.
   "croc-crop": [
     { name: "FABI", height: "[HEIGHT]", size: "XS" },
-    { name: "ADELINE", height: "[HEIGHT]", size: "S" },
+    { name: "MODEL 2", height: "[HEIGHT]", size: "S" },
   ],
   // Brianna's and Connor's heights and sizes are still to come from the founder.
   "sleep-shirt": [

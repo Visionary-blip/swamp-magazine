@@ -118,7 +118,7 @@ const CATALOG: SeedProduct[] = [
     name: "Croc Crop",
     priceCents: 2500,
     sizes: ["XS", "S", "M", "L"],
-    modelCredits: "FABI, ADELINE",
+    modelCredits: "FABI, MODEL 2",
     cutoutFile: "swamp-images/CROC CROP GRID.webp",
     sortOrder: 7,
   },
@@ -202,6 +202,11 @@ const LIFESTYLE_SLOTS = [
     slotKey: "product_bg:fc-hoodie",
     file: "swamp-images/FC HOODIE BG.jpg",
     alt: "FC Hoodie lifestyle shot",
+  },
+  {
+    slotKey: "product_bg:sleep-shirt",
+    file: "swamp-images/SLEEP SHIRT BG.webp",
+    alt: "Sleep Shirt lifestyle shot",
   },
 ];
 
