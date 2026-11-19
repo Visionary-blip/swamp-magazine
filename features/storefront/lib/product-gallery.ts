@@ -6,7 +6,13 @@
 //
 // Alt text stays in the register of the other lifestyle shots; the models'
 // names live in `products.model_credits`, not here.
-export type GalleryImage = { src: string; alt: string };
+export type GalleryImage = {
+  src: string;
+  alt: string;
+  /** CSS object-position for a photograph taller than its 4:5 frame: which part
+   * of it the frame shows. Centred when left out. */
+  position?: string;
+};
 
 function shots(slug: string, count: number, alt: string): GalleryImage[] {
   return Array.from({ length: count }, (_, index) => ({
@@ -15,16 +21,24 @@ function shots(slug: string, count: number, alt: string): GalleryImage[] {
   }));
 }
 
-// The same files in an order of their own: the numbers are the files' names, so
-// a new photograph can take a place in the run without renaming the rest.
-function shotsInOrder(
-  slug: string,
-  order: number[],
-  alt: string,
-): GalleryImage[] {
-  return order.map((number) => ({
-    src: `/gallery/${slug}-${number}.webp`,
-    alt,
+function sleepShirtShots(): GalleryImage[] {
+  const framing: [number, number][] = [
+    [1, 99],
+    [2, 48],
+    [3, 50],
+    [4, 57],
+    [5, 1],
+    [6, 99],
+    [7, 100],
+    [8, 0],
+    [9, 0],
+    [10, 65],
+    [11, 0],
+  ];
+  return framing.map(([number, y]) => ({
+    src: `/gallery/sleep-shirt-${number}.webp`,
+    alt: "Sleep Shirt lifestyle shot",
+    position: `50% ${y}%`,
   }));
 }
 
@@ -38,12 +52,11 @@ const GALLERIES: Record<string, GalleryImage[]> = {
     "Lurker Long Sleeve lifestyle shot",
   ),
   "star-shorts": shots("star-shorts", 4, "Star Shorts lifestyle shot"),
-  // The couch photograph (12) sits third, behind the two that lead.
-  "sleep-shirt": shotsInOrder(
-    "sleep-shirt",
-    [1, 2, 12, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-    "Sleep Shirt lifestyle shot",
-  ),
+  // The Sleep Shirt photographs are kept whole (2:3), so each frame shows the
+  // part the founder framed; the number is the file's, the percentage how far
+  // down the photograph the 4:5 frame sits. The couch photograph (12) is a second
+  // copy of the first, so it is not listed.
+  "sleep-shirt": sleepShirtShots(),
 };
 
 export function getProductGallery(slug: string): GalleryImage[] {

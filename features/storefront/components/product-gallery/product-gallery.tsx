@@ -63,6 +63,11 @@ export function ProductGallery({ images }: { images: GalleryImage[] }) {
                   className={
                     isOrphan ? "object-cover object-[50%_38%]" : "object-cover"
                   }
+                  style={
+                    !isOrphan && image.position
+                      ? { objectPosition: image.position }
+                      : undefined
+                  }
                 />
               </button>
             </li>
