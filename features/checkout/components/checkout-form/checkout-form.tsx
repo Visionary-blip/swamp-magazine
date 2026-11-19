@@ -30,7 +30,7 @@ import {
   pairSize,
   withDesign,
 } from "@/lib/checkout/designs";
-import { lineTotalCents } from "@/lib/checkout/packs";
+import { lineTotalCents, twoPackCents } from "@/lib/checkout/packs";
 import { cn } from "@/lib/utils";
 
 import type { LedgerLine } from "../order-ledger/order-ledger";
@@ -92,6 +92,7 @@ export function CheckoutForm({
   // Which design, on a garment that has them (EX-MODEL, SWEET DREAMS), and one
   // shirt or two.
   const designs = designsFor(slug);
+  const twoPack = twoPackCents(slug);
   // One design, or BOTH (the page's word for two): two shirts shown, each with a
   // design and a size of its own.
   const [mode, setMode] = useState<string | null>(null);
@@ -349,7 +350,7 @@ export function CheckoutForm({
             <>
               {/* For former models: the order goes through without a charge,
                   once, and the button is gone afterwards. */}
-              {exModelUsed ? null : (
+              {exModelUsed || !dials.exModelOrdersEnabled ? null : (
                 <button
                   type="button"
                   onClick={() => setExModelOpen(true)}
@@ -358,7 +359,7 @@ export function CheckoutForm({
                   I&apos;M AN EX-MODEL
                 </button>
               )}
-              {exModelOpen ? (
+              {dials.exModelOrdersEnabled && exModelOpen ? (
                 <ExModelDialog
                   items={orderItems.map((item) => ({
                     slug: item.slug,
@@ -454,8 +455,31 @@ export function CheckoutForm({
         </fieldset>
       ) : null}
 
-      {/* One shirt: which design. */}
-      {designs.length > 0 && mode !== "BOTH" ? (
+      {/* What one costs and what two cost. The wording is invented, for the
+          founder to review. */}
+      {designs.length > 0 && twoPack ? (
+        <p className="brat text-brand-red/70 max-md:py-2">
+          1 SHIRT {formatUsd(priceCents)} · 2 SHIRTS {formatUsd(twoPack)}
+        </p>
+      ) : null}
+
+      {/* One shirt: which design, until it is picked; then just its title,
+          which reopens the choice. */}
+      {designs.length > 0 && mode !== "BOTH" && design ? (
+        <button
+          type="button"
+          disabled={isPending}
+          onClick={() => {
+            setMode(null);
+            setSize(null);
+          }}
+          aria-label={`${design}. Change design`}
+          className="brat cursor-pointer px-1 py-2 text-brand-yellow transition-colors duration-200 focus-visible:underline focus-visible:underline-offset-8 max-md:w-full max-md:border-y max-md:border-brand-red/40 max-md:bg-ink/55 max-md:py-4"
+        >
+          {design}
+        </button>
+      ) : null}
+      {designs.length > 0 && mode !== "BOTH" && !design ? (
         <fieldset disabled={isPending} className="max-md:w-full">
           <legend className="sr-only">DESIGN</legend>
           <div className="brat flex flex-wrap justify-center gap-x-6 max-md:flex-nowrap max-md:gap-x-0 max-md:divide-x max-md:divide-brand-red/40 max-md:border-y max-md:border-brand-red/40 max-md:bg-ink/55">
@@ -492,41 +516,57 @@ export function CheckoutForm({
         <div className="flex justify-center gap-10 max-md:gap-6">
           {[0, 1].map((index) => (
             <div key={index} className="flex flex-col items-center gap-3">
-              <fieldset
-                disabled={isPending}
-                className="flex flex-col items-center gap-1"
-              >
-                <legend className="sr-only">SHIRT {index + 1} DESIGN</legend>
-                {designs.map((option) => (
-                  <label
-                    key={option}
-                    className={cn(
-                      "cursor-pointer px-1 py-1 font-display text-[clamp(1.3125rem,2.7vw,2.25rem)] leading-[0.92] tracking-[0.03em] uppercase transition-colors duration-200",
-                      pairPicks[index] === option
-                        ? "text-brand-yellow"
-                        : "text-brand-red hover:text-brand-yellow",
-                    )}
-                  >
-                    <input
-                      type="radio"
-                      name={`pair-${index}`}
-                      value={option}
-                      checked={pairPicks[index] === option}
-                      onChange={() =>
-                        setPairPicks((current) =>
-                          index === 0
-                            ? [option, current[1]]
-                            : [current[0], option],
-                        )
-                      }
-                      className="peer sr-only"
-                    />
-                    <span className="peer-focus-visible:underline peer-focus-visible:underline-offset-8">
-                      {option}
-                    </span>
-                  </label>
-                ))}
-              </fieldset>
+              {pairPicks[index] ? (
+                <button
+                  type="button"
+                  disabled={isPending}
+                  onClick={() =>
+                    setPairPicks((current) =>
+                      index === 0 ? [null, current[1]] : [current[0], null],
+                    )
+                  }
+                  aria-label={`Shirt ${index + 1}: ${pairPicks[index]}. Change design`}
+                  className="cursor-pointer px-1 py-1 font-display text-[clamp(1.3125rem,2.7vw,2.25rem)] leading-[0.92] tracking-[0.03em] text-brand-yellow uppercase"
+                >
+                  {pairPicks[index]}
+                </button>
+              ) : (
+                <fieldset
+                  disabled={isPending}
+                  className="flex flex-col items-center gap-1"
+                >
+                  <legend className="sr-only">SHIRT {index + 1} DESIGN</legend>
+                  {designs.map((option) => (
+                    <label
+                      key={option}
+                      className={cn(
+                        "cursor-pointer px-1 py-1 font-display text-[clamp(1.3125rem,2.7vw,2.25rem)] leading-[0.92] tracking-[0.03em] uppercase transition-colors duration-200",
+                        pairPicks[index] === option
+                          ? "text-brand-yellow"
+                          : "text-brand-red hover:text-brand-yellow",
+                      )}
+                    >
+                      <input
+                        type="radio"
+                        name={`pair-${index}`}
+                        value={option}
+                        checked={pairPicks[index] === option}
+                        onChange={() =>
+                          setPairPicks((current) =>
+                            index === 0
+                              ? [option, current[1]]
+                              : [current[0], option],
+                          )
+                        }
+                        className="peer sr-only"
+                      />
+                      <span className="peer-focus-visible:underline peer-focus-visible:underline-offset-8">
+                        {option}
+                      </span>
+                    </label>
+                  ))}
+                </fieldset>
+              )}
               <fieldset
                 disabled={isPending}
                 className="flex justify-center gap-4"
