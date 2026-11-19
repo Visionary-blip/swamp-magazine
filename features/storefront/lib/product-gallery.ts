@@ -25,6 +25,7 @@ const GALLERIES: Record<string, GalleryImage[]> = {
     "Lurker Long Sleeve lifestyle shot",
   ),
   "star-shorts": shots("star-shorts", 4, "Star Shorts lifestyle shot"),
+  "sleep-shirt": shots("sleep-shirt", 11, "Sleep Shirt lifestyle shot"),
 };
 
 export function getProductGallery(slug: string): GalleryImage[] {
