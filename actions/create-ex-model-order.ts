@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { Resend } from "resend";
 import { z } from "zod";
 
+import { dials } from "@/config/dials";
 import { adminRoutes } from "@/features/admin/lib/admin-routes";
 import { resolveOrderDraft, type ProductRow } from "@/lib/checkout/order-draft";
 import { serverEnv } from "@/lib/env/server";
@@ -43,7 +44,7 @@ const inputSchema = z.object({
     .array(
       z.object({
         slug: z.string().min(1).max(200),
-        size: z.string().min(1).max(20),
+        size: z.string().min(1).max(64),
         quantity: z.number().int().min(1).max(10),
       }),
     )
@@ -62,6 +63,10 @@ const LEGACY_PRODUCT_SELECT =
 export async function createExModelOrder(
   input: CreateExModelOrderInput,
 ): Promise<CreateExModelOrderResult> {
+  // Switched off in config/dials.ts: no order is made, whoever calls this.
+  if (!dials.exModelOrdersEnabled) {
+    return { status: "error", reason: "not-found" };
+  }
   const parsed = inputSchema.safeParse(input);
   if (!parsed.success) return { status: "error", reason: "invalid-input" };
   const { items, delivery, name, email } = parsed.data;

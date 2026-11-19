@@ -45,7 +45,7 @@ const inputSchema = z.object({
     .array(
       z.object({
         slug: z.string().min(1).max(200),
-        size: z.string().min(1).max(20),
+        size: z.string().min(1).max(64),
         quantity: z.number().int().min(1).max(10),
       }),
     )
