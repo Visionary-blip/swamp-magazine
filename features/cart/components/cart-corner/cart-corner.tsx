@@ -12,12 +12,21 @@ import {
   parseBotchedSize,
   sizeMatches,
 } from "@/lib/checkout/botched";
+import {
+  designImagesFor,
+  splitDesign,
+  withDesign,
+  designsFor,
+  offeredSizes as designSizes,
+  type Shirt,
+} from "@/lib/checkout/designs";
 import { formatUsd } from "@/lib/money";
 import { cn } from "@/lib/utils";
 
 import {
   cartCount,
   cartSubtotalCents,
+  pairShirts,
   sortSizes,
   type CartItem,
 } from "../../lib/cart";
@@ -88,13 +97,29 @@ export function CartCorner({ placement }: { placement: "fixed" | "inline" }) {
         {/* Add-ons are not garments: they ride in the total, not the row. */}
         {items
           .filter((item) => !item.addOn)
-          .map((item) => (
-            <CartThumb
-              key={`${item.slug}:${item.size}`}
-              item={item}
-              fixed={fixed}
-            />
-          ))}
+          .flatMap((item) => {
+            // Two shirts bought together are drawn as two, each with its own
+            // design, size and remove button.
+            const shirts = pairShirts(item);
+            if (!shirts) {
+              return [
+                <CartThumb
+                  key={`${item.slug}:${item.size}`}
+                  item={item}
+                  fixed={fixed}
+                />,
+              ];
+            }
+            return shirts.map((shirt, index) => (
+              <ShirtThumb
+                key={`${item.slug}:${item.size}:${index}`}
+                item={item}
+                shirt={shirt}
+                index={index === 0 ? 0 : 1}
+                fixed={fixed}
+              />
+            ));
+          })}
       </ul>
     </div>
   );
@@ -134,7 +159,21 @@ function CartThumb({ item, fixed }: { item: CartItem; fixed: boolean }) {
     };
   }, [open]);
 
-  const sizes = sortSizes(offeredSizes(item.slug, item.sizes));
+  // A design line ("L / EX-MODEL") is one shirt: its sizes come from the
+  // product's own list, and a pick keeps the design.
+  const lone = splitDesign(item.slug, item.size)?.shirts;
+  const shirt =
+    designsFor(item.slug).length > 0 && lone?.length === 1 ? lone[0] : null;
+  const design = shirt?.design ?? null;
+  const shownSize = shirt ? shirt.size : item.size;
+  const sizes = shirt
+    ? sortSizes(
+        (designSizes(item.slug) ?? []).map((size) => ({
+          size,
+          soldOut: false,
+        })),
+      )
+    : sortSizes(offeredSizes(item.slug, item.sizes));
   // A garment saved with no size list (or only the one size) has nothing to
   // change to, so its size is shown but is not a button.
   const canChange = sizes.length > 1;
@@ -192,80 +231,24 @@ function CartThumb({ item, fixed }: { item: CartItem; fixed: boolean }) {
           open && "opacity-100",
         )}
       >
-        {/* A mouse opens the sizes by pointing at the button and closes them on
-            leaving; a finger has no hover, so a tap toggles as before. The
-            menu is a child of this wrapper, so moving onto it is not leaving. */}
-        <div
-          className="relative"
-          onPointerEnter={(event) => {
-            if (event.pointerType === "mouse" && canChange) setMenuOpen(true);
+        <SizeButton
+          size={shownSize}
+          sizes={sizes}
+          canChange={canChange}
+          onPick={(option) => {
+            if (option === BOTCHED_SIZE) {
+              setBotchedOpen(true);
+              return;
+            }
+            changeSize(
+              item.slug,
+              item.size,
+              design ? withDesign(option, design) : option,
+            );
           }}
-          onPointerLeave={(event) => {
-            if (event.pointerType === "mouse") setMenuOpen(false);
-          }}
-        >
-          <button
-            type="button"
-            disabled={!canChange}
-            onClick={(event) => {
-              // After a hover has opened it, a mouse click keeps it open
-              // rather than snapping it shut under the pointer.
-              const mouse =
-                (event.nativeEvent as PointerEvent).pointerType === "mouse";
-              setMenuOpen((current) => (mouse ? true : !current));
-            }}
-            aria-haspopup="listbox"
-            aria-expanded={menuOpen}
-            aria-label={`Size ${item.size}. ${canChange ? "Change size" : "Only size"}`}
-            className="flex size-6 items-center justify-center rounded-full border border-brand-red/70 bg-ink/80 font-display text-xs leading-none text-brand-red uppercase transition-colors duration-200 hover:text-brand-yellow hover:border-brand-yellow focus-visible:text-brand-yellow focus-visible:border-brand-yellow focus-visible:outline-none disabled:cursor-default disabled:hover:text-brand-red disabled:hover:border-brand-red/70 pointer-coarse:size-10 pointer-coarse:text-sm"
-          >
-            {/* A Botched size carries a height; the bubble only has room for the B. */}
-            {parseBotchedSize(item.size) ? BOTCHED_SIZE : item.size}
-          </button>
-          {menuOpen ? (
-            // The padding is the gap between the button and the row, kept
-            // inside the wrapper so the pointer never crosses dead space.
-            <div className="absolute top-1/2 right-full -translate-y-1/2 pr-1">
-              <ul
-                role="listbox"
-                aria-label="Choose a size"
-                className="flex flex-row overflow-hidden rounded-2xl border border-brand-red/70 bg-ink/95"
-              >
-                {sizes.map((option) => {
-                  const current = sizeMatches(option.size, item.size);
-                  return (
-                    <li key={option.size} role="option" aria-selected={current}>
-                      <button
-                        type="button"
-                        disabled={option.soldOut && !current}
-                        onClick={() => {
-                          setMenuOpen(false);
-                          if (option.size === BOTCHED_SIZE) {
-                            setBotchedOpen(true);
-                            return;
-                          }
-                          changeSize(item.slug, item.size, option.size);
-                        }}
-                        className={cn(
-                          "block w-full px-3 py-1 text-center font-display text-xs leading-none uppercase transition-colors duration-200 hover:text-brand-yellow focus-visible:text-brand-yellow focus-visible:outline-none pointer-coarse:min-w-11 pointer-coarse:py-3 pointer-coarse:text-sm",
-                          current ? "text-brand-yellow" : "text-brand-red",
-                          option.soldOut &&
-                            !current &&
-                            "cursor-not-allowed line-through opacity-40 hover:text-brand-red",
-                        )}
-                      >
-                        {option.size}
-                        {option.soldOut && !current ? (
-                          <span className="sr-only"> sold out</span>
-                        ) : null}
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          ) : null}
-        </div>
+          menuOpen={menuOpen}
+          setMenuOpen={setMenuOpen}
+        />
         <button
           type="button"
           onClick={() => removeItem(item.slug, item.size)}
@@ -299,5 +282,238 @@ function CartThumb({ item, fixed }: { item: CartItem; fixed: boolean }) {
         />
       ) : null}
     </li>
+  );
+}
+
+// One shirt of a pair. The design button reads "1" or "2" (the design's place in
+// the product's list: 1 EX-MODEL, 2 SWEET DREAMS) and flips to the other; the
+// size button steps through the sizes on offer; the X takes this shirt out and
+// leaves the other.
+function ShirtThumb({
+  item,
+  shirt,
+  index,
+  fixed,
+}: {
+  item: CartItem;
+  shirt: Shirt;
+  index: 0 | 1;
+  fixed: boolean;
+}) {
+  const router = useRouter();
+  const { changeShirt, removeShirt } = useCart();
+  // Touch only, as on CartThumb: the first tap opens the controls.
+  const [tapped, setTapped] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const root = useRef<HTMLLIElement>(null);
+
+  const open = menuOpen || tapped;
+  useEffect(() => {
+    if (!open) return;
+    function close() {
+      setMenuOpen(false);
+      setTapped(false);
+    }
+    function onPointerDown(event: PointerEvent) {
+      if (!root.current?.contains(event.target as Node)) close();
+    }
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") close();
+    }
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
+  const designs = designsFor(item.slug);
+  const designNumber = shirt.design ? designs.indexOf(shirt.design) + 1 : 0;
+  const nextDesign = designs[Math.max(designNumber, 1) % designs.length];
+  const sizes = designSizes(item.slug) ?? [];
+  const image =
+    (shirt.design ? designImagesFor(item.slug)[shirt.design] : null) ??
+    item.cutoutUrl;
+  const sets = item.quantity / 2;
+  const name = `${item.name}, ${shirt.design ?? "shirt"}, size ${shirt.size}`;
+  const round =
+    "flex size-6 items-center justify-center rounded-full border border-brand-red/70 bg-ink/80 font-display text-xs leading-none text-brand-red uppercase transition-colors duration-200 hover:text-brand-yellow hover:border-brand-yellow focus-visible:text-brand-yellow focus-visible:border-brand-yellow focus-visible:outline-none pointer-coarse:size-10 pointer-coarse:text-sm";
+
+  return (
+    <li ref={root} className="group relative">
+      <Link
+        href="/add-ons"
+        aria-label={name}
+        onClick={(event) => {
+          if (!tapped && window.matchMedia("(hover: none)").matches) {
+            event.preventDefault();
+            setTapped(true);
+            return;
+          }
+          sendPhoneToCart(event, router);
+        }}
+        className={cn(
+          "relative block",
+          fixed
+            ? "size-[70px] md:size-[120px]"
+            : "size-[105px] md:size-[120px]",
+        )}
+      >
+        {image ? (
+          <Image
+            src={image}
+            alt={name}
+            fill
+            sizes="120px"
+            className="object-contain drop-shadow-lg"
+          />
+        ) : (
+          <span className="brat flex size-full items-center justify-center text-brand-red">
+            {item.name.slice(0, 1)}
+          </span>
+        )}
+        {sets > 1 ? (
+          <span className="absolute -top-1 -right-1 font-display text-xs leading-none text-brand-yellow">
+            ×{sets}
+          </span>
+        ) : null}
+      </Link>
+
+      <div
+        className={cn(
+          "absolute bottom-full left-1/2 z-40 mb-1 flex -translate-x-1/2 flex-row items-center gap-1.5 opacity-0 md:top-1/2 md:right-full md:bottom-auto md:left-auto md:mr-1 md:mb-0 md:translate-x-0 md:-translate-y-1/2 md:flex-col transition-opacity duration-150 group-focus-within:opacity-100 group-hover:opacity-100",
+          open && "opacity-100",
+        )}
+      >
+        <button
+          type="button"
+          onClick={() =>
+            changeShirt(item.slug, item.size, index, { design: nextDesign })
+          }
+          aria-label={`Design ${designNumber}, ${shirt.design}. Change to ${nextDesign}`}
+          className={round}
+        >
+          {designNumber || "?"}
+        </button>
+        <SizeButton
+          size={shirt.size}
+          sizes={sizes.map((size) => ({ size, soldOut: false }))}
+          canChange={sizes.length > 1}
+          onPick={(size) => changeShirt(item.slug, item.size, index, { size })}
+          menuOpen={menuOpen}
+          setMenuOpen={setMenuOpen}
+        />
+        <button
+          type="button"
+          onClick={() => removeShirt(item.slug, item.size, index)}
+          aria-label={`Remove ${name}`}
+          className={round}
+        >
+          <svg
+            aria-hidden
+            viewBox="0 0 10 10"
+            className="size-3.5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.7"
+            strokeLinecap="round"
+          >
+            <path d="M1.5 1.5l7 7M8.5 1.5l-7 7" />
+          </svg>
+        </button>
+      </div>
+    </li>
+  );
+}
+
+// The size bubble and its menu. A mouse opens the sizes by pointing at the button
+// and closes them on leaving; a finger has no hover, so a tap toggles. The menu
+// is a child of the wrapper, so moving onto it is not leaving.
+function SizeButton({
+  size,
+  sizes,
+  canChange,
+  onPick,
+  menuOpen,
+  setMenuOpen,
+}: {
+  size: string;
+  sizes: { size: string; soldOut: boolean }[];
+  canChange: boolean;
+  onPick: (size: string) => void;
+  /** Held by the garment, so its controls stay showing while the menu is open
+   * and Escape or a tap elsewhere closes both. */
+  menuOpen: boolean;
+  setMenuOpen: (open: boolean | ((current: boolean) => boolean)) => void;
+}) {
+  return (
+    <div
+      className="relative"
+      onPointerEnter={(event) => {
+        if (event.pointerType === "mouse" && canChange) setMenuOpen(true);
+      }}
+      onPointerLeave={(event) => {
+        if (event.pointerType === "mouse") setMenuOpen(false);
+      }}
+    >
+      <button
+        type="button"
+        disabled={!canChange}
+        onClick={(event) => {
+          // After a hover has opened it, a mouse click keeps it open
+          // rather than snapping it shut under the pointer.
+          const mouse =
+            (event.nativeEvent as PointerEvent).pointerType === "mouse";
+          setMenuOpen((current) => (mouse ? true : !current));
+        }}
+        aria-haspopup="listbox"
+        aria-expanded={menuOpen}
+        aria-label={`Size ${size}. ${canChange ? "Change size" : "Only size"}`}
+        className="flex size-6 items-center justify-center rounded-full border border-brand-red/70 bg-ink/80 font-display text-xs leading-none text-brand-red uppercase transition-colors duration-200 hover:text-brand-yellow hover:border-brand-yellow focus-visible:text-brand-yellow focus-visible:border-brand-yellow focus-visible:outline-none disabled:cursor-default disabled:hover:text-brand-red disabled:hover:border-brand-red/70 pointer-coarse:size-10 pointer-coarse:text-sm"
+      >
+        {/* A Botched size carries a height; the bubble only has room for the B. */}
+        {parseBotchedSize(size) ? BOTCHED_SIZE : size}
+      </button>
+      {menuOpen ? (
+        // The padding is the gap between the button and the row, kept
+        // inside the wrapper so the pointer never crosses dead space.
+        <div className="absolute top-1/2 right-full -translate-y-1/2 pr-1">
+          <ul
+            role="listbox"
+            aria-label="Choose a size"
+            className="flex flex-row overflow-hidden rounded-2xl border border-brand-red/70 bg-ink/95"
+          >
+            {sizes.map((option) => {
+              const current = sizeMatches(option.size, size);
+              return (
+                <li key={option.size} role="option" aria-selected={current}>
+                  <button
+                    type="button"
+                    disabled={option.soldOut && !current}
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onPick(option.size);
+                    }}
+                    className={cn(
+                      "block w-full px-3 py-1 text-center font-display text-xs leading-none uppercase transition-colors duration-200 hover:text-brand-yellow focus-visible:text-brand-yellow focus-visible:outline-none pointer-coarse:min-w-11 pointer-coarse:py-3 pointer-coarse:text-sm",
+                      current ? "text-brand-yellow" : "text-brand-red",
+                      option.soldOut &&
+                        !current &&
+                        "cursor-not-allowed line-through opacity-40 hover:text-brand-red",
+                    )}
+                  >
+                    {option.size}
+                    {option.soldOut && !current ? (
+                      <span className="sr-only"> sold out</span>
+                    ) : null}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ) : null}
+    </div>
   );
 }

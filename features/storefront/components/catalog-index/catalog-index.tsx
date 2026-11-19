@@ -156,7 +156,12 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
                           {product.name}
                         </span>
                         <span className="font-display text-lg text-cream/70 transition-opacity duration-300 md:text-xl md:group-data-[piled=true]/issue:opacity-0">
-                          {formatUsd(product.priceCents)}
+                          {/* Every size gone reads as the price's replacement, not a
+                              price on something that cannot be bought. */}
+                          {product.variants.length > 0 &&
+                          product.variants.every((variant) => variant.soldOut)
+                            ? "Out of stock"
+                            : formatUsd(product.priceCents)}
                         </span>
                       </HandoffLink>
                     </Reveal>

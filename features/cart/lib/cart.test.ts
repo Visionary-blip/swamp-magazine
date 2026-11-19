@@ -7,6 +7,9 @@ import {
   cartCount,
   cartSubtotalCents,
   changeCartSize,
+  changePairShirt,
+  pairShirts,
+  removePairShirt,
   moveOneToSize,
   parseStoredCart,
   pruneAddOns,
@@ -216,5 +219,56 @@ describe("adjustQuantity", () => {
     const next = adjustQuantity(cart, "star-shorts", "M", 1);
     expect(next[0].quantity).toBe(MAX_LINE_QUANTITY);
     expect(next[1]).toBe(cart[1]);
+  });
+});
+
+describe("pair lines", () => {
+  const PAIR = "L / EX-MODEL + XL / SWEET DREAMS";
+  function pair(overrides: Partial<CartItem> = {}): CartItem {
+    return item({ slug: "sleep-shirt", size: PAIR, quantity: 2, ...overrides });
+  }
+
+  it("reads a pair as two shirts", () => {
+    expect(pairShirts(pair())).toEqual([
+      { size: "L", design: "EX-MODEL" },
+      { size: "XL", design: "SWEET DREAMS" },
+    ]);
+  });
+
+  it("does not read a single shirt as a pair", () => {
+    expect(pairShirts(pair({ size: "L / EX-MODEL", quantity: 1 }))).toBeNull();
+  });
+
+  it("changes one shirt's design and renames the line", () => {
+    const cart = changePairShirt([pair()], "sleep-shirt", PAIR, 1, {
+      design: "EX-MODEL",
+    });
+    expect(cart[0].size).toBe("L / EX-MODEL + XL / EX-MODEL");
+    expect(cart[0].quantity).toBe(2);
+  });
+
+  it("changes one shirt's size", () => {
+    const cart = changePairShirt([pair()], "sleep-shirt", PAIR, 0, {
+      size: "XL",
+    });
+    expect(cart[0].size).toBe("XL / EX-MODEL + XL / SWEET DREAMS");
+  });
+
+  it("takes one shirt out and leaves the other on its own", () => {
+    const cart = removePairShirt([pair()], "sleep-shirt", PAIR, 0);
+    expect(cart).toHaveLength(1);
+    expect(cart[0].size).toBe("XL / SWEET DREAMS");
+    expect(cart[0].quantity).toBe(1);
+  });
+
+  it("keeps the number of sets when one shirt goes", () => {
+    const cart = removePairShirt(
+      [pair({ quantity: 4 })],
+      "sleep-shirt",
+      PAIR,
+      1,
+    );
+    expect(cart[0].size).toBe("L / EX-MODEL");
+    expect(cart[0].quantity).toBe(2);
   });
 });

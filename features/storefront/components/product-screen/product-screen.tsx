@@ -14,6 +14,7 @@ import { parseModelCredits } from "../../lib/model-credits";
 import { getCreditsMinWidth, getModelFit } from "../../lib/model-fit";
 import { getScrim } from "../../lib/background-scrim";
 import {
+  getBackgroundPositionClass,
   getPageExposureClass,
   getPageScaleClass,
 } from "../../lib/cutout-treatment";
@@ -55,7 +56,10 @@ export function ProductScreen({ product }: { product: ProductDetail }) {
                 fill
                 priority
                 sizes="100vw"
-                className="-z-20 object-cover"
+                className={cn(
+                  "-z-20 object-cover",
+                  getBackgroundPositionClass(product.slug),
+                )}
               />
               <div
                 className={cn(

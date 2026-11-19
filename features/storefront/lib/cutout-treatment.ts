@@ -31,3 +31,15 @@ const PAGE_SCALE: Record<string, string> = {
 export function getPageScaleClass(slug: string): string {
   return PAGE_SCALE[slug] ?? "";
 }
+
+// Where a product's background photograph sits in its frame. The poster is wide
+// and most shoots are tall, so the frame shows a band of the photo: a lower
+// percentage slides the photo down (more of its top in view). Centred unless
+// listed.
+const BACKGROUND_POSITION: Record<string, string> = {
+  "sleep-shirt": "object-[50%_45%]",
+};
+
+export function getBackgroundPositionClass(slug: string): string {
+  return BACKGROUND_POSITION[slug] ?? "";
+}

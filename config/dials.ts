@@ -40,6 +40,16 @@ export const dials = {
   scatterProducts: false,
 
   /**
+   * Whether the EX-MODEL order is on: a former model places the order they built
+   * without paying (the "I'M AN EX-MODEL" button on the card step, and the server
+   * action behind it, actions/create-ex-model-order.ts). Off while the founder
+   * rethinks it; the code is all still there, so turning this on brings it back.
+   * The action refuses while it is off too, since the button hiding alone would
+   * leave a free-order call open to anyone.
+   */
+  exModelOrdersEnabled: false,
+
+  /**
    * Whether the site-wide music player (features/audio-player) is mounted. It
    * is switched off while the founder works on it; everything built for it is
    * kept, so setting this to true brings it back as it was.

@@ -1,5 +1,11 @@
 import { z } from "zod";
 
+import {
+  pairSize,
+  splitDesign,
+  withDesign,
+  type Shirt,
+} from "@/lib/checkout/designs";
 import { lineTotalCents } from "@/lib/checkout/packs";
 
 // The cart is the customer's own scratchpad, kept in the browser: there is no
@@ -116,7 +122,8 @@ export function cartCount(items: CartItem[]): number {
 
 export function cartSubtotalCents(items: CartItem[]): number {
   return items.reduce(
-    (sum, item) => sum + lineTotalCents(item.slug, item.priceCents, item.quantity),
+    (sum, item) =>
+      sum + lineTotalCents(item.slug, item.priceCents, item.quantity),
     0,
   );
 }
@@ -214,4 +221,52 @@ export function adjustQuantity(
     const quantity = Math.min(MAX_LINE_QUANTITY, item.quantity + delta);
     return quantity < 1 ? [] : [{ ...item, quantity }];
   });
+}
+
+/** The two shirts of a pair line (two shirts bought together, each with a design
+ * and a size of its own), or null when the line is not one. */
+export function pairShirts(item: CartItem): [Shirt, Shirt] | null {
+  if (item.addOn || item.quantity < 2 || item.quantity % 2 !== 0) return null;
+  const read = splitDesign(item.slug, item.size);
+  return read && read.shirts.length === 2
+    ? [read.shirts[0], read.shirts[1]]
+    : null;
+}
+
+/** Changes one shirt's design or size inside a pair line. The line is renamed
+ * for the new pair, and joins a line that already is that pair. */
+export function changePairShirt(
+  items: CartItem[],
+  slug: string,
+  size: string,
+  index: 0 | 1,
+  patch: Partial<Shirt>,
+): CartItem[] {
+  const source = items.find((item) => item.slug === slug && item.size === size);
+  const shirts = source ? pairShirts(source) : null;
+  if (!shirts) return items;
+  const next: [Shirt, Shirt] =
+    index === 0
+      ? [{ ...shirts[0], ...patch }, shirts[1]]
+      : [shirts[0], { ...shirts[1], ...patch }];
+  return changeCartSize(items, slug, size, pairSize(next[0], next[1]));
+}
+
+/** Takes one shirt out of a pair: what is left is the other shirt on its own
+ * (at the single price), in the same number of sets. */
+export function removePairShirt(
+  items: CartItem[],
+  slug: string,
+  size: string,
+  index: 0 | 1,
+): CartItem[] {
+  const source = items.find((item) => item.slug === slug && item.size === size);
+  const shirts = source ? pairShirts(source) : null;
+  if (!source || !shirts) return items;
+  const kept = shirts[index === 0 ? 1 : 0];
+  if (!kept.design) return items;
+  const halved = items.map((item) =>
+    item === source ? { ...item, quantity: source.quantity / 2 } : item,
+  );
+  return changeCartSize(halved, slug, size, withDesign(kept.size, kept.design));
 }

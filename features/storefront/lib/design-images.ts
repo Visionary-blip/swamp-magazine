@@ -1,13 +1,9 @@
-// A garment sold in more than one design has a picture per design. Bundled files,
-// like the galleries, keyed by the design names in lib/checkout/designs.ts. A slug
-// with no entry just uses its one cutout.
-const DESIGN_IMAGES: Record<string, Record<string, string>> = {
-  "sleep-shirt": {
-    "EX-MODEL": "/designs/sleep-shirt-ex-model.webp",
-    "SWEET DREAMS": "/designs/sleep-shirt-sweet-dreams.webp",
-  },
-};
+import { designImagesFor } from "@/lib/checkout/designs";
 
+// A garment sold in more than one design has a picture per design. Bundled files,
+// keyed by the design names in lib/checkout/designs.ts (the map lives there, so
+// the cart corner can draw the same pictures). A slug with no entry just uses its
+// one cutout.
 export function getDesignImages(slug: string): Record<string, string> {
-  return DESIGN_IMAGES[slug] ?? {};
+  return designImagesFor(slug);
 }

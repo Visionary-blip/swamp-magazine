@@ -28,6 +28,20 @@ export function offeredSizes(slug: string): readonly string[] | null {
   return OFFERED_SIZES[slug] ?? null;
 }
 
+// A picture per design, bundled with the site (public/designs). Here rather than
+// in the storefront because the cart corner draws each shirt of a pair in its
+// own design too. A slug with no entry just uses its one cutout.
+const DESIGN_IMAGES: Record<string, Record<string, string>> = {
+  "sleep-shirt": {
+    "EX-MODEL": "/designs/sleep-shirt-ex-model.webp",
+    "SWEET DREAMS": "/designs/sleep-shirt-sweet-dreams.webp",
+  },
+};
+
+export function designImagesFor(slug: string): Record<string, string> {
+  return DESIGN_IMAGES[slug] ?? {};
+}
+
 /** The designs a garment is sold in, or an empty list when it has just the one. */
 export function designsFor(slug: string): readonly string[] {
   return DESIGNS[slug] ?? [];

@@ -9,15 +9,19 @@ import {
   type ReactNode,
 } from "react";
 
+import type { Shirt } from "@/lib/checkout/designs";
+
 import {
   CART_STORAGE_KEY,
   addToCart,
   adjustQuantity,
   changeCartSize,
+  changePairShirt,
   moveOneToSize,
   parseStoredCart,
   pruneAddOns,
   removeFromCart,
+  removePairShirt,
   type CartItem,
   type CartState,
   type DeliveryChoice,
@@ -33,6 +37,15 @@ type CartContextValue = {
   /** One unit of a line to another size; see `moveOneToSize`. */
   moveOneToSize: (slug: string, from: string, to: string) => void;
   adjust: (slug: string, size: string, delta: number) => void;
+  /** One shirt of a pair line: its design or size. */
+  changeShirt: (
+    slug: string,
+    size: string,
+    index: 0 | 1,
+    patch: Partial<Shirt>,
+  ) => void;
+  /** One shirt out of a pair line; the other stays. */
+  removeShirt: (slug: string, size: string, index: 0 | 1) => void;
   clear: () => void;
 };
 
@@ -131,6 +144,22 @@ export function CartProvider({ children }: { children: ReactNode }) {
       })),
     [],
   );
+  const changeShirt = useCallback(
+    (slug: string, size: string, index: 0 | 1, patch: Partial<Shirt>) =>
+      update((current) => ({
+        ...current,
+        items: changePairShirt(current.items, slug, size, index, patch),
+      })),
+    [],
+  );
+  const removeShirt = useCallback(
+    (slug: string, size: string, index: 0 | 1) =>
+      update((current) => ({
+        ...current,
+        items: removePairShirt(current.items, slug, size, index),
+      })),
+    [],
+  );
   const clear = useCallback(
     () => update((current) => ({ ...current, items: [] })),
     [],
@@ -146,6 +175,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
       changeSize,
       moveOneToSize: moveOne,
       adjust,
+      changeShirt,
+      removeShirt,
       clear,
     }),
     [
@@ -156,6 +187,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
       changeSize,
       moveOne,
       adjust,
+      changeShirt,
+      removeShirt,
       clear,
     ],
   );
