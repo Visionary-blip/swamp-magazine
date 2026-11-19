@@ -15,6 +15,19 @@ function shots(slug: string, count: number, alt: string): GalleryImage[] {
   }));
 }
 
+// The same files in an order of their own: the numbers are the files' names, so
+// a new photograph can take a place in the run without renaming the rest.
+function shotsInOrder(
+  slug: string,
+  order: number[],
+  alt: string,
+): GalleryImage[] {
+  return order.map((number) => ({
+    src: `/gallery/${slug}-${number}.webp`,
+    alt,
+  }));
+}
+
 const GALLERIES: Record<string, GalleryImage[]> = {
   "college-arch": shots("college-arch", 6, "College Arch lifestyle shot"),
   "fc-hoodie": shots("fc-hoodie", 5, "FC Hoodie lifestyle shot"),
@@ -25,7 +38,12 @@ const GALLERIES: Record<string, GalleryImage[]> = {
     "Lurker Long Sleeve lifestyle shot",
   ),
   "star-shorts": shots("star-shorts", 4, "Star Shorts lifestyle shot"),
-  "sleep-shirt": shots("sleep-shirt", 11, "Sleep Shirt lifestyle shot"),
+  // The couch photograph (12) sits third, behind the two that lead.
+  "sleep-shirt": shotsInOrder(
+    "sleep-shirt",
+    [1, 2, 12, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "Sleep Shirt lifestyle shot",
+  ),
 };
 
 export function getProductGallery(slug: string): GalleryImage[] {
