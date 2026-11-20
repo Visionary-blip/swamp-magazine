@@ -90,7 +90,7 @@ export function ProductScreen({ product }: { product: ProductDetail }) {
                 mockup shorthand -- `products.model_credits` is the source. */}
               {product.modelCredits ? (
                 // `w-fit`, so the ruler bar under the credits is as wide as the
-                // longest of them, (L)/(R) included.
+                // longest of them.
                 <div
                   className={cn(
                     "flex w-fit flex-col",

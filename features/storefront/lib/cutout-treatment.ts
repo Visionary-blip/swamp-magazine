@@ -6,6 +6,10 @@
 // size up on the grid tile, and `hover` is that size plus the usual hover growth.
 const GRID_SCALE: Record<string, string> = {
   "fc-hoodie": "origin-bottom scale-[1.18] group-hover:scale-[1.24]",
+  // These two fill the tile's width like the rest but are shorter in it, so
+  // they read a size down beside the tees.
+  "triple-croc-tee": "origin-bottom scale-[1.1] group-hover:scale-[1.16]",
+  "sleep-shirt": "origin-bottom scale-[1.06] group-hover:scale-[1.12]",
 };
 
 export function getGridScaleClass(slug: string): string {

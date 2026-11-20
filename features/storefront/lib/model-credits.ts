@@ -26,7 +26,8 @@ export type ModelCredit = { text: string; href: string | null };
 
 /**
  * Splits a credit string into one entry per person, each with the Instagram URL
- * for the name at its start ("JOE (BEHIND)" -> JOE). Commas and line breaks both
+ * for the name at its start ("JOE (BEHIND)" -> JOE). A trailing "(L)" or "(R)"
+ * is dropped from the shown text. Commas and line breaks both
  * separate people, so either way the admin's field was filled in works.
  */
 export function parseModelCredits(raw: string): ModelCredit[] {
@@ -34,11 +35,13 @@ export function parseModelCredits(raw: string): ModelCredit[] {
     .split(/[,\n]/)
     .map((part) => part.trim())
     .filter(Boolean)
-    .map((text) => {
-      const name = text.split("(")[0].trim().toUpperCase();
+    .map((entry) => {
+      const name = entry.split("(")[0].trim().toUpperCase();
       const handle = INSTAGRAM_HANDLES[name];
       return {
-        text,
+        // Which side of the photograph someone stood on is a note for the admin
+        // field; the page shows the name alone.
+        text: entry.replace(/\s*\((?:L|R)\)\s*$/i, ""),
         href: handle ? `https://www.instagram.com/${handle}/` : null,
       };
     });

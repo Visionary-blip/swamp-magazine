@@ -3,10 +3,10 @@ import { describe, expect, it } from "vitest";
 import { parseModelCredits } from "./model-credits";
 
 describe("parseModelCredits", () => {
-  it("links each known name and keeps the bracketed suffix in the text", () => {
+  it("links each known name and drops the (L)/(R) side marker", () => {
     expect(parseModelCredits("ANANYA (L), JESSICA (R)")).toEqual([
-      { text: "ANANYA (L)", href: "https://www.instagram.com/ananya.gomatam/" },
-      { text: "JESSICA (R)", href: "https://www.instagram.com/jess.lain/" },
+      { text: "ANANYA", href: "https://www.instagram.com/ananya.gomatam/" },
+      { text: "JESSICA", href: "https://www.instagram.com/jess.lain/" },
     ]);
   });
 

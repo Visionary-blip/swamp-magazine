@@ -9,7 +9,7 @@ const STANDARD: Scrim = {
 
 // The FC hoodie shoot is dark to begin with, so the standard wash buries it. The
 // lighter wash belongs to that photograph, not to the product: it applies only
-// while the background is still the one seeded for it (`product_bg-fc-hoodie`).
+// while the background is still the one seeded for it (`product_bg-fc-hoodie-v4`).
 // The admin uploader stores a replacement under a new path, so the day the
 // founder swaps the photo this stops matching and the standard wash is back.
 const LIGHTER: Scrim = {
@@ -18,7 +18,7 @@ const LIGHTER: Scrim = {
 };
 const LIGHTER_FOR: { slug: string; file: string } = {
   slug: "fc-hoodie",
-  file: "product_bg-fc-hoodie.webp",
+  file: "product_bg-fc-hoodie-v4.webp",
 };
 
 export function getScrim(slug: string, backgroundUrl: string): Scrim {
