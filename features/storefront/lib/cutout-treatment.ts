@@ -7,9 +7,11 @@
 const GRID_SCALE: Record<string, string> = {
   "fc-hoodie": "origin-bottom scale-[1.18] group-hover:scale-[1.24]",
   // These two fill the tile's width like the rest but are shorter in it, so
-  // they read a size down beside the tees.
-  "triple-croc-tee": "origin-bottom scale-[1.1] group-hover:scale-[1.16]",
-  "sleep-shirt": "origin-bottom scale-[1.06] group-hover:scale-[1.12]",
+  // they read a size down beside the tees. They grow from the centre, not the
+  // bottom: the tees' shapes are centred in their tiles, and growing from the
+  // bottom lifts a shirt above its neighbours.
+  "triple-croc-tee": "scale-[1.1] group-hover:scale-[1.16]",
+  "sleep-shirt": "scale-[1.06] group-hover:scale-[1.12]",
 };
 
 export function getGridScaleClass(slug: string): string {
