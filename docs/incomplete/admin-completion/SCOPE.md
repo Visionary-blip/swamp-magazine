@@ -4,7 +4,7 @@
 (§7), the fourth — sequencing — held at Zach's instruction ("stop here") and
 **answered 2026-08-22** in §8.2: **P4 closes first, this project waits.**
 One question remains open and is the founder's, not Zach's (§8.9, §8.10).
-Entered at Stage 2 per `~/Projects/ezhomesteading/docs/feature-lifecycle.md`
+Entered at Stage 2 per `~/Developer/dan-short/ezhomesteading/docs/feature-lifecycle.md`
 ("Entering in the middle": an audit produces its findings as Stage 1 output and
 then enters at Stage 2). Stage 3 not entered; this file is not renamed.
 
@@ -485,7 +485,7 @@ picture rather than asking him to pick a tier.
 
 ### 8.11 Route from here (not a plan — Stage 4 writes that)
 
-Per `~/Projects/ezhomesteading/docs/feature-lifecycle.md`:
+Per `~/Developer/dan-short/ezhomesteading/docs/feature-lifecycle.md`:
 
 | Step | Stage | Folder | Blocked on |
 |---|---|---|---|

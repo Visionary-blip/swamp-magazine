@@ -1,7 +1,7 @@
 <!-- personal-config v0.6.0 · 2026-09-29 · config 30fe5a00 · standard v1.2.0 -->
 # docs/incomplete: open efforts
 
-This folder holds work that is still open. Each effort gets its own folder, `docs/incomplete/<slug>/`, from the first keystroke. When the effort closes, the folder moves to `~/Projects/archive/swamp-magazine/<slug>/` and gets one line in that archive's `INDEX.md`.
+This folder holds work that is still open. Each effort gets its own folder, `docs/incomplete/<slug>/`, from the first keystroke. When the effort closes, the folder moves to `~/Developer/zach-short/archive/swamp-magazine/<slug>/` and gets one line in that archive's `INDEX.md`.
 
 ## Stages
 

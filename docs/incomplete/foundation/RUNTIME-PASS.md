@@ -1,6 +1,6 @@
 # Runtime pass — observed behaviour, per phase
 
-Stage 7 of `~/Projects/ezhomesteading/docs/feature-lifecycle.md`. One entry per
+Stage 7 of `~/Developer/dan-short/ezhomesteading/docs/feature-lifecycle.md`. One entry per
 proof, written **when it was run**, recording what was observed rather than what
 the code should do. A green gate is not a runtime pass; the two claims never
 merge.
