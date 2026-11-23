@@ -6,6 +6,9 @@
 // size up on the grid tile, and `hover` is that size plus the usual hover growth.
 const GRID_SCALE: Record<string, string> = {
   "fc-hoodie": "origin-bottom scale-[1.18] group-hover:scale-[1.24]",
+  // The crop top's cutout is trimmed tight, so it fills its tile and reads a
+  // size up beside the tees; drawn at 90%, from the centre.
+  "croc-crop": "scale-[0.9] group-hover:scale-[0.95]",
   // These two fill the tile's width like the rest but are shorter in it, so
   // they read a size down beside the tees. They grow from the centre, not the
   // bottom: the tees' shapes are centred in their tiles, and growing from the
