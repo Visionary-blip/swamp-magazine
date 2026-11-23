@@ -118,7 +118,7 @@ const CATALOG: SeedProduct[] = [
     name: "Croc Crop",
     priceCents: 2500,
     sizes: ["XS", "S", "M", "L"],
-    modelCredits: "FABI, MODEL 2",
+    modelCredits: "FABI, ADELINE",
     cutoutFile: "swamp-images/CROC CROP GRID.webp",
     sortOrder: 7,
   },

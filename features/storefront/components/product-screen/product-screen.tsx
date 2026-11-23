@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 
 import type { ProductDetail } from "../../lib/catalog";
 import { parseModelCredits } from "../../lib/model-credits";
-import { getCreditsMinWidth, getModelFit } from "../../lib/model-fit";
+import { getModelFit } from "../../lib/model-fit";
 import { getScrim } from "../../lib/background-scrim";
 import {
   getBackgroundPositionClass,
@@ -20,6 +20,7 @@ import {
 } from "../../lib/cutout-treatment";
 import { getDesignImages } from "../../lib/design-images";
 import { getProductGallery } from "../../lib/product-gallery";
+import { getProductSpecs } from "../../lib/product-specs";
 import type { ProductNeighbors } from "../../lib/product-neighbors";
 import { storefrontCopy } from "../../lib/storefront-copy";
 import { ModelFitButton } from "../model-fit/model-fit-button";
@@ -99,14 +100,7 @@ export function ProductScreen({
               {/* The founder's credit line, from the DB rather than from any
                 mockup shorthand -- `products.model_credits` is the source. */}
               {product.modelCredits ? (
-                // `w-fit`, so the ruler bar under the credits is as wide as the
-                // longest of them.
-                <div
-                  className={cn(
-                    "flex w-fit flex-col",
-                    getCreditsMinWidth(product.slug),
-                  )}
-                >
+                <div className="flex w-fit flex-col">
                   <ul className="brat flex flex-col items-end gap-1.5 text-right text-brand-red">
                     {parseModelCredits(product.modelCredits).map((credit) => (
                       <li key={credit.text}>
@@ -135,6 +129,7 @@ export function ProductScreen({
                           credit.text.split("(")[0].trim(),
                         ),
                     )}
+                    specs={getProductSpecs(product.slug)}
                     // Only where there are photographs below to look at.
                     note={
                       hasGallery
@@ -142,14 +137,17 @@ export function ProductScreen({
                         : undefined
                     }
                     noteHref="#gallery"
-                    // Half the credits' width, flush right under them.
-                    className="mt-2.5 hidden self-end md:block md:w-1/2"
+                    // One size for every product: the FC hoodie's, which is half
+                    // the width of its widest credit. That is 1.458 times the
+                    // credits' type size (see `brat`, whose clamp this repeats),
+                    // so it follows the window the way the credits do.
+                    className="mt-2.5 hidden self-end md:block md:w-[calc(clamp(1.75rem,3.6vw,3rem)*1.458)]"
                   />
                 </div>
               ) : null}
-              {/* The cart floats under the credits and the sizing bar and takes no
+              {/* The cart floats under the credits and the specs bar and takes no
                 room, so a filled cart never pushes the page's text and pictures
-                down. Its layer sits below the sizing panel, which opens over it. */}
+                down. Its layer sits below the specs panel, which opens over it. */}
               <div className="relative -mb-3 h-0 w-full">
                 <div className="absolute top-0 right-0 z-[5] w-max max-w-[calc(100vw-2.5rem)]">
                   <CartCorner placement="inline" />

@@ -5,16 +5,20 @@ import { useEffect, useRef, useState } from "react";
 import { glideToAnchor } from "../../lib/glide-to-anchor";
 import type { ModelFit } from "../../lib/model-fit";
 
-// A small bar reading SIZING under the model credits (desktop only). It opens one
-// panel saying how tall each model is and what size they are wearing, in the same
-// thin-red-ring language as the music and cart controls.
+// A small bar reading SPECS under the model credits (desktop only). It opens one
+// panel saying how tall each model is and what size they are wearing, then what
+// the piece is made of and how it was printed, in the same thin-red-ring language
+// as the music and cart controls.
 export function ModelFitButton({
   models,
+  specs,
   note,
   noteHref,
   className,
 }: {
   models: ModelFit[];
+  /** What it is made of and how it was printed, under the models. */
+  specs?: string[];
   /** A closing line under the models (the page's pointer to its photographs). */
   note?: string;
   /** Makes the note a link that glides to this in-page anchor. */
@@ -48,16 +52,16 @@ export function ModelFitButton({
         onClick={() => setOpen((value) => !value)}
         aria-haspopup="dialog"
         aria-expanded={open}
-        aria-label="Model height and size"
+        aria-label="Model height and size, and product specs"
         className="flex h-8 w-full items-center justify-center rounded-full border font-display text-sm leading-none tracking-[0.1em] border-brand-red/70 bg-ink/80 text-brand-red transition-colors duration-200 hover:text-brand-yellow hover:border-brand-yellow focus-visible:text-brand-yellow focus-visible:border-brand-yellow focus-visible:outline-none"
       >
-        SIZING
+        SPECS
       </button>
 
       {open ? (
         <div
           role="dialog"
-          aria-label="Model height and size"
+          aria-label="Model height and size, and product specs"
           className="absolute top-full right-0 z-10 mt-1 w-max max-w-64 flex flex-col gap-2 rounded-2xl border border-brand-red/70 bg-ink/95 p-3 text-right font-display text-xs leading-snug tracking-[0.1em] text-brand-red uppercase"
         >
           {models.map((model) => (
@@ -66,6 +70,13 @@ export function ModelFitButton({
               SIZE {model.size}
             </p>
           ))}
+          {specs && specs.length > 0 ? (
+            <ul className="flex flex-col gap-1 border-t border-brand-red/30 pt-2">
+              {specs.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ul>
+          ) : null}
           {note && noteHref ? (
             <a
               href={noteHref}

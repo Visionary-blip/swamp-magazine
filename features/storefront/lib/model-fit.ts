@@ -34,11 +34,11 @@ const MODEL_FIT: Record<string, ModelFit[]> = {
   // Garrett's height, and Adeline's height and size, are still to come from the
   // founder (a name with no entry shows the bracketed stand-ins).
   "fc-shirt": [{ name: "GARRETT", height: "[HEIGHT]", size: "L" }],
-  // Fabi's height is still to come from the founder; MODEL 2 stands in for the
-  // second model until the founder names them.
+  // Fabi (XS) and Adeline (S) model it together; their heights are still to come
+  // from the founder.
   "croc-crop": [
     { name: "FABI", height: "[HEIGHT]", size: "XS" },
-    { name: "MODEL 2", height: "[HEIGHT]", size: "S" },
+    { name: "ADELINE", height: "[HEIGHT]", size: "S" },
   ],
   // Brianna's and Connor's heights and sizes are still to come from the founder.
   "sleep-shirt": [
@@ -50,18 +50,6 @@ const MODEL_FIT: Record<string, ModelFit[]> = {
     { name: "Z", height: `6'2"`, size: "L" },
   ],
 };
-
-// The SIZING button is half as wide as the credits above it, so a short credit
-// makes a narrow button. A product listed here keeps the width its credits had
-// before they were shortened (Joe's was "JOE (BEHIND)", 177px). Literal class
-// names, so Tailwind can see them.
-const CREDITS_MIN_WIDTH: Record<string, string> = {
-  "lurker-tee": "md:min-w-[177px]",
-};
-
-export function getCreditsMinWidth(slug: string): string {
-  return CREDITS_MIN_WIDTH[slug] ?? "";
-}
 
 // A model's fit by the name as written in the credit line ("JESSICA" for
 // "JESSICA (R)"). A model with no entry yet gets the bracketed stand-ins under
