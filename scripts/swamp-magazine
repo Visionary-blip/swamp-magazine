@@ -43,7 +43,7 @@ cmd_help() {
 
 cmd_shell() {
   cat <<'EOF'
-swamp-magazine() { "$HOME/Projects/swamp-magazine/scripts/swamp-magazine" "$@"; }
+swamp-magazine() { "$HOME/Developer/zach-short/swamp-magazine/scripts/swamp-magazine" "$@"; }
 
 _swamp_magazine_complete() {
   local -a subcmds

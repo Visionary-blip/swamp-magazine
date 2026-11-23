@@ -21,7 +21,7 @@ App Router + Supabase + Stripe on Vercel. The process docs are the law:
   rewrite the dev-server-generated `.next/dev/types` tree.
 - `bun run seed` — idempotent catalog seed (needs `.env.local`).
 
-## Conventions (inherited from ~/Projects/ezhomesteading)
+## Conventions (inherited from ~/Developer/dan-short/ezhomesteading)
 
 - Kebab-case for every file and folder. Named exports; components are function
   declarations; no `React.FC`, no `enum`, no `any`.

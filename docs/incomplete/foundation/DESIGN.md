@@ -1,7 +1,7 @@
 # Foundation — stack, services, and v1 shape
 
 **Status: RATIFIED 2026-08-22** (GATE 1, batched in chat).
-Process adapted from `~/Projects/ezhomesteading/docs/feature-lifecycle.md`. Decisions
+Process adapted from `~/Developer/dan-short/ezhomesteading/docs/feature-lifecycle.md`. Decisions
 D1–D4 below are frozen: they change by dated amendment (a new `D<n>` or an `As built:`
 note), never by editing in place. The options in §3 are the historical record of what
 was weighed.
