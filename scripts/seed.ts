@@ -142,7 +142,7 @@ const CATALOG: SeedProduct[] = [
   // placeholders.
   {
     slug: "triple-croc-tee",
-    name: "Triple Croc Tee",
+    name: "Triple Croc",
     priceCents: 3500,
     sizes: ["XS", "S", "M", "L", "XL"],
     modelCredits: "MODEL 1",
