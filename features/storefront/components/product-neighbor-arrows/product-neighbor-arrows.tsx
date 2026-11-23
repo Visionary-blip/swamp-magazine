@@ -1,16 +1,21 @@
+"use client";
+
 import Link from "next/link";
 
+import { PHONE } from "@/features/transition";
 import { cn } from "@/lib/utils";
 
 import type {
   ProductNeighbor,
   ProductNeighbors,
 } from "../../lib/product-neighbors";
+import { PRODUCT_STEP_EVENT } from "../product-feed/product-feed";
 
 // The two arrows at the sides of a product's poster that step to the previous
 // and the next product, drawn like the scroll cue under the title (same red,
-// same yellow on hover, same gentle bob, here sideways). From md up only: a
-// phone swipes instead (see ProductFeed). An end of the line has no arrow.
+// same yellow on hover, same gentle bob, here sideways). They are on a phone too,
+// where a swipe does the same; a tap on one slides the page the way a swipe
+// does. An end of the line has no arrow.
 export function ProductNeighborArrows({
   neighbors,
 }: {
@@ -41,9 +46,29 @@ function Arrow({
       href={`/product/${neighbor.slug}`}
       aria-label={`${previous ? "Previous" : "Next"} product: ${neighbor.name}`}
       title={neighbor.name}
+      onClick={(event) => {
+        // A phone's page takes the step itself, sliding (and, inside the
+        // landing's overlay, staying on the landing); anywhere else the link
+        // navigates.
+        if (
+          event.metaKey ||
+          event.ctrlKey ||
+          event.shiftKey ||
+          event.altKey ||
+          !window.matchMedia(PHONE).matches
+        ) {
+          return;
+        }
+        event.preventDefault();
+        window.dispatchEvent(
+          new CustomEvent(PRODUCT_STEP_EVENT, { detail: previous ? -1 : 1 }),
+        );
+      }}
       className={cn(
-        "absolute top-1/2 z-[5] hidden size-12 -translate-y-1/2 items-center justify-center rounded-full text-brand-red transition-colors duration-200 hover:text-brand-yellow focus-visible:text-brand-yellow focus-visible:outline-none md:flex",
-        previous ? "left-4 lg:left-8" : "right-4 lg:right-8",
+        "absolute top-1/2 z-[5] flex size-10 -translate-y-1/2 items-center justify-center rounded-full text-brand-red transition-colors duration-200 hover:text-brand-yellow focus-visible:text-brand-yellow focus-visible:outline-none md:size-12",
+        previous
+          ? "left-0.5 md:left-4 lg:left-8"
+          : "right-0.5 md:right-4 lg:right-8",
       )}
     >
       <svg
