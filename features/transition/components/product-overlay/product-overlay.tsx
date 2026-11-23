@@ -50,7 +50,12 @@ export function ProductOverlay({
   useEffect(() => {
     function onOpen(event: Event) {
       const slug = (event as CustomEvent<string>).detail;
-      if (pushed.current) return;
+      // Already open: this is a swipe to a neighbouring product, which takes the
+      // layer in place. It adds no history entry, so one back still closes it.
+      if (pushed.current) {
+        setActive(slug);
+        return;
+      }
       // Same URL, new entry: back closes the page.
       window.history.pushState(window.history.state, "", window.location.href);
       pushed.current = true;

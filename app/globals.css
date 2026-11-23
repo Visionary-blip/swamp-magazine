@@ -197,8 +197,24 @@
   animation: cue-bob-left 1.8s ease-in-out infinite;
 }
 
+/* And the mirror, for the arrow that points right. */
+@keyframes cue-bob-right {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(5px);
+  }
+}
+
+.animate-cue-bob-right {
+  animation: cue-bob-right 1.8s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-nudge,
+  .animate-cue-bob-right,
   .animate-cue-bob-left,
   .animate-cue-bob {
     animation: none;

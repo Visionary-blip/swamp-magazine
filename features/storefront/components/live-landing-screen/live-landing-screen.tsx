@@ -5,6 +5,7 @@ import { CartCorner } from "@/features/cart";
 import { ProductOverlay } from "@/features/transition";
 
 import { getCatalog, getLandingImagery, getProduct } from "../../lib/catalog";
+import { getProductNeighbors } from "../../lib/product-neighbors";
 import { storefrontCopy } from "../../lib/storefront-copy";
 import { CatalogIndex } from "../catalog-index/catalog-index";
 import { FeedPager } from "../feed-pager/feed-pager";
@@ -46,7 +47,17 @@ export async function LiveLandingScreen() {
   );
   const panels = details.flatMap((detail) =>
     detail
-      ? [{ slug: detail.slug, node: <ProductScreen product={detail} /> }]
+      ? [
+          {
+            slug: detail.slug,
+            node: (
+              <ProductScreen
+                product={detail}
+                neighbors={getProductNeighbors(products, detail.slug)}
+              />
+            ),
+          },
+        ]
       : [],
   );
 

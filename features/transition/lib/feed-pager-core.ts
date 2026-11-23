@@ -18,6 +18,9 @@
 export const PHONE = "(max-width: 767px)";
 // A finger that moved less than this is a tap, not a swipe.
 const SWIPE_PX = 8;
+// A sideways swipe has to travel this far to count, so a thumb that drifts while
+// scrolling vertically never turns the page.
+const SIDE_SWIPE_PX = 56;
 const EASE = "transform 450ms cubic-bezier(0.22, 0.8, 0.3, 1)";
 // How far past the first or last point the track follows the finger (a rubber
 // band), as a fraction of the drag.
@@ -35,6 +38,10 @@ export type FeedPagerOptions = {
   isActive?: () => boolean;
   /** The rest stop the track is now on (null between stops), after a step. */
   onStep?: (stop: HTMLElement | null, animated: boolean) => void;
+  /** Given, a swipe that starts out more sideways than up or down is not a page
+   * step but this: 1 for a swipe to the left, -1 for one to the right. The track
+   * stays put for it. Left out, every drag is vertical, as on the landing. */
+  onSideSwipe?: (direction: 1 | -1) => void;
 };
 
 export function createFeedPager(
@@ -49,6 +56,10 @@ export function createFeedPager(
   let rest = 0;
   let startY = 0;
   let lastY = 0;
+  let startX = 0;
+  let lastX = 0;
+  // Which way this drag has turned out to go, once it has moved far enough to say.
+  let axis: "x" | "y" | null = null;
   let dragging = false;
   let wasVisible = false;
 
@@ -147,7 +158,9 @@ export function createFeedPager(
   function onTouchStart(event: TouchEvent) {
     if (!active() || event.touches.length !== 1) return;
     dragging = true;
+    axis = null;
     startY = lastY = event.touches[0].clientY;
+    startX = lastX = event.touches[0].clientX;
     // Catch the track where it is if it was still easing, so a new touch takes
     // over from the middle of the move instead of snapping.
     rest = -currentOffset();
@@ -156,7 +169,17 @@ export function createFeedPager(
   function onTouchMove(event: TouchEvent) {
     if (!dragging) return;
     lastY = event.touches[0].clientY;
+    lastX = event.touches[0].clientX;
     if (event.cancelable) event.preventDefault();
+    if (options.onSideSwipe) {
+      const across = Math.abs(lastX - startX);
+      const along = Math.abs(lastY - startY);
+      if (axis === null && Math.max(across, along) >= SWIPE_PX) {
+        axis = across > along ? "x" : "y";
+      }
+      // Undecided, or going sideways: the track does not follow the finger.
+      if (axis !== "y") return;
+    }
     let drag = lastY - startY;
     const atStart = rest <= points[0] && drag > 0;
     const atEnd = rest >= points[points.length - 1] && drag < 0;
@@ -166,6 +189,14 @@ export function createFeedPager(
   function onTouchEnd() {
     if (!dragging) return;
     dragging = false;
+    if (axis === "x") {
+      axis = null;
+      const across = lastX - startX;
+      if (Math.abs(across) >= SIDE_SWIPE_PX) {
+        options.onSideSwipe?.(across < 0 ? 1 : -1);
+      }
+      return;
+    }
     const moved = startY - lastY;
     if (Math.abs(moved) >= SWIPE_PX) step(moved > 0 ? 1 : -1);
     else settle(rest, true);

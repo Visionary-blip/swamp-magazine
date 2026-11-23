@@ -20,9 +20,11 @@ import {
 } from "../../lib/cutout-treatment";
 import { getDesignImages } from "../../lib/design-images";
 import { getProductGallery } from "../../lib/product-gallery";
+import type { ProductNeighbors } from "../../lib/product-neighbors";
 import { storefrontCopy } from "../../lib/storefront-copy";
 import { ModelFitButton } from "../model-fit/model-fit-button";
 import { ProductFeed } from "../product-feed/product-feed";
+import { ProductNeighborArrows } from "../product-neighbor-arrows/product-neighbor-arrows";
 import { ProductGallery } from "../product-gallery/product-gallery";
 import { ScrollCue } from "../scroll-cue/scroll-cue";
 
@@ -30,13 +32,19 @@ import { ScrollCue } from "../scroll-cue/scroll-cue";
 // centre, red Anton set straight onto the photograph. BACK and the model
 // credits sit across the top; size, delivery and place order are stacked,
 // centred, along the bottom (CheckoutForm). All of it is one type size.
-export function ProductScreen({ product }: { product: ProductDetail }) {
+export function ProductScreen({
+  product,
+  neighbors,
+}: {
+  product: ProductDetail;
+  neighbors: ProductNeighbors;
+}) {
   const gallery = getProductGallery(product.slug);
   const hasGallery = gallery.length > 0;
 
   return (
     <PairViewProvider>
-      <ProductFeed>
+      <ProductFeed neighbors={neighbors}>
         <div
           data-feed-stop
           className={cn(
@@ -77,6 +85,8 @@ export function ProductScreen({ product }: { product: ProductDetail }) {
               />
             </>
           ) : null}
+
+          <ProductNeighborArrows neighbors={neighbors} />
 
           <div className="flex items-start justify-between gap-4">
             <ProductBackLink

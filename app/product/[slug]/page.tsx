@@ -2,7 +2,12 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 
 import { getStorefrontMode } from "@/features/admin";
-import { ProductScreen, getProduct } from "@/features/storefront";
+import {
+  ProductScreen,
+  getCatalog,
+  getProduct,
+  getProductNeighbors,
+} from "@/features/storefront";
 import { isAtOrderCapacity } from "@/lib/order-capacity.server";
 
 // Same gate as "/": product pages must not leak an unreleased drop, and
@@ -28,8 +33,16 @@ export default async function ProductPage({
   if (mode !== "live" || (await isAtOrderCapacity())) redirect("/");
 
   const { slug } = await params;
-  const product = await getProduct(slug);
+  const [product, catalog] = await Promise.all([
+    getProduct(slug),
+    getCatalog(),
+  ]);
   if (!product) notFound();
 
-  return <ProductScreen product={product} />;
+  return (
+    <ProductScreen
+      product={product}
+      neighbors={getProductNeighbors(catalog, slug)}
+    />
+  );
 }
