@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   botchedBaseSize,
+  botchedOffered,
   botchedSize,
   parseBotchedSize,
   sizeMatches,
@@ -46,5 +47,13 @@ describe("botchedBaseSize", () => {
     expect(botchedBaseSize(["S", "L", "M"])).toBe("L");
     expect(botchedBaseSize(["ONE SIZE"])).toBeNull();
     expect(botchedBaseSize([])).toBeNull();
+  });
+});
+
+describe("botchedOffered", () => {
+  // Paused on 2026-11-19 (dials.botchedEnabled). Flip this with the dial.
+  it("is off for every garment while the dial is off", () => {
+    expect(botchedOffered("vamp-tee")).toBe(false);
+    expect(botchedOffered("dog-tee")).toBe(false);
   });
 });

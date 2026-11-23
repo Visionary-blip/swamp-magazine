@@ -24,7 +24,7 @@ const BOTCHED_SLUGS: readonly string[] = [
 
 /** Whether a garment may be had Botched. */
 export function botchedOffered(slug: string): boolean {
-  return BOTCHED_SLUGS.includes(slug);
+  return dials.botchedEnabled && BOTCHED_SLUGS.includes(slug);
 }
 
 /** A garment's sizes as the buttons should show them: the B only where it is

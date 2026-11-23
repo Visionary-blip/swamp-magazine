@@ -1,7 +1,14 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { dials } from "@/config/dials";
 import { resolveOrderDraft, type ProductRow } from "./order-draft";
+
+// Botched is paused in the real dials (see botched.test.ts); these tests are
+// about how the server prices and stocks a B line when it is on.
+vi.mock("@/config/dials", async (importOriginal) => {
+  const original = await importOriginal<typeof import("@/config/dials")>();
+  return { dials: { ...original.dials, botchedEnabled: true } };
+});
 
 // These guards are the ones that lose money quietly: a sold-out size that still
 // takes payment, or a shipped order charged at the pickup price.

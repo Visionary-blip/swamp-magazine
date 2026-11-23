@@ -48,6 +48,14 @@ export const dials = {
    * leave a free-order call open to anyone.
    */
   exModelOrdersEnabled: false,
+  /**
+   * Whether the Botched size (B: the XL with ripped hems, cut to the customer's
+   * height) is on offer. Paused at the founder's request on 2026-11-19; the code,
+   * the pop-up and the order-line format are all still there, so turning this on
+   * brings it back. The server refuses a B line while it is off, so a cart saved
+   * before the pause cannot slip one through.
+   */
+  botchedEnabled: false,
 
   /**
    * Whether the site-wide music player (features/audio-player) is mounted. It
