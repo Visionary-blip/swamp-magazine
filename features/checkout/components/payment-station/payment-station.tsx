@@ -155,17 +155,12 @@ function PaymentFields({
     // A success never returns: confirm redirects to the session's return_url
     // (/order?session_id=...), which is why the order-confirmed page still does
     // its own status check rather than trusting anything this component says.
-    // Merged onto whatever the card block already put on the session (it
-    // collects country and ZIP) rather than replacing it: this call only ever
-    // adds the name, so a postal code the issuer wants for AVS cannot be
-    // dropped on the way past.
-    const existing = checkout.billingAddress;
+    // Stripe only takes a name alongside a country, and refuses either one if
+    // the card block might be collecting it too -- so the block is told never
+    // to (see its `fields`). The ZIP stays the card block's own.
     await settle(() =>
       checkout.confirm({
-        billingAddress: {
-          name: trimmedName,
-          address: existing?.address ?? { country: "US" },
-        },
+        billingAddress: { name: trimmedName, address: { country: "US" } },
       }),
     );
   }
@@ -332,6 +327,14 @@ function PaymentFields({
                   defaultCollapsed: false,
                   radios: "never",
                   spacedAccordionItems: false,
+                },
+                // These two are handed to confirm instead: the name from our
+                // NAME line, and the US, where every card is assumed to be from.
+                fields: {
+                  billingDetails: {
+                    name: "never",
+                    address: { country: "never" },
+                  },
                 },
                 // The wallets live in the chooser above, so the Payment Element
                 // must not draw its own set -- two Apple Pay buttons on one
