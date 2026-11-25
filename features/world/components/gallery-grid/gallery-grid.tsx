@@ -6,6 +6,7 @@ import { useCallback, useRef, useState } from "react";
 import { PhotoLightbox } from "@/features/photo-lightbox";
 
 import type { WorldGallerySection } from "../../lib/world-gallery";
+import { SectionNote } from "../section-note/section-note";
 
 // The grid and its lightbox in one client component: the open photo is a single
 // index into the flattened list, so the arrows run on across the section
@@ -38,9 +39,16 @@ export function GalleryGrid({
         const start = starts[sectionIndex];
         return (
           <div key={section.heading} className="mt-12 first:mt-0">
-            <h2 className="mb-6 px-5 text-center font-display text-4xl leading-none tracking-[0.03em] text-brand-red uppercase">
-              {section.heading}
-            </h2>
+            <div className="relative mb-6 flex items-center justify-center gap-1 px-5">
+              <h2 className="text-center font-display text-4xl leading-none tracking-[0.03em] text-brand-red uppercase">
+                {section.heading}
+              </h2>
+              {section.note ? (
+                <SectionNote title={section.heading}>
+                  {section.note}
+                </SectionNote>
+              ) : null}
+            </div>
             <ul className="grid grid-cols-2 overflow-x-clip md:grid-cols-4">
               {section.images.map((image, index) => (
                 <li
