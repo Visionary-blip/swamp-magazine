@@ -3,7 +3,7 @@ import { formatUsd } from "@/lib/money";
 
 import { stageOf } from "../../lib/order-stage";
 import type { Purchase } from "../../lib/purchases";
-import { StageButton } from "../stage-button/stage-button";
+import { StageSteps } from "../stage-steps/stage-steps";
 
 /** One bar of the log: who bought what, and how far along it is. */
 export function PurchaseRow({
@@ -16,8 +16,8 @@ export function PurchaseRow({
   const stage = stageOf(purchase.status, purchase.productionStage);
 
   return (
-    <li className="flex items-start gap-3 rounded-2xl border border-brand-red/70 p-4">
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
+    <li className="flex flex-col gap-3 rounded-2xl border border-brand-red/70 p-4">
+      <div className="flex min-w-0 flex-col gap-1">
         <p className="font-display text-2xl leading-none tracking-[0.03em] break-words">
           {purchase.customerName?.toUpperCase() ?? "NO NAME"}
         </p>
@@ -46,7 +46,7 @@ export function PurchaseRow({
         ) : null}
       </div>
       {stage ? (
-        <StageButton
+        <StageSteps
           orderId={purchase.id}
           stage={stage}
           disabled={!stagesReady}

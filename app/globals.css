@@ -6,6 +6,8 @@
 :root {
   --brand-red: #e0361f;
   --brand-yellow: #f2e438;
+  /* Stork only: a step that is done. */
+  --brand-green: #5fbf5a;
   --cream: #f4eddd;
   /* The site's ground: a very dark brown, not black (230F08). */
   --ink: #230f08;
@@ -25,6 +27,7 @@
 @theme inline {
   --color-brand-red: var(--brand-red);
   --color-brand-yellow: var(--brand-yellow);
+  --color-brand-green: var(--brand-green);
   --color-cream: var(--cream);
   --color-ink: var(--ink);
   --color-brown: var(--brown);

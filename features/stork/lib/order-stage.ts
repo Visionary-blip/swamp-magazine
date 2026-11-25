@@ -48,7 +48,7 @@ export function canMoveStage(from: OrderStage, to: OrderStage): boolean {
 
 export const stageLabel: Record<OrderStage, string> = {
   to_do: "TO DO",
-  wholesale_bought: "WHOLESALE BOUGHT",
-  printed: "PRINTED",
-  delivered: "DELIVERED",
+  wholesale_bought: "PIECE BOUGHT",
+  printed: "PIECE PRINTED",
+  delivered: "PIECE DELIVERED",
 };
