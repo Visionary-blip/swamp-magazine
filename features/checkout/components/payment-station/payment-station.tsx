@@ -160,16 +160,33 @@ function PaymentFields({
     // adds the name, so a postal code the issuer wants for AVS cannot be
     // dropped on the way past.
     const existing = checkout.billingAddress;
-    const result = await checkout.confirm({
-      billingAddress: {
-        name: trimmedName,
-        address: existing?.address ?? { country: "US" },
-      },
-    });
-    if (result.type === "error") {
-      setErrorLine(paymentErrorLine(result.error.message));
+    await settle(() =>
+      checkout.confirm({
+        billingAddress: {
+          name: trimmedName,
+          address: existing?.address ?? { country: "US" },
+        },
+      }),
+    );
+  }
+
+  // `confirm` reports a declined card in its result but throws on a broken
+  // setup. Uncaught, that left the button on SENDING... for good with the
+  // reason visible only in the console.
+  async function settle(confirm: () => ReturnType<typeof checkout.confirm>) {
+    try {
+      const result = await confirm();
+      if (result.type === "error") {
+        setErrorLine(paymentErrorLine(result.error.message));
+      }
+    } catch (error) {
+      console.error("[CHECKOUT] confirm threw", error);
+      setErrorLine(
+        paymentErrorLine(error instanceof Error ? error.message : null),
+      );
+    } finally {
+      setIsPaying(false);
     }
-    setIsPaying(false);
   }
 
   // The wallet sheet has already collected and authorised everything by the time
@@ -185,13 +202,9 @@ function PaymentFields({
     // session at confirm. Adding our own would either be overwritten or
     // silently overwrite the payer's, which is the mismatch the chooser-first
     // layout exists to prevent.
-    const result = await checkout.confirm({
-      expressCheckoutConfirmEvent: event,
-    });
-    if (result.type === "error") {
-      setErrorLine(paymentErrorLine(result.error.message));
-    }
-    setIsPaying(false);
+    await settle(() =>
+      checkout.confirm({ expressCheckoutConfirmEvent: event }),
+    );
   }
 
   // The opt-in is the press itself. The email is the one already typed into the
