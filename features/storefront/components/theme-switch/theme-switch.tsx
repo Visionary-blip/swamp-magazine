@@ -16,6 +16,7 @@ export function ThemeSwitch() {
   const national = useNationalTheme();
   const pathname = usePathname();
   if (pathname === "/admin" || pathname.startsWith("/admin/")) return null;
+  if (pathname === "/stork") return null;
 
   return (
     <button

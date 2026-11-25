@@ -1,6 +1,7 @@
 import { Resend } from "resend";
 
 import { OrderConfirmationEmail } from "@/emails/order-confirmation";
+import { OwnerNewOrderEmail } from "@/emails/owner-new-order";
 import { dials } from "@/config/dials";
 import {
   handleStripeEvent,
@@ -8,6 +9,7 @@ import {
   type CompletionOutcome,
 } from "@/lib/checkout/checkout-completion";
 import { serverEnv } from "@/lib/env/server";
+import { formatUsd } from "@/lib/money";
 import { getStripe } from "@/lib/stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -55,6 +57,7 @@ export async function POST(request: Request): Promise<Response> {
     const action = await handleStripeEvent(event, {
       applyCompletion,
       sendConfirmation,
+      notifyOwner,
       refundOversold,
     });
 
@@ -228,6 +231,67 @@ async function sendConfirmation(orderId: string): Promise<void> {
     // claim is released so replaying the event can still deliver the email.
     console.error("[ORDER_EMAIL]", orderId, error);
     await releaseConfirmationClaim(orderId);
+  }
+}
+
+// Mails every admin address when a sale comes in. The idempotency key stops a
+// redelivered event mailing twice, and nothing here throws: the sale is already
+// recorded and shows in the admin log either way.
+async function notifyOwner(orderId: string): Promise<void> {
+  try {
+    if (serverEnv.adminEmails.length === 0) {
+      console.error("[OWNER_EMAIL] ADMIN_EMAILS is empty", orderId);
+      return;
+    }
+
+    const { data: order, error } = await createAdminClient()
+      .from("orders")
+      .select(
+        "delivery_method, customer_name, customer_email, amount_total_cents, order_items(product_name, size, quantity)",
+      )
+      .eq("id", orderId)
+      .maybeSingle();
+    if (error || !order) {
+      console.error("[OWNER_EMAIL]", orderId, error?.code, error?.message);
+      return;
+    }
+
+    const name = (order.customer_name as string | null) ?? "SOMEONE";
+    const total = formatUsd(
+      (order.amount_total_cents as number | null) ?? 0,
+    );
+    const items = (order.order_items ?? []) as {
+      product_name: string;
+      size: string;
+      quantity: number;
+    }[];
+
+    const { error: sendError } = await new Resend(
+      serverEnv.resendApiKey,
+    ).emails.send(
+      {
+        from: serverEnv.resendFrom,
+        to: serverEnv.adminEmails,
+        subject: `NEW ORDER: ${name} (${total})`,
+        react: OwnerNewOrderEmail({
+          customerName: name,
+          customerEmail: order.customer_email as string | null,
+          delivery:
+            order.delivery_method === "shipping" ? "shipping" : "pickup",
+          items: items.map((item) => ({
+            name: item.product_name,
+            size: item.size,
+            quantity: item.quantity,
+          })),
+          total,
+          ordersUrl: `${dials.canonicalSiteUrl}/stork`,
+        }),
+      },
+      { idempotencyKey: `owner-new-order-${orderId}` },
+    );
+    if (sendError) console.error("[OWNER_EMAIL]", orderId, sendError);
+  } catch (error) {
+    console.error("[OWNER_EMAIL]", orderId, error);
   }
 }
 

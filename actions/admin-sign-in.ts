@@ -1,10 +1,13 @@
 "use server";
 
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { hasAdminAllowlist } from "@/features/admin/lib/admin-allowlist";
-import { adminRoutes } from "@/features/admin/lib/admin-routes";
+import {
+  adminRoutes,
+  storkReturnCookie,
+} from "@/features/admin/lib/admin-routes";
 import { createClient } from "@/lib/supabase/server";
 
 export type AdminSignInFailure = "no-allowlist" | "google-unreachable";
@@ -28,13 +31,27 @@ export type AdminSignInState =
  * in a denial is a worse error message than saying so on the page.
  *
  * Runs as a server action rather than a link because the PKCE verifier is a
- * cookie, and only an action (or a route handler) can write one. Takes no
- * arguments -- there is no form to read, only a button -- so the caller
- * supplies `useActionState`'s type parameters rather than this signature.
+ * cookie, and only an action (or a route handler) can write one. The one thing
+ * the form says is where to come back to: the admin, or Stork.
  */
-export async function startAdminGoogleSignIn(): Promise<AdminSignInState> {
+export async function startAdminGoogleSignIn(
+  _state: AdminSignInState,
+  formData: FormData,
+): Promise<AdminSignInState> {
   if (!hasAdminAllowlist()) {
     return { status: "error", reason: "no-allowlist" };
+  }
+
+  const cookieStore = await cookies();
+  if (formData.get("destination") === "stork") {
+    cookieStore.set(storkReturnCookie, "1", {
+      httpOnly: true,
+      sameSite: "lax",
+      maxAge: 600,
+      path: "/",
+    });
+  } else {
+    cookieStore.delete(storkReturnCookie);
   }
 
   let consentScreen: string;

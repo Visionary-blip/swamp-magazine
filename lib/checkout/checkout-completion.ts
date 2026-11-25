@@ -25,6 +25,8 @@ export type ApplyCompletionInput = {
 export type CheckoutCompletionDeps = {
   applyCompletion: (input: ApplyCompletionInput) => Promise<CompletionOutcome>;
   sendConfirmation: (orderId: string) => Promise<void>;
+  /** Tells the founder a sale came in. Must not throw. */
+  notifyOwner: (orderId: string) => Promise<void>;
   refundOversold: (input: {
     orderId: string;
     paymentIntentId: string | null;
@@ -88,6 +90,7 @@ export async function handleStripeEvent(
       // The email hangs off the once-only transition, so a redelivery cannot
       // mail the buyer twice.
       await deps.sendConfirmation(orderId);
+      await deps.notifyOwner(orderId);
       return "applied";
     case "oversold":
       await deps.refundOversold({

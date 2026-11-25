@@ -19,5 +19,6 @@ export const config = {
     "/product/:path*",
     "/checkout",
     "/add-ons",
+    "/stork",
   ],
 };

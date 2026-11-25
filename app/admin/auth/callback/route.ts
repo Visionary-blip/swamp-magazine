@@ -1,6 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { adminRoutes, resolveAdminAccess } from "@/features/admin";
+import {
+  adminRoutes,
+  resolveAdminAccess,
+  storkPath,
+  storkReturnCookie,
+} from "@/features/admin";
 import { createClient } from "@/lib/supabase/server";
 
 // Where Google lands after Supabase has traded the provider's response for our
@@ -43,7 +48,12 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  return NextResponse.redirect(new URL(adminRoutes.dashboard, origin));
+  const toStork = request.cookies.has(storkReturnCookie);
+  const response = NextResponse.redirect(
+    new URL(toStork ? storkPath : adminRoutes.dashboard, origin),
+  );
+  response.cookies.delete(storkReturnCookie);
+  return response;
 }
 
 function toSignIn(origin: string, reason: string) {

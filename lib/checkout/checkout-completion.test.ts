@@ -65,6 +65,7 @@ function applyAgainst(store: StoreState) {
 }
 
 type Recorder = {
+  notices?: string[];
   emails: string[];
   refunds: string[];
 };
@@ -74,6 +75,9 @@ function createDeps(store: StoreState, recorder: Recorder) {
     applyCompletion: applyAgainst(store),
     sendConfirmation: async (orderId: string) => {
       recorder.emails.push(orderId);
+    },
+    notifyOwner: async (orderId: string) => {
+      recorder.notices?.push(orderId);
     },
     refundOversold: async ({ orderId }: { orderId: string }) => {
       recorder.refunds.push(orderId);
@@ -128,6 +132,19 @@ describe("handleStripeEvent", () => {
     expect(store.inventory.get("var-s")).toBe(11);
     expect(recorder.emails).toEqual(["order-1"]);
     expect(recorder.refunds).toEqual([]);
+  });
+
+  it("tells the founder about a paid sale, and not about an oversold one", async () => {
+    const sold: Recorder = { emails: [], refunds: [], notices: [] };
+    await handleStripeEvent(completedEvent(), createDeps(createStore(), sold));
+    expect(sold.notices).toEqual(["order-1"]);
+
+    const oversold: Recorder = { emails: [], refunds: [], notices: [] };
+    await handleStripeEvent(
+      completedEvent(),
+      createDeps(createStore(0), oversold),
+    );
+    expect(oversold.notices).toEqual([]);
   });
 
   it("does not decrement again when the same event id is replayed", async () => {

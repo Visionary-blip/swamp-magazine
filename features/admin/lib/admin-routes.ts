@@ -15,6 +15,13 @@ export const adminRoutes = {
   orders: "/admin/orders",
 } as const;
 
+// Stork, the founder's purchase log, is its own page behind the same sign-in.
+export const storkPath = "/stork";
+// Remembers that a Google round trip started at Stork. A cookie rather than a
+// query on the callback URL, which Supabase only honours if it is on the
+// project's list of redirect URLs.
+export const storkReturnCookie = "sign-in-to-stork";
+
 // Reachable while signed out. The Google round trip dies if the callback is
 // behind the same redirect as everything else.
 export const publicAdminPrefixes = [adminRoutes.signIn, "/admin/auth"] as const;
