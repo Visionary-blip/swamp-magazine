@@ -47,6 +47,17 @@ const MISSING_COLUMN = "42703";
 
 const LIST_LIMIT = 200;
 
+// Test orders from before and during launch, kept out of the log at the
+// founder's request. Hidden, not deleted: they are still in the database and
+// the admin. Remove an id to bring that order back.
+const HIDDEN_ORDER_IDS = new Set([
+  "19cdc7c1-05b9-46a2-91d8-83f14836b1a1",
+  "434b96da-6eb5-46ba-b44c-eef1e9ae34e4",
+  "acb8a677-30e5-4598-b658-dc65b211374f",
+  "87fea8ea-deec-4f22-8485-fac2b928e41d",
+  "5bb64175-77b1-40fb-905e-058a2b03da6c",
+]);
+
 type Row = {
   id: string;
   status: string;
@@ -84,7 +95,9 @@ export async function getPurchaseLog(): Promise<PurchaseLog | null> {
     }
 
     return {
-      purchases: ((data ?? []) as unknown as Row[]).map(toPurchase),
+      purchases: ((data ?? []) as unknown as Row[])
+        .filter((row) => !HIDDEN_ORDER_IDS.has(row.id))
+        .map(toPurchase),
       stagesReady,
     };
   } catch (error) {
