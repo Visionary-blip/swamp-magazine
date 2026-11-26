@@ -40,10 +40,10 @@ const MODEL_FIT: Record<string, ModelFit[]> = {
     { name: "FABI", height: "[HEIGHT]", size: "XS" },
     { name: "ADELINE", height: "[HEIGHT]", size: "S" },
   ],
-  // Brianna's and Connor's heights and sizes are still to come from the founder.
+  // Brianna's and Connor's heights are still to come from the founder.
   "sleep-shirt": [
-    { name: "BRIANNA", height: "[HEIGHT]", size: "[SIZE]" },
-    { name: "CONNOR", height: "[HEIGHT]", size: "[SIZE]" },
+    { name: "BRIANNA", height: "[HEIGHT]", size: "L" },
+    { name: "CONNOR", height: "[HEIGHT]", size: "XL" },
   ],
   "lurker-longsleeve": [
     { name: "YLVA", height: `5'5"`, size: "L" },
