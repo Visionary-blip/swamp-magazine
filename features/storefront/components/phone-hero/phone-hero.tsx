@@ -3,36 +3,8 @@
 import Image from "next/image";
 
 import { FEED_STEP_EVENT } from "@/features/transition";
-import { cn } from "@/lib/utils";
 
 import { storefrontCopy } from "../../lib/storefront-copy";
-
-// The middle "A" of MAG falls on the woman's face in its column, so it sits a
-// little right of it, between the two.
-const NUDGED_CELL = 7;
-
-// The founder's shield drawing, the same file the National mascot uses.
-const SHIELD_URL = "/world/shield.webp";
-
-// One of the founder's drawings as a mask over a red box, so it takes the brand
-// red whatever colour the file is.
-function RedMark({ url }: { url: string }) {
-  return (
-    <span
-      className="block size-full bg-brand-red"
-      style={{
-        maskImage: `url(${url})`,
-        WebkitMaskImage: `url(${url})`,
-        maskSize: "contain",
-        WebkitMaskSize: "contain",
-        maskRepeat: "no-repeat",
-        WebkitMaskRepeat: "no-repeat",
-        maskPosition: "center",
-        WebkitMaskPosition: "center",
-      }}
-    />
-  );
-}
 
 // On to the products. In the one-at-a-time feed the pager takes the step (and
 // cancels the event to say so); the grid is an ordinary scrolling <main>.
@@ -49,9 +21,8 @@ function scrollToProducts() {
 }
 
 // The phone's opening screen, ahead of the products in both views: the
-// bus-shelter photograph cut close on the two figures, the masthead spread over
-// it a letter at a time with the mascot and shield among them.
-// Everything laid on the photograph leads down.
+// bus-shelter photograph cut close on the two figures, with the mascot alone
+// over it. A tap on the mascot leads down.
 export function PhoneHero({
   mascot,
 }: {
@@ -78,52 +49,31 @@ export function PhoneHero({
           />
         </div>
       </div>
-      {/* One button for the whole grid; only the letters and drawings take
-          the tap, not the photograph between them. */}
-      <h1 className="pointer-events-none absolute inset-x-0 top-1 bottom-1">
+      {/* No visible words here; the name is still the screen's heading. */}
+      <h1 className="sr-only">{storefrontCopy.wordmark}</h1>
+      {/* The fisher as a mask over a red box, so it takes the brand red. */}
+      {mascot ? (
         <button
           type="button"
           onClick={scrollToProducts}
-          aria-label={storefrontCopy.phoneMastheadLabel}
-          className="grid size-full grid-cols-3 grid-rows-5 place-items-center px-2 font-display text-[27px] leading-none text-brand-red [text-shadow:0_0_6px_var(--ink)]"
+          aria-label="Scroll to the products"
+          className="absolute top-12 left-1/2 block size-[72px] -translate-x-1/2 drop-shadow-[0_0_5px_var(--ink)]"
         >
-          {storefrontCopy.phoneMasthead.map((mark, cell) => {
-            // The grid is a fixed list with repeated letters: the cell is each
-            // one's identity.
-            if (mark === "mascot") {
-              return (
-                <span
-                  key={cell}
-                  className="pointer-events-auto block size-[50px] drop-shadow-[0_0_5px_var(--ink)]"
-                >
-                  {mascot ? <RedMark url={mascot.maskUrl} /> : null}
-                </span>
-              );
-            }
-            if (mark === "shield") {
-              return (
-                <span
-                  key={cell}
-                  className="pointer-events-auto block h-10 w-7 drop-shadow-[0_0_5px_var(--ink)]"
-                >
-                  <RedMark url={SHIELD_URL} />
-                </span>
-              );
-            }
-            return (
-              <span
-                key={cell}
-                className={cn(
-                  "pointer-events-auto p-2",
-                  cell === NUDGED_CELL && "translate-x-[4vw]",
-                )}
-              >
-                {mark}
-              </span>
-            );
-          })}
+          <span
+            className="block size-full bg-brand-red"
+            style={{
+              maskImage: `url(${mascot.maskUrl})`,
+              WebkitMaskImage: `url(${mascot.maskUrl})`,
+              maskSize: "contain",
+              WebkitMaskSize: "contain",
+              maskRepeat: "no-repeat",
+              WebkitMaskRepeat: "no-repeat",
+              maskPosition: "center",
+              WebkitMaskPosition: "center",
+            }}
+          />
         </button>
-      </h1>
+      ) : null}
     </section>
   );
 }
