@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-import { createFeedPager } from "@/features/transition";
+import { createFeedPager, FEED_STEP_EVENT } from "@/features/transition";
 import { cn } from "@/lib/utils";
 
 import { StarMark } from "../star-mark/star-mark";
@@ -20,11 +20,13 @@ function productOpen() {
 }
 
 export function FeedPager({ count }: { count: number }) {
-  const [active, setActive] = useState(0);
-  // "feed": one product per screen, swiped. "grid": every product, two across,
-  // scrolled like a page. The landing's <main> carries it as `data-view` so the
+  // -1 is the opening photograph, ahead of the first product.
+  const [active, setActive] = useState(-1);
+  // "grid" (the default): every product, three across, scrolled like a page.
+  // "feed": one product per screen, swiped. The landing's <main> carries it as `data-view` so the
   // tiles restyle themselves in CSS (see CatalogIndex).
-  const [view, setView] = useState<"feed" | "grid">("feed");
+  const [view, setView] = useState<"feed" | "grid">("grid");
+  const switched = useRef(false);
 
   useEffect(() => {
     const track = document.querySelector<HTMLElement>("[data-feed-track]");
@@ -32,12 +34,18 @@ export function FeedPager({ count }: { count: number }) {
     if (!track || !main) return;
     main.dataset.view = view;
     main.scrollTop = 0;
+    // A visitor who switched views, or came back by a "shop" link, is after the
+    // products, not the opening photograph again.
+    const toProducts = switched.current || window.location.hash === "#products";
     // The grid is an ordinary scrolling page: the pager is not running at all.
-    if (view === "grid") return;
+    if (view === "grid") {
+      if (toProducts) main.querySelector("#products")?.scrollIntoView();
+      return;
+    }
     const products = [
       ...track.querySelectorAll<HTMLElement>("[data-feed-product]"),
     ];
-    return createFeedPager(track, {
+    const stopPaging = createFeedPager(track, {
       isActive: () => !productOpen(),
       onStep(stop, animated) {
         // The star after the dots is WORLD, and so is the footer rest point
@@ -58,6 +66,12 @@ export function FeedPager({ count }: { count: number }) {
         }
       },
     });
+    if (toProducts) {
+      window.dispatchEvent(
+        new CustomEvent(FEED_STEP_EVENT, { detail: 1, cancelable: true }),
+      );
+    }
+    return stopPaging;
   }, [view]);
 
   if (count < 2) return null;
@@ -67,7 +81,10 @@ export function FeedPager({ count }: { count: number }) {
     <>
       <button
         type="button"
-        onClick={() => setView(view === "feed" ? "grid" : "feed")}
+        onClick={() => {
+          switched.current = true;
+          setView(view === "feed" ? "grid" : "feed");
+        }}
         aria-label={
           view === "feed" ? "Show all products" : "Show one at a time"
         }
@@ -89,7 +106,7 @@ export function FeedPager({ count }: { count: number }) {
           )}
         </svg>
       </button>
-      {view === "feed" ? (
+      {view === "feed" && active >= 0 ? (
         <ol
           aria-hidden
           className="pointer-events-none fixed top-1/2 right-3.5 z-30 flex -translate-y-1/2 flex-col items-center gap-2 md:hidden"
