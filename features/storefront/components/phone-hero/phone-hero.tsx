@@ -57,7 +57,7 @@ export function PhoneHero({
           type="button"
           onClick={scrollToProducts}
           aria-label="Scroll to the products"
-          className="absolute top-12 left-1/2 block size-[72px] -translate-x-1/2 drop-shadow-[0_0_5px_var(--ink)]"
+          className="absolute top-12 left-1/2 block size-[108px] -translate-x-1/2 drop-shadow-[0_0_5px_var(--ink)]"
         >
           <span
             className="block size-full bg-brand-red"
