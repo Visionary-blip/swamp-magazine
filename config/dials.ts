@@ -185,4 +185,12 @@ export const dials = {
    * exist bounces without telling the sender anything useful.
    */
   contactEmail: "hello@swampmagazine.com",
+
+  /**
+   * The phone landing's one-product-per-screen view and the button at the top
+   * that switches to it from the grid. Switched off, not removed, on
+   * 2026-11-27 at the founder's request "for now": phones get the grid only.
+   * True brings both back.
+   */
+  phoneSingleProductFeed: false,
 } as const;

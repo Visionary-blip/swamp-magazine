@@ -34,14 +34,14 @@ export function PhoneHero({
       data-feed-stop
       className="relative flex h-dvh flex-col items-center justify-between overflow-hidden bg-ink pt-16 pb-4 md:hidden"
     >
-      {/* The screen's width, so the figures are never sliced at the sides, and
-          standing on the foot of the screen. On a short screen it stops rising
-          where the man's head (42% down the cut, 76vw) would go under "SWAMP"
-          (which ends at 4rem + 34vw), and runs off the bottom instead. */}
-      <div className="absolute inset-x-0 top-[max(calc(100%_-_180.2vw),calc(4rem_-_38vw))] aspect-[1110/2000]">
+      {/* A close cut, centred on the two. The screen's width, standing on the
+          foot of the screen; on a short screen it stops rising where the man's
+          head (64vw down the cut) would go under "SWAMP" (which ends at 4rem +
+          34vw), and runs off the bottom instead. */}
+      <div className="absolute inset-x-0 top-[max(calc(100%_-_216.7vw),calc(4rem_-_28vw))] aspect-[600/1300]">
         <div className="absolute inset-0 [mask-image:linear-gradient(to_bottom,transparent,black_14%)]">
           <Image
-            src="/hero/landing-hero-phone-shelter.webp"
+            src="/hero/landing-hero-phone-closer.webp"
             alt="Two people in SWAMP MAGAZINE sweatshirts on a bus-shelter bench beside windows covered in drawings"
             fill
             sizes="100vw"
@@ -49,8 +49,19 @@ export function PhoneHero({
             className="object-cover"
           />
         </div>
-        {/* Small and low, in the dark under the windows, clear of both. Part of
-            the photo's box, to stay there on any screen. */}
+      </div>
+      {/* Shades the foot so the red mascot and arrow read over the photograph. */}
+      <div
+        aria-hidden
+        className="absolute inset-x-0 bottom-0 h-36 bg-linear-to-t from-ink to-transparent"
+      />
+      <h1 className="relative font-display text-[34vw] leading-none text-brand-red">
+        <button type="button" onClick={scrollToProducts} className="block">
+          {storefrontCopy.phoneWordmark}
+        </button>
+      </h1>
+      <div className="relative flex flex-col items-center">
+        {/* Small, centred, just over the arrow. */}
         {mascot ? (
           // The shadow lifts the line art off the photograph. It sits on the
           // button because the drawing's own mask would cut it off.
@@ -58,7 +69,7 @@ export function PhoneHero({
             type="button"
             onClick={scrollToProducts}
             aria-label={mascot.alt || "Shop the products"}
-            className="absolute top-[73%] right-[2%] block aspect-square w-[17vw] drop-shadow-[0_0_5px_var(--ink)]"
+            className="block aspect-square w-[17vw] drop-shadow-[0_0_5px_var(--ink)]"
           >
             <span
               aria-hidden
@@ -76,36 +87,26 @@ export function PhoneHero({
             />
           </button>
         ) : null}
-      </div>
-      {/* Shades the foot so the red arrow reads over the photograph. */}
-      <div
-        aria-hidden
-        className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-ink to-transparent"
-      />
-      <h1 className="relative font-display text-[34vw] leading-none text-brand-red">
-        <button type="button" onClick={scrollToProducts} className="block">
-          {storefrontCopy.phoneWordmark}
-        </button>
-      </h1>
-      <button
-        type="button"
-        onClick={scrollToProducts}
-        aria-label="Scroll to the products"
-        className="relative flex size-10 items-center justify-center text-brand-red"
-      >
-        <svg
-          aria-hidden
-          viewBox="0 0 16 10"
-          className="animate-cue-bob h-3 w-5"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+        <button
+          type="button"
+          onClick={scrollToProducts}
+          aria-label="Scroll to the products"
+          className="relative flex size-10 items-center justify-center text-brand-red"
         >
-          <path d="M1.5 1.5l6.5 6.5 6.5-6.5" />
-        </svg>
-      </button>
+          <svg
+            aria-hidden
+            viewBox="0 0 16 10"
+            className="animate-cue-bob h-3 w-5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M1.5 1.5l6.5 6.5 6.5-6.5" />
+          </svg>
+        </button>
+      </div>
     </section>
   );
 }

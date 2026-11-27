@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { dials } from "@/config/dials";
 import { createFeedPager, FEED_STEP_EVENT } from "@/features/transition";
 import { cn } from "@/lib/utils";
 
@@ -74,7 +75,9 @@ export function FeedPager({ count }: { count: number }) {
     return stopPaging;
   }, [view]);
 
-  if (count < 2) return null;
+  // With the feed switched off there is nothing to switch to; the effect above
+  // still runs, for the grid's "shop" links.
+  if (!dials.phoneSingleProductFeed || count < 2) return null;
   // Phone only; the pager's own rest stops are what it tracks, so it sits with
   // the pager rather than in the catalog.
   return (
