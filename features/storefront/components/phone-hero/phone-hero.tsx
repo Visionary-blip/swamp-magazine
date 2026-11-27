@@ -50,7 +50,7 @@ function scrollToProducts() {
 
 // The phone's opening screen, ahead of the products in both views: the
 // bus-shelter photograph cut close on the two figures, the masthead spread over
-// it a letter at a time with the mascot among them, and the arrow at the foot.
+// it a letter at a time with the mascot and shield among them.
 // Everything laid on the photograph leads down.
 export function PhoneHero({
   mascot,
@@ -61,7 +61,7 @@ export function PhoneHero({
   return (
     <section
       data-feed-stop
-      className="relative flex h-dvh flex-col items-center justify-end overflow-hidden bg-ink pb-4 md:hidden"
+      className="relative h-dvh overflow-hidden bg-ink md:hidden"
     >
       {/* A close cut, centred on the two. The screen's width, standing on the
           foot of the screen; on a short screen it stops rising and runs off the
@@ -78,14 +78,9 @@ export function PhoneHero({
           />
         </div>
       </div>
-      {/* Shades the foot so the red arrow reads over the photograph. */}
-      <div
-        aria-hidden
-        className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-ink to-transparent"
-      />
       {/* One button for the whole grid; only the letters and drawings take
           the tap, not the photograph between them. */}
-      <h1 className="pointer-events-none absolute inset-x-0 top-2 bottom-20">
+      <h1 className="pointer-events-none absolute inset-x-0 top-1 bottom-1">
         <button
           type="button"
           onClick={scrollToProducts}
@@ -97,11 +92,9 @@ export function PhoneHero({
             // one's identity.
             if (mark === "mascot") {
               return (
-                // Set a little low: the drawing is head-heavy, and dead centre
-                // reads high.
                 <span
                   key={cell}
-                  className="pointer-events-auto block size-[50px] translate-y-1 drop-shadow-[0_0_5px_var(--ink)]"
+                  className="pointer-events-auto block size-[50px] drop-shadow-[0_0_5px_var(--ink)]"
                 >
                   {mascot ? <RedMark url={mascot.maskUrl} /> : null}
                 </span>
@@ -131,25 +124,6 @@ export function PhoneHero({
           })}
         </button>
       </h1>
-      <button
-        type="button"
-        onClick={scrollToProducts}
-        aria-label="Scroll to the products"
-        className="relative flex size-10 items-center justify-center text-brand-red"
-      >
-        <svg
-          aria-hidden
-          viewBox="0 0 16 10"
-          className="animate-cue-bob h-3 w-5"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M1.5 1.5l6.5 6.5 6.5-6.5" />
-        </svg>
-      </button>
     </section>
   );
 }
