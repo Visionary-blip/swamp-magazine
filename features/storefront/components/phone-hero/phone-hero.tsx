@@ -6,6 +6,10 @@ import { FEED_STEP_EVENT } from "@/features/transition";
 
 import { storefrontCopy } from "../../lib/storefront-copy";
 
+// Four across by as many as twelve down; the rows that do not fit the screen
+// collapse to nothing (see the grid below).
+const MASCOT_CELLS = Array.from({ length: 48 }, (_, cell) => cell);
+
 // On to the products. In the one-at-a-time feed the pager takes the step (and
 // cancels the event to say so); the grid is an ordinary scrolling <main>.
 function scrollToProducts() {
@@ -21,8 +25,8 @@ function scrollToProducts() {
 }
 
 // The phone's opening screen, ahead of the products in both views: the
-// bus-shelter photograph cut close on the two figures, with the mascot alone
-// over it. A tap on the mascot leads down.
+// bus-shelter photograph cut close on the two figures, with a grid of the
+// mascot over it. A tap on any of them leads down.
 export function PhoneHero({
   mascot,
 }: {
@@ -51,27 +55,40 @@ export function PhoneHero({
       </div>
       {/* No visible words here; the name is still the screen's heading. */}
       <h1 className="sr-only">{storefrontCopy.wordmark}</h1>
-      {/* The fisher as a mask over a red box, so it takes the brand red. */}
+      {/* The fisher, four across. The screen's shape picks the number of rows:
+          as many cells about a quarter-width tall as fit, stretched to share
+          the height, and the rest of the cells in rows of no height. One button
+          for the lot; only the drawings take the tap. */}
       {mascot ? (
         <button
           type="button"
           onClick={scrollToProducts}
           aria-label="Scroll to the products"
-          className="absolute top-12 left-1/2 block size-[108px] -translate-x-1/2 drop-shadow-[0_0_5px_var(--ink)]"
+          className="pointer-events-none absolute inset-0 grid auto-rows-[0px] grid-cols-4 grid-rows-[repeat(auto-fill,minmax(25vw,1fr))] overflow-hidden"
         >
-          <span
-            className="block size-full bg-brand-red"
-            style={{
-              maskImage: `url(${mascot.maskUrl})`,
-              WebkitMaskImage: `url(${mascot.maskUrl})`,
-              maskSize: "contain",
-              WebkitMaskSize: "contain",
-              maskRepeat: "no-repeat",
-              WebkitMaskRepeat: "no-repeat",
-              maskPosition: "center",
-              WebkitMaskPosition: "center",
-            }}
-          />
+          {MASCOT_CELLS.map((cell) => (
+            <span
+              key={cell}
+              className="flex min-h-0 items-center justify-center overflow-hidden"
+            >
+              <span className="pointer-events-auto block size-[66px] drop-shadow-[0_0_5px_var(--ink)]">
+                {/* The drawing as a mask over a red box: the brand red. */}
+                <span
+                  className="block size-full bg-brand-red"
+                  style={{
+                    maskImage: `url(${mascot.maskUrl})`,
+                    WebkitMaskImage: `url(${mascot.maskUrl})`,
+                    maskSize: "contain",
+                    WebkitMaskSize: "contain",
+                    maskRepeat: "no-repeat",
+                    WebkitMaskRepeat: "no-repeat",
+                    maskPosition: "center",
+                    WebkitMaskPosition: "center",
+                  }}
+                />
+              </span>
+            </span>
+          ))}
         </button>
       ) : null}
     </section>
