@@ -14,9 +14,8 @@ export const storefrontCopy = {
   nationalSwitchMark: "V",
   /** LIFTED -- the byline under it, verbatim. */
   byline: "FROM LALO FARRO",
-  /** The founder's shorter pair for the phone's opening screen. */
+  /** The founder's shorter masthead for the phone's opening screen. */
   phoneWordmark: "SWAMP",
-  phoneByline: "FROM LALO",
   /** The founder's: the line above the product grid (the issue on sale). */
   issueHeading: "FIRST ISSUE F/W 25",
   /** The founder's: the line above the National Issue's row of the grid. */
