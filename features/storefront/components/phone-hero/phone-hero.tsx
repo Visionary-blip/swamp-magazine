@@ -6,9 +6,9 @@ import { FEED_STEP_EVENT } from "@/features/transition";
 
 import { storefrontCopy } from "../../lib/storefront-copy";
 
-// Three across by as many as twelve down; the rows that do not fit the screen
+// Four across by as many as eight down; the rows that do not fit the screen
 // collapse to nothing (see the grid below).
-const MASCOT_CELLS = Array.from({ length: 36 }, (_, cell) => cell);
+const MASCOT_CELLS = Array.from({ length: 32 }, (_, cell) => cell);
 
 // On to the products. In the one-at-a-time feed the pager takes the step (and
 // cancels the event to say so); the grid is an ordinary scrolling <main>.
@@ -55,8 +55,8 @@ export function PhoneHero({
       </div>
       {/* No visible words here; the name is still the screen's heading. */}
       <h1 className="sr-only">{storefrontCopy.wordmark}</h1>
-      {/* The fisher, three across. The screen's shape picks the number of rows:
-          as many cells about a quarter-width tall as fit, stretched to share
+      {/* The fisher, four across. The screen's shape picks the number of rows:
+          as many cells at least 40vw tall as fit, stretched to share
           the height, and the rest of the cells in rows of no height. One button
           for the lot; only the drawings take the tap. */}
       {mascot ? (
@@ -64,14 +64,14 @@ export function PhoneHero({
           type="button"
           onClick={scrollToProducts}
           aria-label="Scroll to the products"
-          className="pointer-events-none absolute inset-0 grid auto-rows-[0px] grid-cols-3 grid-rows-[repeat(auto-fill,minmax(25vw,1fr))] overflow-hidden"
+          className="pointer-events-none absolute inset-0 grid auto-rows-[0px] grid-cols-4 grid-rows-[repeat(auto-fill,minmax(40vw,1fr))] overflow-hidden"
         >
           {MASCOT_CELLS.map((cell) => (
             <span
               key={cell}
               className="flex min-h-0 items-center justify-center overflow-hidden"
             >
-              <span className="pointer-events-auto block size-[66px] drop-shadow-[0_0_5px_var(--ink)]">
+              <span className="pointer-events-auto block size-[50px] drop-shadow-[0_0_5px_var(--ink)]">
                 {/* The drawing as a mask over a red box: the brand red. */}
                 <span
                   className="block size-full bg-brand-red"
