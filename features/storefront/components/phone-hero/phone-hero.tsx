@@ -6,9 +6,20 @@ import { FEED_STEP_EVENT } from "@/features/transition";
 
 import { storefrontCopy } from "../../lib/storefront-copy";
 
-// Four across by as many as eight down; the rows that do not fit the screen
-// collapse to nothing (see the grid below).
-const MASCOT_CELLS = Array.from({ length: 32 }, (_, cell) => cell);
+// A frame of cells, four across: both outer columns all the way down, and the
+// two middle cells of the first and last rows. How many rows there are is the
+// screen's business (see the grid below), so the sides list as many as eight:
+// those past the end land in rows of no height. A row of -2 is the grid's last.
+const FRAME_CELLS = [
+  ...Array.from({ length: 8 }, (_, row) => [
+    { column: 1, row: row + 1 },
+    { column: 4, row: row + 1 },
+  ]).flat(),
+  ...[1, -2].flatMap((row) => [
+    { column: 2, row },
+    { column: 3, row },
+  ]),
+];
 
 // On to the products. In the one-at-a-time feed the pager takes the step (and
 // cancels the event to say so); the grid is an ordinary scrolling <main>.
@@ -25,8 +36,8 @@ function scrollToProducts() {
 }
 
 // The phone's opening screen, ahead of the products in both views: the
-// bus-shelter photograph cut close on the two figures, with a grid of the
-// mascot over it. A tap on any of them leads down.
+// bus-shelter photograph cut close on the two figures, with a frame of the
+// mascot around it. A tap on any of them leads down.
 export function PhoneHero({
   mascot,
 }: {
@@ -55,10 +66,9 @@ export function PhoneHero({
       </div>
       {/* No visible words here; the name is still the screen's heading. */}
       <h1 className="sr-only">{storefrontCopy.wordmark}</h1>
-      {/* The fisher, four across. The screen's shape picks the number of rows:
+      {/* The fisher, framing the screen. The screen's shape picks the number of rows:
           as many cells at least 40vw tall as fit, stretched to share
-          the height, and the rest of the cells in rows of no height. One button
-          for the lot; only the drawings take the tap. */}
+          the height. One button for the lot; only the drawings take the tap. */}
       {mascot ? (
         <button
           type="button"
@@ -66,9 +76,10 @@ export function PhoneHero({
           aria-label="Scroll to the products"
           className="pointer-events-none absolute inset-0 grid auto-rows-[0px] grid-cols-4 grid-rows-[repeat(auto-fill,minmax(40vw,1fr))] overflow-hidden"
         >
-          {MASCOT_CELLS.map((cell) => (
+          {FRAME_CELLS.map(({ column, row }) => (
             <span
-              key={cell}
+              key={`${column}:${row}`}
+              style={{ gridColumn: column, gridRow: row }}
               className="flex min-h-0 items-center justify-center overflow-hidden"
             >
               <span className="pointer-events-auto block size-[50px] drop-shadow-[0_0_5px_var(--ink)]">
