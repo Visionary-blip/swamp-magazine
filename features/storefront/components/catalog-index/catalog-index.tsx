@@ -17,8 +17,12 @@ import { Reveal } from "../reveal/reveal";
 // (md:gap-x-8, 2rem). An issue of fewer than six stands centred in its row.
 const TILE_WIDTH = "md:w-[calc((100%-10rem)/6)]";
 
-// The product grid under the hero (six across from md up, two across on a
-// phone): each garment's cutout on ink, name and price
+// The founder wants the hoodie on the second line of the phone's three-across
+// grid. Visual order only: the feed and the desktop row keep the catalog's.
+const SECOND_ROW_ON_PHONE = "fc-hoodie";
+
+// The product grid under the hero (six across from md up, three across in a
+// phone's grid view): each garment's cutout on ink, name and price
 // beneath, the whole tile the link. It replaces the film-credits index list at
 // the founder's request -- the visitor scrolls past the photograph and meets the
 // clothes themselves. A product with no cutout uploaded yet still gets a tile
@@ -65,7 +69,7 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
               holdWhenLeftBelow={centered}
               className={cn(
                 "group/issue md:[&>li]:transition-transform md:[&>li]:duration-700 md:[&>li]:ease-out",
-                "grid grid-cols-1 max-md:group-data-[view=grid]/landing:grid-cols-2 max-md:group-data-[view=grid]/landing:gap-y-4 md:gap-x-8",
+                "grid grid-cols-1 max-md:group-data-[view=grid]/landing:grid-cols-3 max-md:group-data-[view=grid]/landing:gap-x-1 max-md:group-data-[view=grid]/landing:gap-y-5 md:gap-x-8",
                 // A scattered grid needs the room its tiles drift into.
                 dials.scatterProducts ? "md:gap-y-40" : "md:gap-y-16",
                 dials.scatterProducts
@@ -100,8 +104,10 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
                     data-feed-stop
                     data-feed-product
                     className={cn(
-                      "relative isolate flex min-h-dvh items-center justify-center overflow-hidden px-5 max-md:group-data-[view=grid]/landing:min-h-0 max-md:group-data-[view=grid]/landing:items-start max-md:group-data-[view=grid]/landing:px-0 md:min-h-0 md:items-start md:overflow-visible md:px-0",
+                      "relative isolate flex min-h-dvh items-center justify-center overflow-hidden px-5 max-md:group-data-[view=grid]/landing:min-h-0 max-md:group-data-[view=grid]/landing:items-start max-md:group-data-[view=grid]/landing:px-0 max-md:group-data-[view=grid]/landing:overflow-visible md:min-h-0 md:items-start md:overflow-visible md:px-0",
                       !scatter && TILE_WIDTH,
+                      product.slug === SECOND_ROW_ON_PHONE &&
+                        "max-md:group-data-[view=grid]/landing:order-1",
                       scatter &&
                         "md:[transform:translate(var(--sx),var(--sy))_scale(var(--ss))]",
                     )}
@@ -133,11 +139,11 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
                       <HandoffLink
                         href={`/product/${product.slug}`}
                         overlaySlug={product.slug}
-                        className="group flex w-full flex-col items-center gap-4 text-center focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-red"
+                        className="group flex w-full flex-col items-center gap-4 text-center max-md:group-data-[view=grid]/landing:gap-1.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-red"
                       >
                         <div
                           data-handoff
-                          className="relative aspect-square w-full max-md:w-[78%] max-md:group-data-[view=grid]/landing:w-full"
+                          className="relative aspect-square w-full max-md:w-[78%] max-md:group-data-[view=grid]/landing:w-[88%]"
                         >
                           {product.cutout ? (
                             <Image
@@ -152,10 +158,10 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
                             />
                           ) : null}
                         </div>
-                        <span className="font-display text-2xl leading-none tracking-[0.02em] text-brand-red uppercase transition-[color,opacity] duration-300 md:group-data-[piled=true]/issue:opacity-0 group-hover:text-brand-yellow max-md:group-data-[view=grid]/landing:text-lg md:text-2xl lg:text-[30px]">
+                        <span className="font-display text-2xl leading-none tracking-[0.02em] text-brand-red uppercase transition-[color,opacity] duration-300 md:group-data-[piled=true]/issue:opacity-0 group-hover:text-brand-yellow max-md:group-data-[view=grid]/landing:text-sm md:text-2xl lg:text-[30px]">
                           {product.name}
                         </span>
-                        <span className="font-display text-lg text-cream/70 transition-opacity duration-300 md:text-xl md:group-data-[piled=true]/issue:opacity-0">
+                        <span className="font-display text-lg text-cream/70 transition-opacity duration-300 max-md:group-data-[view=grid]/landing:text-xs md:text-xl md:group-data-[piled=true]/issue:opacity-0">
                           {/* Every size gone reads as the price's replacement, not a
                               price on something that cannot be bought. */}
                           {product.variants.length > 0 &&
