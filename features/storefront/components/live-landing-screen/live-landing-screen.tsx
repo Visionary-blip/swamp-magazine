@@ -102,10 +102,7 @@ export async function LiveLandingScreen() {
         <PhoneHero
           mascot={
             imagery.mascot
-              ? {
-                  maskUrl: optimizedUrl(imagery.mascot.url, 640),
-                  alt: imagery.mascot.alt,
-                }
+              ? { maskUrl: optimizedUrl(imagery.mascot.url, 640) }
               : null
           }
         />

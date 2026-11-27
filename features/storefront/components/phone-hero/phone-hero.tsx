@@ -3,8 +3,36 @@
 import Image from "next/image";
 
 import { FEED_STEP_EVENT } from "@/features/transition";
+import { cn } from "@/lib/utils";
 
 import { storefrontCopy } from "../../lib/storefront-copy";
+
+// The middle "A" of MAG falls on the woman's face in its column, so it sits a
+// little right of it, between the two.
+const NUDGED_CELL = 7;
+
+// The founder's shield drawing, the same file the National mascot uses.
+const SHIELD_URL = "/world/shield.webp";
+
+// One of the founder's drawings as a mask over a red box, so it takes the brand
+// red whatever colour the file is.
+function RedMark({ url }: { url: string }) {
+  return (
+    <span
+      className="block size-full bg-brand-red"
+      style={{
+        maskImage: `url(${url})`,
+        WebkitMaskImage: `url(${url})`,
+        maskSize: "contain",
+        WebkitMaskSize: "contain",
+        maskRepeat: "no-repeat",
+        WebkitMaskRepeat: "no-repeat",
+        maskPosition: "center",
+        WebkitMaskPosition: "center",
+      }}
+    />
+  );
+}
 
 // On to the products. In the one-at-a-time feed the pager takes the step (and
 // cancels the event to say so); the grid is an ordinary scrolling <main>.
@@ -21,27 +49,27 @@ function scrollToProducts() {
 }
 
 // The phone's opening screen, ahead of the products in both views: the
-// bus-shelter photograph cut down to the two figures, "SWAMP" over it and the
-// arrow at the foot. Everything laid on the photograph leads down.
+// bus-shelter photograph cut close on the two figures, the masthead spread over
+// it a letter at a time with the mascot among them, and the arrow at the foot.
+// Everything laid on the photograph leads down.
 export function PhoneHero({
   mascot,
 }: {
   /** The fisher, as on the wide hero; null until it is uploaded. */
-  mascot: { maskUrl: string; alt: string } | null;
+  mascot: { maskUrl: string } | null;
 }) {
   return (
     <section
       data-feed-stop
-      className="relative flex h-dvh flex-col items-center justify-between overflow-hidden bg-ink pt-16 pb-4 md:hidden"
+      className="relative flex h-dvh flex-col items-center justify-end overflow-hidden bg-ink pb-4 md:hidden"
     >
       {/* A close cut, centred on the two. The screen's width, standing on the
-          foot of the screen; on a short screen it stops rising where the man's
-          head (64vw down the cut) would go under "SWAMP" (which ends at 4rem +
-          34vw), and runs off the bottom instead. */}
+          foot of the screen; on a short screen it stops rising and runs off the
+          bottom instead, so their heads stay well down from the top. */}
       <div className="absolute inset-x-0 top-[max(calc(100%_-_216.7vw),calc(4rem_-_28vw))] aspect-[600/1300]">
         <div className="absolute inset-0 [mask-image:linear-gradient(to_bottom,transparent,black_14%)]">
           <Image
-            src="/hero/landing-hero-phone-closer.webp"
+            src="/hero/landing-hero-phone-grid.webp"
             alt="Two people in SWAMP MAGAZINE sweatshirts on a bus-shelter bench beside windows covered in drawings"
             fill
             sizes="100vw"
@@ -50,63 +78,78 @@ export function PhoneHero({
           />
         </div>
       </div>
-      {/* Shades the foot so the red mascot and arrow read over the photograph. */}
+      {/* Shades the foot so the red arrow reads over the photograph. */}
       <div
         aria-hidden
-        className="absolute inset-x-0 bottom-0 h-36 bg-linear-to-t from-ink to-transparent"
+        className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-ink to-transparent"
       />
-      <h1 className="relative font-display text-[34vw] leading-none text-brand-red">
-        <button type="button" onClick={scrollToProducts} className="block">
-          {storefrontCopy.phoneWordmark}
-        </button>
-      </h1>
-      <div className="relative flex flex-col items-center">
-        {/* Small, centred, just over the arrow. */}
-        {mascot ? (
-          // The shadow lifts the line art off the photograph. It sits on the
-          // button because the drawing's own mask would cut it off.
-          <button
-            type="button"
-            onClick={scrollToProducts}
-            aria-label={mascot.alt || "Shop the products"}
-            className="block aspect-square w-[17vw] drop-shadow-[0_0_5px_var(--ink)]"
-          >
-            <span
-              aria-hidden
-              className="block size-full bg-brand-red"
-              style={{
-                maskImage: `url(${mascot.maskUrl})`,
-                WebkitMaskImage: `url(${mascot.maskUrl})`,
-                maskSize: "contain",
-                WebkitMaskSize: "contain",
-                maskRepeat: "no-repeat",
-                WebkitMaskRepeat: "no-repeat",
-                maskPosition: "center",
-                WebkitMaskPosition: "center",
-              }}
-            />
-          </button>
-        ) : null}
+      {/* One button for the whole grid; only the letters and drawings take
+          the tap, not the photograph between them. */}
+      <h1 className="pointer-events-none absolute inset-x-0 top-2 bottom-20">
         <button
           type="button"
           onClick={scrollToProducts}
-          aria-label="Scroll to the products"
-          className="relative flex size-10 items-center justify-center text-brand-red"
+          aria-label={storefrontCopy.phoneMastheadLabel}
+          className="grid size-full grid-cols-3 grid-rows-5 place-items-center px-2 font-display text-[27px] leading-none text-brand-red [text-shadow:0_0_6px_var(--ink)]"
         >
-          <svg
-            aria-hidden
-            viewBox="0 0 16 10"
-            className="animate-cue-bob h-3 w-5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M1.5 1.5l6.5 6.5 6.5-6.5" />
-          </svg>
+          {storefrontCopy.phoneMasthead.map((mark, cell) => {
+            // The grid is a fixed list with repeated letters: the cell is each
+            // one's identity.
+            if (mark === "mascot") {
+              return (
+                // Set a little low: the drawing is head-heavy, and dead centre
+                // reads high.
+                <span
+                  key={cell}
+                  className="pointer-events-auto block size-[50px] translate-y-1 drop-shadow-[0_0_5px_var(--ink)]"
+                >
+                  {mascot ? <RedMark url={mascot.maskUrl} /> : null}
+                </span>
+              );
+            }
+            if (mark === "shield") {
+              return (
+                <span
+                  key={cell}
+                  className="pointer-events-auto block h-10 w-7 drop-shadow-[0_0_5px_var(--ink)]"
+                >
+                  <RedMark url={SHIELD_URL} />
+                </span>
+              );
+            }
+            return (
+              <span
+                key={cell}
+                className={cn(
+                  "pointer-events-auto p-2",
+                  cell === NUDGED_CELL && "translate-x-[4vw]",
+                )}
+              >
+                {mark}
+              </span>
+            );
+          })}
         </button>
-      </div>
+      </h1>
+      <button
+        type="button"
+        onClick={scrollToProducts}
+        aria-label="Scroll to the products"
+        className="relative flex size-10 items-center justify-center text-brand-red"
+      >
+        <svg
+          aria-hidden
+          viewBox="0 0 16 10"
+          className="animate-cue-bob h-3 w-5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M1.5 1.5l6.5 6.5 6.5-6.5" />
+        </svg>
+      </button>
     </section>
   );
 }

@@ -14,8 +14,27 @@ export const storefrontCopy = {
   nationalSwitchMark: "V",
   /** LIFTED -- the byline under it, verbatim. */
   byline: "FROM LALO FARRO",
-  /** The founder's shorter masthead for the phone's opening screen. */
-  phoneWordmark: "SWAMP",
+  /** The founder's: the phone opening screen's masthead, three to a row. The
+   * "mascot" and "shield" are where those drawings stand. */
+  phoneMasthead: [
+    "S",
+    "W",
+    "A",
+    "M",
+    "mascot",
+    "P",
+    "M",
+    "A",
+    "G",
+    "A",
+    "Z",
+    "I",
+    "N",
+    "E",
+    "shield",
+  ],
+  /** The same, as a screen reader should say it. */
+  phoneMastheadLabel: "Swamp Magazine: scroll to the products",
   /** The founder's: the line above the product grid (the issue on sale). */
   issueHeading: "FIRST ISSUE F/W 25",
   /** The founder's: the line above the National Issue's row of the grid. */
