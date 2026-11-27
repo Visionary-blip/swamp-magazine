@@ -93,7 +93,7 @@ const CATALOG: SeedProduct[] = [
     name: "FC Tee",
     priceCents: 2500,
     sizes: ["XS", "S", "M", "L", "XL"],
-    modelCredits: "GARRETT, ADELINE",
+    modelCredits: "GARRETT",
     cutoutFile: "swamp-images/FC SHIRT GRID.webp",
     sortOrder: 6,
   },
