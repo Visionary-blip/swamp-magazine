@@ -177,11 +177,12 @@ export async function getProduct(slug: string): Promise<ProductDetail | null> {
   }
 }
 
-// The founder's 16:9 hero (HERO 169, Aug 20). A bundled file rather than a
+// The founder's 16:9 hero (HERO 169, Aug 20), recut to the same framing from
+// the camera original (0J9A3727) on 2026-11-27. A bundled file rather than a
 // slot row so the landing has its real hero before any admin upload; a
 // landing_hero upload still wins. The alt is drafted, not the founder's.
 const BUNDLED_HERO: SlotImage = {
-  url: "/hero/landing-hero.jpg",
+  url: "/hero/landing-hero-original.jpg",
   alt: "Two people in SWAMP MAGAZINE sweatshirts sitting in warm, low light",
 };
 
