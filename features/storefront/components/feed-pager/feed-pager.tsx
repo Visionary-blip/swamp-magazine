@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { dials } from "@/config/dials";
-import { createFeedPager, FEED_STEP_EVENT } from "@/features/transition";
+import { createFeedPager } from "@/features/transition";
 import { cn } from "@/lib/utils";
 
 import { StarMark } from "../star-mark/star-mark";
@@ -21,8 +21,7 @@ function productOpen() {
 }
 
 export function FeedPager({ count }: { count: number }) {
-  // -1 is the opening photograph, ahead of the first product.
-  const [active, setActive] = useState(-1);
+  const [active, setActive] = useState(0);
   // "grid" (the default): every product, three across, scrolled like a page.
   // "feed": one product per screen, swiped. The landing's <main> carries it as `data-view` so the
   // tiles restyle themselves in CSS (see CatalogIndex).
@@ -35,12 +34,13 @@ export function FeedPager({ count }: { count: number }) {
     if (!track || !main) return;
     main.dataset.view = view;
     main.scrollTop = 0;
-    // A visitor who switched views, or came back by a "shop" link, is after the
-    // products, not the opening photograph again.
-    const toProducts = switched.current || window.location.hash === "#products";
     // The grid is an ordinary scrolling page: the pager is not running at all.
     if (view === "grid") {
-      if (toProducts) main.querySelector("#products")?.scrollIntoView();
+      // A visitor who switched back, or came by a "shop" link, is after the
+      // products.
+      if (switched.current || window.location.hash === "#products") {
+        main.querySelector("#products")?.scrollIntoView();
+      }
       return;
     }
     const products = [
@@ -67,11 +67,6 @@ export function FeedPager({ count }: { count: number }) {
         }
       },
     });
-    if (toProducts) {
-      window.dispatchEvent(
-        new CustomEvent(FEED_STEP_EVENT, { detail: 1, cancelable: true }),
-      );
-    }
     return stopPaging;
   }, [view]);
 
@@ -91,8 +86,9 @@ export function FeedPager({ count }: { count: number }) {
         aria-label={
           view === "feed" ? "Show all products" : "Show one at a time"
         }
-        // A touch target a little larger than the glyph, top centre.
-        className="fixed top-3 left-1/2 z-30 flex size-12 -translate-x-1/2 items-center justify-center text-brand-red transition-colors duration-200 focus-visible:text-brand-yellow focus-visible:outline-none md:hidden"
+        // A touch target a little larger than the glyph, top centre. Not while the
+        // clothes are still piled (see PhonePile).
+        className="group-data-[spread=false]/landing:hidden fixed top-3 left-1/2 z-30 flex size-12 -translate-x-1/2 items-center justify-center text-brand-red transition-colors duration-200 focus-visible:text-brand-yellow focus-visible:outline-none md:hidden"
       >
         <svg
           aria-hidden
@@ -109,7 +105,7 @@ export function FeedPager({ count }: { count: number }) {
           )}
         </svg>
       </button>
-      {view === "feed" && active >= 0 ? (
+      {view === "feed" ? (
         <ol
           aria-hidden
           className="pointer-events-none fixed top-1/2 right-3.5 z-30 flex -translate-y-1/2 flex-col items-center gap-2 md:hidden"

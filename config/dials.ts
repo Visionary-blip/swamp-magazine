@@ -188,9 +188,8 @@ export const dials = {
 
   /**
    * The phone landing's one-product-per-screen view and the button at the top
-   * that switches to it from the grid. Switched off, not removed, on
-   * 2026-11-27 at the founder's request "for now": phones get the grid only.
-   * True brings both back.
+   * that switches to it from the grid. The button appears once the opening pile
+   * has been spread into the grid. Was switched off for part of 2026-11-27.
    */
-  phoneSingleProductFeed: false,
+  phoneSingleProductFeed: true,
 } as const;
