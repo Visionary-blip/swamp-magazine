@@ -11,6 +11,7 @@ import { groupByIssue } from "../../lib/issues";
 import { getScatter } from "../../lib/scatter";
 import { getProductGallery } from "../../lib/product-gallery";
 import { IssueGrid } from "../issue-grid/issue-grid";
+import { PhonePile } from "../phone-pile/phone-pile";
 import { Reveal } from "../reveal/reveal";
 
 // Every tile on the page is one size: a sixth of the row less its five gaps
@@ -21,9 +22,14 @@ const TILE_WIDTH = "md:w-[calc((100%-10rem)/6)]";
 // grid. Visual order only: the feed and the desktop row keep the catalog's.
 const SECOND_ROW_ON_PHONE = "fc-hoodie";
 
+// And the Lurker Tee in that grid's middle column, directly under the Star
+// Shorts rather than under the longsleeve.
+const MIDDLE_COLUMN_ON_PHONE = "lurker-tee";
+
 // The product grid under the hero (six across from md up, three across in a
 // phone's grid view): each garment's cutout on ink, name and price
-// beneath, the whole tile the link. It replaces the film-credits index list at
+// beneath, the whole tile the link. A phone opens on it, as a pile (PhonePile)
+// and has no issue headings. It replaces the film-credits index list at
 // the founder's request -- the visitor scrolls past the photograph and meets the
 // clothes themselves. A product with no cutout uploaded yet still gets a tile
 // (name and price on an empty square) rather than vanishing from the shop.
@@ -34,7 +40,7 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
   return (
     <section
       id="products"
-      className="bg-ink max-md:group-data-[view=grid]/landing:bg-transparent max-md:group-data-[view=grid]/landing:px-2 max-md:group-data-[view=grid]/landing:pt-14 md:px-16 md:py-[88px]"
+      className="relative bg-ink max-md:group-data-[view=grid]/landing:min-h-dvh max-md:group-data-[view=grid]/landing:bg-transparent max-md:group-data-[view=grid]/landing:px-2 max-md:group-data-[view=grid]/landing:pt-14 md:px-16 md:py-[88px]"
     >
       {groups.map((group, groupIndex) => {
         // Where this issue's tiles start in the whole run, so the entrance
@@ -50,14 +56,12 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
             key={group.heading}
             className={cn(
               groupIndex > 0 &&
-                "md:mt-24 max-md:group-data-[view=grid]/landing:mt-10",
+                "md:mt-24 max-md:group-data-[view=grid]/landing:mt-5",
             )}
           >
-            {/* Not on the phone's one-at-a-time feed: a heading there would
-                push the first garment off its screen, so it shows on desktop
-                and in the grid. */}
+            {/* From md up only: a phone runs every issue together. */}
             {group.heading ? (
-              <h2 className="mb-16 hidden text-center font-display text-3xl leading-none tracking-[0.05em] text-brand-red md:block max-md:group-data-[view=grid]/landing:mb-6 max-md:group-data-[view=grid]/landing:block">
+              <h2 className="mb-16 hidden text-center font-display text-3xl leading-none tracking-[0.05em] text-brand-red md:block">
                 {group.heading}
               </h2>
             ) : null}
@@ -68,7 +72,9 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
               // The centred row is the National issue, the one under the hero.
               holdWhenLeftBelow={centered}
               className={cn(
-                "group/issue md:[&>li]:transition-transform md:[&>li]:duration-700 md:[&>li]:ease-out",
+                "group/issue [&>li]:transition-transform [&>li]:duration-700 [&>li]:ease-out",
+                // Unseen on a phone until PhonePile has laid them.
+                "max-md:group-not-data-placed/landing:invisible",
                 "grid grid-cols-1 max-md:group-data-[view=grid]/landing:grid-cols-3 max-md:group-data-[view=grid]/landing:gap-x-1 max-md:group-data-[view=grid]/landing:gap-y-5 md:gap-x-8",
                 // A scattered grid needs the room its tiles drift into.
                 dials.scatterProducts ? "md:gap-y-40" : "md:gap-y-16",
@@ -108,6 +114,8 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
                       !scatter && TILE_WIDTH,
                       product.slug === SECOND_ROW_ON_PHONE &&
                         "max-md:group-data-[view=grid]/landing:order-1",
+                      product.slug === MIDDLE_COLUMN_ON_PHONE &&
+                        "max-md:group-data-[view=grid]/landing:col-start-2",
                       scatter &&
                         "md:[transform:translate(var(--sx),var(--sy))_scale(var(--ss))]",
                     )}
@@ -158,10 +166,10 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
                             />
                           ) : null}
                         </div>
-                        <span className="font-display text-2xl leading-none tracking-[0.02em] text-brand-red uppercase transition-[color,opacity] duration-300 md:group-data-[piled=true]/issue:opacity-0 group-hover:text-brand-yellow max-md:group-data-[view=grid]/landing:text-sm md:text-2xl lg:text-[30px]">
+                        <span className="font-display text-2xl leading-none tracking-[0.02em] text-brand-red uppercase transition-[color,opacity] duration-300 md:group-data-[piled=true]/issue:opacity-0 max-md:group-data-[spread=false]/landing:group-data-[view=grid]/landing:opacity-0 group-hover:text-brand-yellow max-md:group-data-[view=grid]/landing:text-sm md:text-2xl lg:text-[30px]">
                           {product.name}
                         </span>
-                        <span className="font-display text-lg text-cream/70 transition-opacity duration-300 max-md:group-data-[view=grid]/landing:text-xs md:text-xl md:group-data-[piled=true]/issue:opacity-0">
+                        <span className="font-display text-lg text-cream/70 transition-opacity duration-300 max-md:group-data-[view=grid]/landing:text-xs md:text-xl md:group-data-[piled=true]/issue:opacity-0 max-md:group-data-[spread=false]/landing:group-data-[view=grid]/landing:opacity-0">
                           {/* Every size gone reads as the price's replacement, not a
                               price on something that cannot be bought. */}
                           {product.variants.length > 0 &&
@@ -178,6 +186,9 @@ export function CatalogIndex({ products }: { products: CatalogProduct[] }) {
           </div>
         );
       })}
+      {/* After the grids: their effects clear the tiles on mounting, and the
+          pile has to be laid after that. */}
+      <PhonePile />
     </section>
   );
 }

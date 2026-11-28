@@ -12,7 +12,6 @@ import { FeedPager } from "../feed-pager/feed-pager";
 import { GlideLink } from "../glide-link/glide-link";
 import { HeroMascot } from "../hero-mascot/hero-mascot";
 import { HeroWordmark } from "../hero-wordmark/hero-wordmark";
-import { PhoneHero } from "../phone-hero/phone-hero";
 import { ProductScreen } from "../product-screen/product-screen";
 import { Reveal } from "../reveal/reveal";
 import { ScrollCue } from "../scroll-cue/scroll-cue";
@@ -66,12 +65,14 @@ export async function LiveLandingScreen() {
     <main
       // A phone opens on the grid; set here so it is right before FeedPager runs.
       data-view="grid"
+      // The clothes start in a pile there (see PhonePile).
+      data-spread="false"
       className="group/landing bg-ink max-md:fixed max-md:inset-0 max-md:overflow-hidden max-md:data-[view=grid]:overflow-y-auto"
     >
       <FeedPager count={products.length} />
       <CartCorner placement="fixed" />
       <ProductOverlay panels={panels} />
-      {/* The phone's all-products grid sits on a photograph, fixed behind the
+      {/* A phone's pile and grid both sit on this photograph, fixed behind the
           scrolling tiles under a scrim so the red type reads. It is sized to the
           LARGE viewport (lvh) and drawn a size up, so it neither shifts nor
           resizes as the browser's toolbar slides away while the visitor scrolls
@@ -96,16 +97,8 @@ export async function LiveLandingScreen() {
           behind an entrance animation, and a null hero leaves a plain ink
           screen with the same masthead on it. The scrim keeps cream type
           readable on the lighter parts of the shoot. */}
-        {/* A phone opens on its own cut of the shoot (PhoneHero), with the
-          products below as a grid, or one to a screen if the visitor switches
-          (see CatalogIndex). The widescreen, full-height hero is from md up. */}
-        <PhoneHero
-          mascot={
-            imagery.mascot
-              ? { maskUrl: optimizedUrl(imagery.mascot.url, 640) }
-              : null
-          }
-        />
+        {/* Not on a phone, which opens straight on the products, piled (see
+          PhonePile). */}
         <section className="relative hidden h-dvh w-full overflow-hidden bg-ink md:block">
           {imagery.hero && (
             <Image
